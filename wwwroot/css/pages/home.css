@@ -119,3 +119,36 @@
         transform: translateY(-6px);
         box-shadow: 0 18px 48px rgba(0,0,0,0.45);
     }
+
+/* ==================================================
+   DATE INPUT (SEARCH) — OPTIONAL
+   ================================================== */
+
+.search-box .search-date {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface-soft);
+    border: 1px solid transparent;
+    padding: 14px 16px;
+    border-radius: 14px;
+    color: var(--text-main);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+    .search-box .search-date:hover {
+        background: rgba(255,255,255,0.06);
+    }
+
+    .search-box .search-date:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .search-box .search-date::-webkit-calendar-picker-indicator {
+        opacity: 0.6;
+        filter: invert(1);
+        cursor: pointer;
+    }

@@ -14,12 +14,12 @@
 </head>
 
 @{
-        var isHome =
-                ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
-                ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+            var isHome =
+                            ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
+                            ViewContext.RouteData.Values["action"]?.ToString() == "Index";
 }
 
-<body class="@(isHome ? "no-scroll" : "")">
+<body class="@(isHome ? "no-scroll" : "") @ViewData["BodyClass"]">
 
     <!-- =========================
          HEADER
@@ -39,10 +39,11 @@
             </nav>
 
             <div class="header-right">
-                <a class="btn-login" asp-area="" asp-page="/Account/Login">
+                <a class="btn-login" asp-area="Identity" asp-page="/Account/Login">
                     Увійти
                 </a>
             </div>
+
 
         </div>
     </header>
