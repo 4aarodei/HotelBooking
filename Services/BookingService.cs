@@ -7,7 +7,7 @@ namespace HotelBooking.Services;
 public interface IBookingService
 {
     Task<Booking> CreateAsync(
-        int roomId,
+        Guid roomId,
         string userId,
         DateTime checkIn,
         DateTime checkOut);

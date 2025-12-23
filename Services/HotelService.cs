@@ -8,7 +8,7 @@ public interface IHotelService
 {
     Task<List<Hotel>> GetAllAsync();
     Task<Hotel?> GetByIdAsync(Guid id);
-
+    Task<List<Hotel>> GetByCityAsync(string city);
     Task<Hotel> CreateAsync(Hotel hotel);
     Task UpdateAsync(Hotel hotel);
     Task DeleteAsync(int id);
@@ -21,6 +21,14 @@ public class HotelService : IHotelService
     public HotelService(ApplicationDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<List<Hotel>> GetByCityAsync(string city)
+    {
+        return await _context.Hotels
+            .Where(h => h.City.ToLower() == city.ToLower())
+            .Include(h => h.Rooms)
+            .ToListAsync();
     }
 
     public async Task<List<Hotel>> GetAllAsync()
