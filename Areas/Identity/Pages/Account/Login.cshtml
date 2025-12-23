@@ -1,0 +1,54 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Вхід";
+    ViewData["BodyClass"] = "auth-page";
+}
+
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/auth.css" asp-append-version="true" />
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1 class="auth-title">Вхід</h1>
+        <p class="auth-subtitle">Увійдіть у свій акаунт</p>
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="auth-error"></div>
+
+            <div class="form-group">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" autocomplete="username" />
+                <span asp-validation-for="Input.Email"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Password"></label>
+                <input asp-for="Input.Password" autocomplete="current-password" />
+                <span asp-validation-for="Input.Password"></span>
+            </div>
+
+            <div class="form-remember">
+                <input asp-for="Input.RememberMe" />
+                <label asp-for="Input.RememberMe"></label>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                Увійти
+            </button>
+        </form>
+
+        <div class="auth-links">
+            <a asp-page="./ForgotPassword">Забули пароль?</a>
+            <a asp-page="./Register">Створити акаунт</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
