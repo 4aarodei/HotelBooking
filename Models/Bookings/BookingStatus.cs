@@ -2,7 +2,7 @@
 
 public class BookingStatus
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     // TECH код (для логіки)
     public string Code { get; set; } = null!; // CONFIRMED, CANCELLED
