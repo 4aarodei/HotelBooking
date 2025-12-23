@@ -24,10 +24,12 @@
                    placeholder="Місто" />
 
             <input type="date"
-                   name="checkIn" />
+                   name="checkIn"
+                   class="search-date" />
 
             <input type="date"
-                   name="checkOut" />
+                   name="checkOut"
+                   class="search-date" />
 
             <select name="guests">
                 @for (int i = 1; i <= 6; i++)
@@ -36,7 +38,9 @@
                 }
             </select>
 
-            <button type="submit" class="btn-primary">
+            <button type="submit"
+                    class="btn-primary"
+                    formnovalidate>
                 Знайти готель
             </button>
         </form>

@@ -6,14 +6,13 @@ public class HotelViewModelIndex
     public Guid Id { get; set; }
     public string Name { get; set; }
     public string City { get; set; }
-    public int Stars { get; set; }
     public decimal Price { get; set; }
     public string ShortDescription { get; set; }
 
     public List<HotelViewModelIndex> CreateVM(List<Hotel> hotels)
     {
         var result = new List<HotelViewModelIndex>();
-        
+
         foreach (var hotel in hotels)
         {
             var vm = new HotelViewModelIndex
@@ -21,22 +20,23 @@ public class HotelViewModelIndex
                 Id = hotel.Id,
                 Name = hotel.Name,
                 City = hotel.City,
-                ShortDescription = hotel.Description.Length > 100 ? hotel.Description.Substring(0, 100) + "..." : hotel.Description
+                ShortDescription = hotel.Description.Length > 100 ? hotel.Description.Substring(0, 100) + "..." : hotel.Description,
+                Price = hotel.Rooms.Min(r => r.PricePerNight),
             };
             result.Add(vm);
         }
-        
+
         return result;
     }
 }
 
 
- //public Guid Id { get; set; } = Guid.NewGuid();
+//public Guid Id { get; set; } = Guid.NewGuid();
 
- //   public string Name { get; set; } = null!;
- //   public string City { get; set; } = null!;
- //   public string Address { get; set; } = null!;
- //   public string? Description { get; set; }
+//   public string Name { get; set; } = null!;
+//   public string City { get; set; } = null!;
+//   public string Address { get; set; } = null!;
+//   public string? Description { get; set; }
 
- //   // Готель створюється одразу з номерами
- //   public ICollection<Room> Rooms { get; set; } = new List<Room>();
+//   // Готель створюється одразу з номерами
+//   public ICollection<Room> Rooms { get; set; } = new List<Room>();
