@@ -1,0 +1,40 @@
+﻿@model IEnumerable<HotelBooking.Models.ViewModels.HotelViewModelIndex>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/hotels-city.css" />
+}
+
+
+<section class="hero hero--small">
+    <h1>Готелі в місті @ViewBag.City</h1>
+    <p>Знайдено @Model.Count() готелів</p>
+</section>
+
+<section class="page popular">
+    <div class="hotel-grid hotel-grid--wide">
+        @foreach (var hotel in Model)
+        {
+            <a class="hotel-card"
+               asp-controller="Hotel"
+               asp-action="Details"
+               asp-route-hotelId="@hotel.Id">
+
+
+                <h3>@hotel.Name</h3>
+
+                <p>
+                    @hotel.City • @hotel.Stars ★
+                </p>
+
+                <strong>
+                    від @hotel.Price ₴
+                </strong>
+
+                <p class="hotel-card-desc">
+                    @hotel.ShortDescription
+                </p>
+
+            </a>
+        }
+    </div>
+</section>

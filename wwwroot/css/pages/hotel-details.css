@@ -1,0 +1,201 @@
+﻿/* ==================================================
+   HOTEL DETAILS PAGE
+   ================================================== */
+
+.hotel-details {
+    padding-bottom: 80px;
+}
+
+/* ==================================================
+   HOTEL HEADER
+   ================================================== */
+
+.hotel-header {
+    padding: 72px 0 56px;
+    text-align: center;
+    position: relative;
+}
+
+    .hotel-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient( 520px 260px at 50% 0%, rgba(124,124,255,0.22), transparent 70% );
+        pointer-events: none;
+    }
+
+    .hotel-header h1 {
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .hotel-header p {
+        margin-top: 10px;
+        font-size: 16px;
+        color: var(--text-muted);
+    }
+
+/* ==================================================
+   MAIN LAYOUT
+   ================================================== */
+
+.hotel-details-main {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+}
+
+/* ==================================================
+   ABOUT
+   ================================================== */
+
+.hotel-details-about h2 {
+    margin-bottom: 16px;
+}
+
+.hotel-details-about p {
+    max-width: 720px;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text-muted);
+}
+
+/* ==================================================
+   META ASIDE
+   ================================================== */
+
+.hotel-details-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: calc(var(--header-height) + 32px);
+}
+
+.meta-card {
+    background: linear-gradient( 180deg, var(--surface), rgba(23,26,43,0.9) );
+    padding: 20px 22px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.meta-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+/* ==================================================
+   ROOMS
+   ================================================== */
+
+.hotel-rooms {
+    margin-top: 64px;
+}
+
+    .hotel-rooms h2 {
+        margin-bottom: 28px;
+    }
+
+/* grid for room cards */
+.hotel-grid--wide {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+}
+
+/* ==================================================
+   ROOM CARD
+   ================================================== */
+
+.room-card {
+    background: linear-gradient( 180deg, var(--surface), rgba(23,26,43,0.88) );
+    padding: 28px;
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .room-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+    }
+
+    .room-card h3 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .room-card p {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    .room-card .price {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .room-card form {
+        margin-top: auto;
+    }
+
+    .room-card button {
+        width: 100%;
+        padding: 12px 0;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+/* ==================================================
+   EMPTY STATE
+   ================================================== */
+
+.empty-state {
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+
+@media (max-width: 900px) {
+
+    .hotel-details-main {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .hotel-details-meta {
+        position: static;
+        max-width: 420px;
+    }
+
+    .hotel-header h1 {
+        font-size: 34px;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .hotel-header {
+        padding: 56px 0 40px;
+    }
+
+        .hotel-header h1 {
+            font-size: 28px;
+        }
+
+    .room-card {
+        padding: 22px;
+    }
+}

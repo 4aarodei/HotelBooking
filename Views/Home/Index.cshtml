@@ -1,8 +1,77 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HotelBooking.Models.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Головна";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/home.css" />
+}
+
+<section class="hero">
+    <div class="page">
+
+        <h1>Бронюйте готелі просто</h1>
+        <p>Знайдіть ідеальне місце для подорожі за кілька кліків</p>
+
+        <form class="search-box"
+              method="get"
+              asp-controller="Hotel"
+              asp-action="Index">
+
+            <input type="text"
+                   name="city"
+                   placeholder="Місто" />
+
+            <input type="date"
+                   name="checkIn" />
+
+            <input type="date"
+                   name="checkOut" />
+
+            <select name="guests">
+                @for (int i = 1; i <= 6; i++)
+                {
+                    <option value="@i">@i гість</option>
+                }
+            </select>
+
+            <button type="submit" class="btn-primary">
+                Знайти готель
+            </button>
+        </form>
+
+    </div>
+</section>
+
+<section class="popular">
+    <div class="page">
+
+        <h2>Популярні готелі</h2>
+
+        @if (Model?.PopularHotels != null && Model.PopularHotels.Any())
+        {
+            <div class="hotel-grid">
+                @foreach (var hotel in Model.PopularHotels)
+                {
+                    <a asp-controller="Hotel"
+                       asp-action="Details"
+                       asp-route-hotelId="@hotel.Id"
+                       class="hotel-card">
+
+                        <h3>@hotel.Name</h3>
+                        <p>@hotel.City · від @hotel.MinPrice.ToString("0") ₴</p>
+
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">
+                Наразі немає популярних готелів
+            </p>
+        }
+
+    </div>
+</section>

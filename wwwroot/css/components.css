@@ -1,0 +1,53 @@
+﻿/* ================= BUTTONS ================= */
+
+.btn-primary {
+    background: linear-gradient(180deg, #8b8bff, #6f6fff);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 14px;
+    font-weight: 600;
+}
+
+    .btn-primary:hover {
+        filter: brightness(1.05);
+    }
+
+/* ================= CARDS ================= */
+
+.card {
+    background: linear-gradient( 180deg, var(--surface), rgba(23,26,43,0.85) );
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* ================= GRID ================= */
+
+.hotel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+/* FIX: anchor cards */
+a.hotel-card {
+    display: block;
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+    a.hotel-card:hover {
+        color: var(--text-main);
+    }
+/* ==================================================
+   LINK CARDS FIX
+   ================================================== */
+
+a.hotel-card {
+    display: block;
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+    a.hotel-card:hover {
+        color: var(--text-main);
+    }

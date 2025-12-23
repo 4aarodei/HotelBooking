@@ -1,0 +1,25 @@
+﻿html {
+    font-size: 16px;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-main);
+    font-family: Inter, system-ui, sans-serif;
+    overflow-x: hidden;
+}
+
+    body.no-scroll {
+        overflow: hidden;
+    }
+
+h1, h2, h3 {
+    margin: 0;
+    font-weight: 700;
+}
+
+p {
+    margin: 0;
+    line-height: 1.6;
+}

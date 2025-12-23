@@ -1,0 +1,125 @@
+﻿/* ==================================================
+   ROOT
+   ================================================== */
+
+:root {
+    --header-height: 64px;
+}
+
+/* ==================================================
+   HEADER
+   ================================================== */
+
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    z-index: 100;
+    background: linear-gradient( 180deg, rgba(15, 18, 32, 0.96), rgba(15, 18, 32, 0.88) );
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ---------- HEADER INNER ---------- */
+.header-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+}
+
+/* ---------- LOGO ---------- */
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* ---------- NAV ---------- */
+.header-center {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+}
+
+    .header-center a {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .header-center a:hover {
+            color: #fff;
+        }
+
+/* ---------- AUTH BUTTON ---------- */
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.btn-login {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    background: linear-gradient( 180deg, #8b8bff, #6f6fff );
+    box-shadow: 0 6px 20px rgba(124,124,255,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .btn-login:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 30px rgba(124,124,255,0.45);
+    }
+
+/* ==================================================
+   MAIN OFFSET
+   ================================================== */
+
+main {
+    padding-top: var(--header-height);
+}
+
+/* ==================================================
+   PAGE CONTAINER
+   ================================================== */
+
+.page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* ==================================================
+   FOOTER
+   ================================================== */
+
+.footer {
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 32px;
+    font-size: 14px;
+    color: var(--text-muted);
+}

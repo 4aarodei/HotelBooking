@@ -1,0 +1,109 @@
+﻿@model HotelBooking.Models.ViewModels.HotelDetailsViewModel
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/hotel-details.css" />
+}
+
+<div class="page hotel-details">
+
+    <!-- HOTEL HEADER -->
+    <section class="hotel-header">
+        <h1>@Model.Name</h1>
+        <p>@Model.City · @Model.Address</p>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="hotel-details-main">
+
+        <!-- LEFT COLUMN -->
+        <div class="hotel-details-about">
+
+            <h2>Про готель</h2>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p>@Model.Description</p>
+            }
+            else
+            {
+                <p class="empty-state">
+                    Опис для цього готелю поки що відсутній.
+                </p>
+            }
+
+            <!-- ROOMS -->
+            <div class="hotel-rooms">
+
+                <h2>Доступні кімнати</h2>
+
+                @if (!Model.Rooms.Any())
+                {
+                    <p class="empty-state">
+                        Наразі немає доступних кімнат
+                    </p>
+                }
+                else
+                {
+                    <div class="hotel-grid--wide">
+
+                        @foreach (var room in Model.Rooms)
+                        {
+                            <div class="room-card">
+
+                                <h3>@room.Name</h3>
+
+                                <p>
+                                    👤 @room.Capacity осіб
+                                </p>
+
+                                <div class="price">
+                                    @room.PricePerNight.ToString("0.00") ₴ / ніч
+                                </div>
+
+                                <form asp-controller="Booking"
+                                      asp-action="Create"
+                                      method="get">
+
+                                    <input type="hidden"
+                                           name="roomId"
+                                           value="@room.Id" />
+
+                                    <button type="submit"
+                                            class="btn-primary">
+                                        Забронювати
+                                    </button>
+                                </form>
+
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN / SIDEBAR -->
+        <aside class="hotel-details-meta">
+
+            <div class="meta-card">
+                <span class="meta-label">Місто</span>
+                <strong>@Model.City</strong>
+            </div>
+
+            <div class="meta-card">
+                <span class="meta-label">Адреса</span>
+                <strong>@Model.Address</strong>
+            </div>
+
+            <div class="meta-card">
+                <span class="meta-label">Доступних кімнат</span>
+                <strong>@Model.Rooms.Count</strong>
+            </div>
+
+        </aside>
+
+    </section>
+
+</div>

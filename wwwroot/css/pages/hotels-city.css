@@ -1,0 +1,140 @@
+﻿/* ==================================================
+   HOTELS CITY PAGE
+   ================================================== */
+
+.page.popular {
+    padding-bottom: 80px;
+}
+
+/* ==================================================
+   HERO
+   ================================================== */
+
+.hero {
+    padding: 72px 0 56px;
+    position: relative;
+    text-align: center;
+}
+
+    .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient( 520px 260px at 50% 0%, rgba(124,124,255,0.22), transparent 70% );
+        pointer-events: none;
+    }
+
+    .hero h1 {
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .hero p {
+        margin-top: 10px;
+        font-size: 15px;
+        color: var(--text-muted);
+    }
+
+/* smaller hero modifier */
+.hero--small {
+    padding: 64px 0 48px;
+}
+
+/* ==================================================
+   GRID
+   ================================================== */
+
+.hotel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+    margin-top: 56px;
+}
+
+/* ==================================================
+   HOTEL CARD
+   ================================================== */
+
+.hotel-card {
+    background: linear-gradient( 180deg, var(--surface), rgba(23,26,43,0.88) );
+    padding: 26px;
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .hotel-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+    }
+
+    .hotel-card h3 {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+
+    .hotel-card p {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    .hotel-card strong {
+        margin-top: 6px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+.hotel-card-desc {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+/* ==================================================
+   EMPTY / EDGE CASES
+   ================================================== */
+
+.hotel-grid:empty::after {
+    content: "Нічого не знайдено";
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+
+@media (max-width: 900px) {
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .hotel-grid {
+        gap: 28px;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .hero {
+        padding: 56px 0 40px;
+    }
+
+        .hero h1 {
+            font-size: 28px;
+        }
+
+    .hotel-card {
+        padding: 22px;
+        border-radius: 18px;
+    }
+}
