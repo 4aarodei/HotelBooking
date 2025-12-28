@@ -1,0 +1,142 @@
+﻿/* ==================================================
+   BOOKING PAGE
+   ================================================== */
+
+.booking {
+    padding: 96px 16px 56px;
+    text-align: center;
+}
+
+    .booking h1 {
+        font-size: 36px;
+        margin-bottom: 12px;
+    }
+
+.booking-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 40px;
+}
+
+/* ==================================================
+   STACK
+   ================================================== */
+
+.booking-stack {
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* ==================================================
+   ALERT
+   ================================================== */
+
+.booking-alert {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 22px 24px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,60,60,.22), rgba(255,60,60,.08));
+    border: 1px solid rgba(255,90,90,.45);
+    box-shadow: 0 18px 50px rgba(255,60,60,.25);
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,80,80,.95);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.alert-content {
+    text-align: left;
+}
+
+    .alert-content h4 {
+        margin: 0 0 6px;
+        color: #fff;
+    }
+
+/* ==================================================
+   CARD
+   ================================================== */
+
+.booking-card {
+    padding: 32px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--surface), rgba(23,26,43,.85));
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    text-align: left;
+}
+
+/* ==================================================
+   GRID — FIXED FOREVER
+   ================================================== */
+
+.booking-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+    .booking-grid > div {
+        min-width: 0;
+    }
+
+.booking-field {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==================================================
+   INPUT DATE — FIXED
+   ================================================== */
+
+.booking input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 48px;
+    padding: 14px 44px 14px 16px;
+    border-radius: 14px;
+    background: var(--surface-soft);
+    border: 1px solid transparent;
+    color: var(--text-main);
+    box-sizing: border-box;
+}
+
+    .booking input[type="date"]:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .booking input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(.85);
+        opacity: .8;
+        cursor: pointer;
+    }
+
+/* ==================================================
+   BUTTON
+   ================================================== */
+
+.btn-primary {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+}

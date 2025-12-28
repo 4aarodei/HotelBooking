@@ -12,7 +12,8 @@ public static class DependencyInjection
     {
         services.AddScoped<IHotelService, HotelService>();
         services.AddScoped<IRoomService, RoomService>();
-        services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<BookingService, BookingService>();
+        services.AddScoped<BookingStatusService, BookingStatusService>();
 
         // Dapper
         services.AddScoped<DapperConnectionFactory>();

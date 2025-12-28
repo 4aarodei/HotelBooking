@@ -1,0 +1,64 @@
+﻿@model HotelBooking.Models.ViewModels.CreateBookingRequest
+
+@{
+    ViewData["Title"] = "Бронювання номера";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/create.css" />
+}
+
+<section class="booking">
+
+    <h1>Бронювання номера</h1>
+    <p class="booking-subtitle">Оберіть дати заїзду та виїзду</p>
+
+    <div class="booking-stack">
+
+        @* ERROR *@
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="booking-alert">
+                <div class="alert-icon">!</div>
+                <div class="alert-content">
+                    <h4>Номер недоступний</h4>
+                    <div asp-validation-summary="ModelOnly"></div>
+                </div>
+            </div>
+        }
+
+        <div class="booking-card">
+            <form asp-action="Create" method="post">
+
+                <input type="hidden" asp-for="RoomId" />
+
+                <div class="booking-grid">
+
+                    <div class="booking-field">
+                        <label asp-for="CheckIn">Дата заїзду</label>
+                        <input asp-for="CheckIn" type="date" />
+                        <span asp-validation-for="CheckIn" class="text-danger"></span>
+                    </div>
+
+                    <div class="booking-field">
+                        <label asp-for="CheckOut">Дата виїзду</label>
+                        <input asp-for="CheckOut" type="date" />
+                        <span asp-validation-for="CheckOut" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Забронювати
+                </button>
+
+            </form>
+        </div>
+
+    </div>
+
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

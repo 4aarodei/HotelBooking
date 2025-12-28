@@ -1,102 +1,77 @@
-﻿using HotelBooking.Data.ApplicationDbContext;
+﻿using HotelBooking.Constants;
+using HotelBooking.Data.ApplicationDbContext;
 using HotelBooking.Models.Bookings;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Services;
 
-public interface IBookingService
-{
-    Task<Booking> CreateAsync(
-        Guid roomId,
-        string userId,
-        DateTime checkIn,
-        DateTime checkOut);
-
-    Task<List<Booking>> GetUserBookingsAsync(string userId);
-    Task<List<Booking>> GetAllAsync();
-    Task ChangeStatusAsync(int bookingId, string statusCode);
-}
-
-public class BookingService : IBookingService
+public class BookingService
 {
     private readonly ApplicationDbContext _context;
+    private readonly BookingStatusService _bookingStatusService;
 
-    public BookingService(ApplicationDbContext context)
+    public BookingService(
+        ApplicationDbContext db,
+        BookingStatusService bookingStatusService)
     {
-        _context = context;
+        _context = db;
+        _bookingStatusService = bookingStatusService;
     }
 
-    public async Task<Booking> CreateAsync(Guid roomId, string userId, DateTime checkIn, DateTime checkOut)
+    // CREATE
+    public async Task<Booking> CreateAsync(
+        string userId,
+        Guid roomId,
+        DateTime checkIn,
+        DateTime checkOut,
+        CancellationToken ct = default)
     {
-        if (checkIn >= checkOut)
-            throw new Exception("Invalid dates");
+        checkIn = checkIn.Date;
+        checkOut = checkOut.Date;
 
-        var room = await _context.Rooms.FindAsync(roomId);
-        if (room == null)
-            throw new Exception("Room not found");
+        if (checkOut <= checkIn)
+            throw new InvalidOperationException("Check-out має бути пізніше Check-in");
 
-        var isBusy = await _context.Bookings.AnyAsync(b =>
-            b.RoomId == roomId &&
-            checkIn < b.CheckOut &&
-            checkOut > b.CheckIn);
+        // 🔒 Перевірка перетинів (ігноруємо скасовані)
+        var cancelledStatus = await _bookingStatusService.GetCancelledAsync(ct);
 
-        if (isBusy)
-            throw new Exception("Room is already booked");
+        var hasOverlap = await _context.Bookings
+            .AnyAsync(b =>
+                b.RoomId == roomId &&
+                b.StatusId != cancelledStatus.Id &&
+                checkIn < b.CheckOut &&
+                checkOut > b.CheckIn,
+                ct);
 
-        var status = await _context.BookingStatuses
-            .FirstAsync(s => s.Code == "NEW");
+        if (hasOverlap)
+            throw new InvalidOperationException("Кімната вже заброньована на ці дати");
 
-        var days = (checkOut - checkIn).Days;
+        var pendingStatus = await _bookingStatusService.GetPendingAsync(ct);
 
         var booking = new Booking
         {
-            RoomId = roomId,
             UserId = userId,
-            StatusId = status.Id,
+            RoomId = roomId,
+            StatusId = pendingStatus.Id,
             CheckIn = checkIn,
             CheckOut = checkOut,
-            PricePerNightSnapshot = room.PricePerNight,
-            TotalPrice = room.PricePerNight * days
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         _context.Bookings.Add(booking);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
 
         return booking;
     }
 
-    public async Task<List<Booking>> GetUserBookingsAsync(string userId)
+    public async Task<bool> IsRoomAvailableAsync(Guid roomId, DateTime checkIn, DateTime checkOut, CancellationToken ct)
     {
         return await _context.Bookings
-            .Include(b => b.Room)
-                .ThenInclude(r => r.Hotel)
-            .Include(b => b.Status)
-            .Where(b => b.UserId == userId)
-            .ToListAsync();
+            .AnyAsync(b =>
+                b.RoomId == roomId &&
+                b.CheckIn < checkOut &&
+                b.CheckOut > checkIn,
+                ct);
     }
 
-    public async Task<List<Booking>> GetAllAsync()
-    {
-        return await _context.Bookings
-            .Include(b => b.Room)
-            .Include(b => b.User)
-            .Include(b => b.Status)
-            .ToListAsync();
-    }
-
-    public async Task ChangeStatusAsync(int bookingId, string statusCode)
-    {
-        var booking = await _context.Bookings.FindAsync(bookingId);
-        if (booking == null)
-            throw new Exception("Booking not found");
-
-        var status = await _context.BookingStatuses
-            .FirstOrDefaultAsync(s => s.Code == statusCode);
-
-        if (status == null)
-            throw new Exception("Invalid status");
-
-        booking.StatusId = status.Id;
-        await _context.SaveChangesAsync();
-    }
 }
