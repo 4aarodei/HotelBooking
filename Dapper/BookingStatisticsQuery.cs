@@ -24,16 +24,18 @@ public class BookingStatisticsQuery : IBookingStatisticsQuery
         DateTime to)
     {
         const string sql = """
-            SELECT 
-                DATE(check_in) AS Date,
-                COUNT(*) AS BookingsCount
-            FROM bookings
-            WHERE check_in BETWEEN @From AND @To
-            GROUP BY DATE(check_in)
-            ORDER BY Date;
-            """;
+    SELECT
+        CAST(b.CheckIn AS date) AS [Date],
+        COUNT(*) AS BookingsCount
+    FROM Bookings b
+    WHERE b.CheckIn >= @From
+      AND b.CheckIn < DATEADD(day, 1, @To)
+    GROUP BY CAST(b.CheckIn AS date)
+    ORDER BY [Date];
+    """;
 
-        var connection = _connectionFactory.CreateConnection();
+
+        using var connection = _connectionFactory.CreateConnection();
 
         var result = await connection.QueryAsync<BookingStatsDto>(
             sql,
@@ -45,4 +47,5 @@ public class BookingStatisticsQuery : IBookingStatisticsQuery
 
         return result.ToList();
     }
+
 }

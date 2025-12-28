@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿﻿@using Microsoft.AspNetCore.Identity
 @using System.Security.Claims
 
 <!DOCTYPE html>
@@ -11,18 +11,18 @@
 
     <!-- GLOBAL STYLES -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+
 
     <!-- PAGE STYLES -->
     @RenderSection("Styles", required: false)
 </head>
 
 @{
-        var isHome =
-                ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
-                ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+                    var isHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
 }
 
-<body class="@(isHome ? "no-scroll" : "") @ViewData["BodyClass"]">
+<body class="@ViewData["BodyClass"]">
 
     <!-- =========================
          HEADER
@@ -40,9 +40,11 @@
                 <a asp-controller="Home" asp-action="Index">Головна</a>
                 <a asp-controller="Home" asp-action="Privacy">Privacy</a>
 
-                @if (User.IsInRole("SuperAdmin"))
+                @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
                 {
                     <a asp-controller="Users" asp-action="Index">Admin Panel</a>
+                    <a asp-controller="AdminStatistics" asp-action="Index">Stats Panel</a>
+
                 }
             </nav>
 

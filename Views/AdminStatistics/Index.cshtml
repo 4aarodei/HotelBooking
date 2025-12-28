@@ -1,0 +1,51 @@
+﻿@model List<HotelBooking.Application.Statistics.BookingStatsDto>
+
+@{
+    ViewData["Title"] = "Booking statistics";
+}
+
+<link rel="stylesheet" href="~/css/pages/admin-booking-statistics.css" />
+
+<div class="admin-stats">
+
+    <h2>Booking statistics</h2>
+
+
+
+    <div class="stats-card">
+
+        @if (!Model.Any())
+        {
+            <div class="stats-empty">
+                No bookings found for selected period.
+            </div>
+        }
+        else
+        {
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Bookings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="stats-date">
+                                @item.Date.ToString("dd MMM yyyy")
+                            </td>
+                            <td>
+                                <span class="stats-badge">
+                                    @item.BookingsCount
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+    </div>
+</div>

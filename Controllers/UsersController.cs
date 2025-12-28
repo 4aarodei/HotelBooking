@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using HotelBooking.Models.ViewModels;
 
 
-namespace HotelBooking.Controllers;
+namespace HotelBooking.Controllers.Admin;
 
 [Authorize(Roles = "SuperAdmin")]
 public class UsersController : Controller
