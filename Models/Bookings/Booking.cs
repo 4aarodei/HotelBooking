@@ -14,7 +14,7 @@ public class Booking
     public Guid RoomId { get; set; }
     public Room Room { get; set; } = null!;
 
-    public Guid StatusId { get; set; } = Guid.NewGuid();
+    public Guid StatusId { get; set; }
     public BookingStatus Status { get; set; } = null!;
 
     public DateTime CheckIn { get; set; }

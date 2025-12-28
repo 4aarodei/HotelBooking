@@ -57,7 +57,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasPrecision(10, 2);
 
         builder.Entity<BookingStatus>()
-            .HasIndex(x => x.Code)
+            .HasIndex(x => x.BookingStatusCode)
             .IsUnique();
     }
 }

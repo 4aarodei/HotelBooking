@@ -4,9 +4,9 @@ public class BookingStatus
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    // TECH код (для логіки)
-    public string Code { get; set; } = null!; // CONFIRMED, CANCELLED
+    // Код (для логіки)
+    public Guid BookingStatusCode { get; set; } // CONFIRMED, CANCELLED
 
-    // Людська назва (для UI)
+    // Назва (для UI)
     public string Name { get; set; } = null!;
 }
