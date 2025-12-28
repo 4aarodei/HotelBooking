@@ -1,5 +1,5 @@
 ﻿/* ==================================================
-   ADMIN — BOOKING STATISTICS
+   ADMIN STATS
    ================================================== */
 
 .admin-stats {
@@ -8,26 +8,102 @@
     padding: 0 20px;
 }
 
-    /* ---------- HEADER ---------- */
-
     .admin-stats h2 {
-        font-size: 32px;
-        font-weight: 600;
-        margin-bottom: 28px;
         text-align: center;
+        font-size: 32px;
+        margin-bottom: 28px;
     }
 
-/* ---------- CARD ---------- */
+/* ==================================================
+   CARD
+   ================================================== */
 
 .stats-card {
     background: linear-gradient(180deg, #0f172a, #020617);
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 28px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.45);
     border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
 }
 
-/* ---------- TABLE ---------- */
+/* ==================================================
+   SEARCH BAR
+   ================================================== */
+
+.stats-bar {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 26px;
+    align-items: flex-end; /* 🔑 правильне вирівнювання */
+}
+
+/* ==================================================
+   FIELD
+   ================================================== */
+
+.stats-field {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(15,23,42,.85);
+    border: 1px solid rgba(255,255,255,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stats-label {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+/* ==================================================
+   DATE INPUT
+   ================================================== */
+
+.stats-field input[type="date"] {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #f3f4f6;
+    padding: 2px 0;
+    line-height: 1.2;
+}
+
+    .stats-field input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) opacity(.6);
+        cursor: pointer;
+    }
+
+/* ==================================================
+   APPLY BUTTON
+   ================================================== */
+
+.stats-apply {
+    height: 68px; /* 🔑 ключ */
+    padding: 0 28px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #7c7cff, #6366f1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+    .stats-apply:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 32px rgba(99,102,241,.45);
+    }
+
+/* ==================================================
+   TABLE
+   ================================================== */
 
 .stats-table {
     width: 100%;
@@ -35,10 +111,9 @@
 }
 
     .stats-table thead th {
-        text-align: left;
         font-size: 13px;
-        font-weight: 500;
         color: #9ca3af;
+        text-align: left;
         padding-bottom: 14px;
     }
 
@@ -48,88 +123,18 @@
 
     .stats-table td {
         padding: 14px 0;
-        font-size: 15px;
         color: #f3f4f6;
     }
 
-/* ---------- DATE ---------- */
-
-.stats-date {
-    font-weight: 500;
-}
-
-/* ---------- COUNT BADGE ---------- */
+/* ==================================================
+   BADGE
+   ================================================== */
 
 .stats-badge {
-    display: inline-block;
+    background: rgba(99,102,241,.18);
+    color: #a5b4fc;
     padding: 6px 14px;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 600;
-    background: rgba(99,102,241,.18);
-    color: #a5b4fc;
-}
-
-/* ---------- EMPTY ---------- */
-
-.stats-empty {
-    text-align: center;
-    color: #9ca3af;
-    font-size: 15px;
-    padding: 24px 0;
-}
-
-/* ---------- FILTER ---------- */
-
-.stats-filter {
-    display: flex;
-    gap: 16px;
-    align-items: flex-end;
-    justify-content: center;
-    margin-bottom: 26px;
-    flex-wrap: wrap;
-}
-
-.stats-filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.stats-filter-group label {
-    font-size: 12px;
-    color: #9ca3af;
-}
-
-.stats-filter-group input {
-    background: rgba(15,23,42,.85);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 10px;
-    padding: 8px 12px;
-    color: #f3f4f6;
-    font-size: 14px;
-}
-
-.stats-filter-group input:focus {
-    outline: none;
-    border-color: rgba(99,102,241,.6);
-}
-
-.stats-filter-btn {
-    height: 38px;
-    padding: 0 18px;
-    border-radius: 10px;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: white;
-    transition: transform .15s ease, box-shadow .15s ease;
-}
-
-.stats-filter-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 25px rgba(99,102,241,.35);
 }

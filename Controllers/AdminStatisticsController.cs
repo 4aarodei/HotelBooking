@@ -23,7 +23,7 @@ public class AdminStatisticsController : Controller
         // значення за замовчуванням
         var today = DateTime.Today;
 
-        var fromDate = (from ?? today.AddDays(-14)).Date;
+        var fromDate = (from ?? today.AddDays(-7)).Date;
         var toDate = (to ?? today).Date;
 
         // захист від некоректного діапазону

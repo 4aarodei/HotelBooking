@@ -1,51 +1,60 @@
 ﻿@model List<HotelBooking.Application.Statistics.BookingStatsDto>
 
-@{
-    ViewData["Title"] = "Booking statistics";
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/admin-booking-statistics.css" />
 }
 
-<link rel="stylesheet" href="~/css/pages/admin-booking-statistics.css" />
-
 <div class="admin-stats">
-
     <h2>Booking statistics</h2>
-
-
 
     <div class="stats-card">
 
-        @if (!Model.Any())
-        {
-            <div class="stats-empty">
-                No bookings found for selected period.
+        <!-- SEARCH BAR -->
+        <form method="get" class="stats-bar">
+
+            <div class="stats-field">
+                <span class="stats-label">From</span>
+                <input type="date"
+                       name="from"
+                       value="@Context.Request.Query["from"]" />
             </div>
-        }
-        else
-        {
-            <table class="stats-table">
-                <thead>
+
+            <div class="stats-field">
+                <span class="stats-label">To</span>
+                <input type="date"
+                       name="to"
+                       value="@Context.Request.Query["to"]" />
+            </div>
+
+            <button type="submit" class="stats-apply">
+                Apply
+            </button>
+
+        </form>
+
+        <!-- TABLE -->
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Bookings</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
                     <tr>
-                        <th>Date</th>
-                        <th>Bookings</th>
+                        <td class="stats-date">
+                            @item.Date.ToString("dd MMM yyyy")
+                        </td>
+                        <td>
+                            <span class="stats-badge">@item.BookingsCount</span>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="stats-date">
-                                @item.Date.ToString("dd MMM yyyy")
-                            </td>
-                            <td>
-                                <span class="stats-badge">
-                                    @item.BookingsCount
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+                }
+            </tbody>
+        </table>
 
     </div>
 </div>
