@@ -1,0 +1,60 @@
+﻿@using HotelBooking.Models.ViewModels
+@model List<UserRolesVm>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/admin-users.css" asp-append-version="true" />
+}
+
+<div class="admin-page">
+
+    <div class="admin-hero">
+        <h1>Користувачі</h1>
+        <p>Керування ролями користувачів системи</p>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card">
+
+            @foreach (var user in Model)
+            {
+                <div class="admin-user-item">
+
+                    <div class="admin-user-left">
+                        <div class="admin-user-email">@user.Email</div>
+
+                        <div class="admin-user-roles">
+                            @foreach (var role in user.Roles)
+                            {
+                                <span class="role-chip @role.ToLower()">
+                                    @role
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <form asp-action="UpdateRole" method="post" class="admin-user-actions">
+                        <input type="hidden" name="userId" value="@user.UserId" />
+
+                        <select name="role" class="admin-select">
+                            @foreach (var role in user.AllRoles)
+                            {
+                                <option value="@role"
+                                        selected="@(user.Roles.Contains(role))">
+                                    @role
+                                </option>
+                            }
+                        </select>
+
+                        <button class="admin-btn">
+                            Зберегти
+                        </button>
+                    </form>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
