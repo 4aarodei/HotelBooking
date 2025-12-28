@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="utf-8" />
@@ -14,9 +17,9 @@
 </head>
 
 @{
-            var isHome =
-                            ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
-                            ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+        var isHome =
+                ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
+                ViewContext.RouteData.Values["action"]?.ToString() == "Index";
 }
 
 <body class="@(isHome ? "no-scroll" : "") @ViewData["BodyClass"]">
@@ -36,14 +39,46 @@
             <nav class="header-center">
                 <a asp-controller="Home" asp-action="Index">Головна</a>
                 <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <a asp-controller="Users" asp-action="Index">Admin Panel</a>
+                }
             </nav>
 
             <div class="header-right">
-                <a class="btn-login" asp-area="Identity" asp-page="/Account/Login">
-                    Увійти
-                </a>
-            </div>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="auth-user">
+                        <div class="auth-profile">
+                            <span class="auth-avatar">
+                                @(User.Identity?.Name?.Substring(0, 1) ?? "?")
+                            </span>
 
+                            <span class="auth-name" title="@User.Identity?.Name">
+                                @User.Identity?.Name
+                            </span>
+                        </div>
+
+                        <form asp-area="Identity"
+                              asp-page="/Account/Logout"
+                              method="post"
+                              class="logout-form">
+                            <button type="submit" class="btn-logout">
+                                Вийти
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a class="btn-login"
+                       asp-area="Identity"
+                       asp-page="/Account/Login">
+                        Увійти
+                    </a>
+                }
+            </div>
 
         </div>
     </header>

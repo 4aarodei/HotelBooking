@@ -3606,7 +3606,7 @@
         if (!isDestroyed && options.onFirstUpdate) {
           options.onFirstUpdate(state);
         }
-      }); // Modifiers have the ability to execute arbitrary code before the first
+      }); // Modifiers have the ability to execute arbitrary Code before the first
       // update cycle runs. They will be executed in the same order as the update
       // cycle. This is useful when a modifier adds some persistent data that
       // other modifiers need to use, but the modifier is run after the dependent
@@ -5221,7 +5221,7 @@
     b: [],
     br: [],
     col: [],
-    code: [],
+    Code: [],
     div: [],
     em: [],
     hr: [],

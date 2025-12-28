@@ -20,6 +20,8 @@ namespace HotelBooking.Controllers
         }
         public async Task<IActionResult> Index()
         {
+
+            // Створити список "популярних, або готелів які "на рекламі" і передвати їх в VM
             var hotels = await _context.Hotels
                 .Where(h => h.Rooms.Any(r => r.IsActive))
                 .Select(h => new HotelCardVm

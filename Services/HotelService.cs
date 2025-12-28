@@ -1,4 +1,5 @@
-﻿using HotelBooking.Data.ApplicationDbContext;
+﻿using HotelBooking.Constants;
+using HotelBooking.Data.ApplicationDbContext;
 using HotelBooking.Models.Hotels;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,10 @@ public interface IHotelService
     Task<Hotel> CreateAsync(Hotel hotel);
     Task UpdateAsync(Hotel hotel);
     Task DeleteAsync(int id);
+    Task<List<Room>> GetAvailableRoomsAsync(
+       Guid hotelId,
+       DateTime checkIn,
+       DateTime checkOut);
 }
 
 public class HotelService : IHotelService
@@ -22,6 +27,25 @@ public class HotelService : IHotelService
     {
         _context = context;
     }
+
+    public async Task<List<Room>> GetAvailableRoomsAsync(Guid hotelId, DateTime checkIn, DateTime checkOut)
+    {
+        checkIn = checkIn.Date;
+        checkOut = checkOut.Date;
+
+        var cancelledStatusId = BookingStatusCodes.Cancelled;
+
+        return await _context.Rooms
+            .Where(r => r.HotelId == hotelId)
+            .Where(r =>
+                !_context.Bookings.Any(b =>
+                    b.RoomId == r.Id &&
+                    b.Status.BookingStatusCode != cancelledStatusId &&
+                    checkIn < b.CheckOut &&
+                    checkOut > b.CheckIn))
+            .ToListAsync();
+    }
+
 
     public async Task<List<Hotel>> GetByCityAsync(string city)
     {

@@ -1,12 +1,9 @@
 ﻿using HotelBooking.Models.Hotels;
 using HotelBooking.Models.ViewModels;
 using HotelBooking.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace HotelBooking.Controllers;
-
 
 public class HotelController : Controller
 {

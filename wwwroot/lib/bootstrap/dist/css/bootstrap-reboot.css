@@ -189,13 +189,13 @@ a:not([href]):not([class]), a:not([href]):not([class]):hover {
 }
 
 pre,
-code,
+Code,
 kbd,
 samp {
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 1em;
   direction: ltr /* rtl:ignore */;
-  unicode-bidi: bidi-override;
+  uniCode-bidi: bidi-override;
 }
 
 pre {
@@ -205,18 +205,18 @@ pre {
   overflow: auto;
   font-size: 0.875em;
 }
-pre code {
+pre Code {
   font-size: inherit;
   color: inherit;
   word-break: normal;
 }
 
-code {
+Code {
   font-size: 0.875em;
   color: #d63384;
   word-wrap: break-word;
 }
-a > code {
+a > Code {
   color: inherit;
 }
 

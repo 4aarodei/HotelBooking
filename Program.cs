@@ -1,6 +1,8 @@
 using HotelBooking.Application;
 using HotelBooking.Data.ApplicationDbContext;
+using HotelBooking.Data.IdentitySeeder;
 using HotelBooking.Models.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,16 +15,26 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
 
 
-//������� ���� ������ 
+// Зареєстрував кастомні сервіси
 builder.Services.AddApplicationServices();
 
-
 var app = builder.Build();
+
+// Ініціалізація даних Identity (створення ролей та адміністратора)
+// Автоматично видаємо роль SuperAdminEmail користувачу значиним емайлом (Admin@email.com)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await IdentitySeeder.SeedAsync(services);
+}
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

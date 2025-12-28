@@ -40,7 +40,7 @@
 } )( typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
 
 // Edge <= 12 - 13+, Firefox <=18 - 45+, IE 10 - 11, Safari 5.1 - 9+, iOS 6 - 9.1
-// throw exceptions when non-strict code (e.g., ASP.NET 4.5) accesses strict mode
+// throw exceptions when non-strict Code (e.g., ASP.NET 4.5) accesses strict mode
 // arguments.callee.caller (trac-13335). But as of jQuery 3.0 (2016), strict mode should be common
 // enough that all such attempts are guarded in a try block.
 "use strict";
@@ -104,13 +104,13 @@ var document = window.document;
 		noModule: true
 	};
 
-	function DOMEval( code, node, doc ) {
+	function DOMEval( Code, node, doc ) {
 		doc = doc || document;
 
 		var i, val,
 			script = doc.createElement( "script" );
 
-		script.text = code;
+		script.text = Code;
 		if ( node ) {
 			for ( i in preservedScriptAttributes ) {
 
@@ -372,8 +372,8 @@ jQuery.extend( {
 
 	// Evaluates a script in a provided context; falls back to the global one
 	// if not specified.
-	globalEval: function( code, options, doc ) {
-		DOMEval( code, { nonce: options && options.nonce }, doc );
+	globalEval: function( Code, options, doc ) {
+		DOMEval( Code, { nonce: options && options.nonce }, doc );
 	},
 
 	each: function( obj, callback ) {
@@ -680,7 +680,7 @@ var i,
 			// Strip the backslash prefix from a non-hex escape sequence
 			nonHex :
 
-			// Replace a hexadecimal escape sequence with the encoded Unicode code point
+			// Replace a hexadecimal escape sequence with the enCoded UniCode Code point
 			// Support: IE <=11+
 			// For values outside the Basic Multilingual Plane (BMP), manually construct a
 			// surrogate pair
@@ -700,7 +700,7 @@ var i,
 				return "\uFFFD";
 			}
 
-			// Control characters and (dependent upon position) numbers get escaped as code points
+			// Control characters and (dependent upon position) numbers get escaped as Code points
 			return ch.slice( 0, -1 ) + "\\" +
 				ch.charCodeAt( ch.length - 1 ).toString( 16 ) + " ";
 		}
@@ -4395,7 +4395,7 @@ var dataUser = new Data();
 //	2. Improve the module's maintainability by reducing the storage
 //		paths to a single mechanism.
 //	3. Use the same single mechanism to support "private" and "user" data.
-//	4. _Never_ expose "private" data to user code (TODO: Drop _data, _removeData)
+//	4. _Never_ expose "private" data to user Code (TODO: Drop _data, _removeData)
 //	5. Avoid exposing implementation details on user objects (eg. expando properties)
 //	6. Provide a clear path for implementation upgrade to WeakMap in 2014
 
@@ -5551,7 +5551,7 @@ jQuery.event = {
 			setup: function( data ) {
 
 				// For mutual compressibility with _default, replace `this` access with a local var.
-				// `|| data` is dead code meant only to preserve the variable through minification.
+				// `|| data` is dead Code meant only to preserve the variable through minification.
 				var el = this || data;
 
 				// Claim the first handler
@@ -5568,7 +5568,7 @@ jQuery.event = {
 			trigger: function( data ) {
 
 				// For mutual compressibility with _default, replace `this` access with a local var.
-				// `|| data` is dead code meant only to preserve the variable through minification.
+				// `|| data` is dead Code meant only to preserve the variable through minification.
 				var el = this || data;
 
 				// Force setup before triggering a click
@@ -5811,7 +5811,7 @@ jQuery.each( {
 	shiftKey: true,
 	view: true,
 	"char": true,
-	code: true,
+	Code: true,
 	charCode: true,
 	key: true,
 	keyCode: true,
@@ -6936,7 +6936,7 @@ jQuery.extend( {
 
 			// If a number was passed in, add the unit (except for certain CSS properties)
 			// The isCustomProp check can be removed in jQuery 4.0 when we only auto-append
-			// "px" to a few hardcoded values.
+			// "px" to a few hardCoded values.
 			if ( type === "number" && !isCustomProp ) {
 				value += ret && ret[ 3 ] || ( jQuery.cssNumber[ origName ] ? "" : "px" );
 			}
@@ -8201,7 +8201,7 @@ jQuery.extend( {
 // on the option
 // The getter ensures a default option is selected
 // when in an optgroup
-// eslint rule "no-unused-expressions" is disabled for this code
+// eslint rule "no-unused-expressions" is disabled for this Code
 // since it considers such accessions noop
 if ( !support.optSelected ) {
 	jQuery.propHooks.selected = {
@@ -8905,7 +8905,7 @@ function buildParams( prefix, obj, traditional, add ) {
 
 			} else {
 
-				// Item is non-scalar (array or object), encode its numeric index.
+				// Item is non-scalar (array or object), enCode its numeric index.
 				buildParams(
 					prefix + "[" + ( typeof v === "object" && v != null ? i : "" ) + "]",
 					v,
@@ -8941,8 +8941,8 @@ jQuery.param = function( a, traditional ) {
 				valueOrFunction() :
 				valueOrFunction;
 
-			s[ s.length ] = encodeURIComponent( key ) + "=" +
-				encodeURIComponent( value == null ? "" : value );
+			s[ s.length ] = enCodeURIComponent( key ) + "=" +
+				enCodeURIComponent( value == null ? "" : value );
 		};
 
 	if ( a == null ) {
@@ -8959,8 +8959,8 @@ jQuery.param = function( a, traditional ) {
 
 	} else {
 
-		// If traditional, encode the "old" way (the way 1.3.2 or older
-		// did it), otherwise encode params recursively.
+		// If traditional, enCode the "old" way (the way 1.3.2 or older
+		// did it), otherwise enCode params recursively.
 		for ( prefix in a ) {
 			buildParams( prefix, a[ prefix ], traditional, add );
 		}
@@ -9297,7 +9297,7 @@ jQuery.extend( {
 		global: true,
 		processData: true,
 		async: true,
-		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+		contentType: "application/x-www-form-urlenCoded; charset=UTF-8",
 
 		/*
 		timeout: 0,
@@ -9485,7 +9485,7 @@ jQuery.extend( {
 
 				// Status-dependent callbacks
 				statusCode: function( map ) {
-					var code;
+					var Code;
 					if ( map ) {
 						if ( completed ) {
 
@@ -9494,8 +9494,8 @@ jQuery.extend( {
 						} else {
 
 							// Lazy-add the new callbacks in a way that preserves old ones
-							for ( code in map ) {
-								statusCode[ code ] = [ statusCode[ code ], map[ code ] ];
+							for ( Code in map ) {
+								statusCode[ Code ] = [ statusCode[ Code ], map[ Code ] ];
 							}
 						}
 					}
@@ -9608,9 +9608,9 @@ jQuery.extend( {
 			// Put hash and anti-cache on the URL that will be requested (gh-1732)
 			s.url = cacheURL + uncached;
 
-		// Change '%20' to '+' if this is encoded form body content (gh-2658)
+		// Change '%20' to '+' if this is enCoded form body content (gh-2658)
 		} else if ( s.data && s.processData &&
-			( s.contentType || "" ).indexOf( "application/x-www-form-urlencoded" ) === 0 ) {
+			( s.contentType || "" ).indexOf( "application/x-www-form-urlenCoded" ) === 0 ) {
 			s.data = s.data.replace( r20, "+" );
 		}
 
@@ -9972,7 +9972,7 @@ jQuery.ajaxSettings.xhr = function() {
 
 var xhrSuccessStatus = {
 
-		// File protocol always yields status code 0, assume 200
+		// File protocol always yields status Code 0, assume 200
 		0: 200,
 
 		// Support: IE <=9 only
@@ -10217,7 +10217,7 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 			"url" :
 			typeof s.data === "string" &&
 				( s.contentType || "" )
-					.indexOf( "application/x-www-form-urlencoded" ) === 0 &&
+					.indexOf( "application/x-www-form-urlenCoded" ) === 0 &&
 				rjsonp.test( s.data ) && "data"
 		);
 

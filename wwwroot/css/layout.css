@@ -123,3 +123,84 @@ main {
     font-size: 14px;
     color: var(--text-muted);
 }
+/* ==================================================
+   AUTH USER
+   ================================================== */
+
+/* ==================================================
+   AUTH USER (FINAL)
+   ================================================== */
+
+.auth-user {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* profile block */
+.auth-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+    .auth-profile:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.2);
+    }
+
+/* avatar */
+.auth-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #8b8bff, #6f6fff);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(124,124,255,0.45);
+    user-select: none;
+}
+
+/* username */
+.auth-name {
+    max-width: 150px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* logout */
+.btn-logout {
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.16);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .btn-logout:hover {
+        background: rgba(255,255,255,0.14);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+
+.logout-form {
+    margin: 0;
+}
+
