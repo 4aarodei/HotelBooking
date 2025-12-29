@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using HotelBooking.Data;
-using HotelBooking.Models.ViewModels;
+using HotelBooking.ViewModels;
 using HotelBooking.Data.ApplicationDbContext;
 
 namespace HotelBooking.Controllers

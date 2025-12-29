@@ -1,5 +1,5 @@
 ﻿using HotelBooking.Models.Hotels;
-using HotelBooking.Models.ViewModels;
+using HotelBooking.ViewModels;
 using HotelBooking.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,8 +7,8 @@ namespace HotelBooking.Controllers;
 
 public class HotelController : Controller
 {
-    public readonly IHotelService _hotelService;
-    public HotelController(IHotelService hotelService)
+    public readonly HotelService _hotelService;
+    public HotelController(HotelService hotelService)
     {
         _hotelService = hotelService;
     }

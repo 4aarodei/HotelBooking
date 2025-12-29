@@ -10,8 +10,8 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services)
     {
-        services.AddScoped<IHotelService, HotelService>();
-        services.AddScoped<IRoomService, RoomService>();
+        services.AddScoped<HotelService, HotelService>();
+        services.AddScoped<RoomService, RoomService>();
         services.AddScoped<BookingService, BookingService>();
         services.AddScoped<BookingStatusService, BookingStatusService>();
 

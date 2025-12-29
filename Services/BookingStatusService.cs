@@ -23,16 +23,16 @@ namespace HotelBooking.Services
 {
     public class BookingStatusService
     {
-        private readonly ApplicationDbContext _db;
+        private readonly ApplicationDbContext _context;
 
         public BookingStatusService(ApplicationDbContext db)
         {
-            _db = db;
+            _context = db;
         }
 
         public async Task<IReadOnlyList<BookingStatus>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _db.BookingStatuses
+            return await _context.BookingStatuses
                 .AsNoTracking()
                 .OrderBy(s => s.Name)
                 .ToListAsync(ct);
@@ -40,7 +40,7 @@ namespace HotelBooking.Services
 
         public async Task<BookingStatus> GetByCodeAsync(Guid code, CancellationToken ct = default)
         {
-            var status = await _db.BookingStatuses
+            var status = await _context.BookingStatuses
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.BookingStatusCode == code, ct);
 

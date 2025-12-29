@@ -5,21 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Services;
 
-public interface IHotelService
-{
-    Task<List<Hotel>> GetAllAsync();
-    Task<Hotel?> GetByIdAsync(Guid id);
-    Task<List<Hotel>> GetByCityAsync(string city);
-    Task<Hotel> CreateAsync(Hotel hotel);
-    Task UpdateAsync(Hotel hotel);
-    Task DeleteAsync(int id);
-    Task<List<Room>> GetAvailableRoomsAsync(
-       Guid hotelId,
-       DateTime checkIn,
-       DateTime checkOut);
-}
-
-public class HotelService : IHotelService
+public class HotelService
 {
     private readonly ApplicationDbContext _context;
 
@@ -27,25 +13,6 @@ public class HotelService : IHotelService
     {
         _context = context;
     }
-
-    public async Task<List<Room>> GetAvailableRoomsAsync(Guid hotelId, DateTime checkIn, DateTime checkOut)
-    {
-        checkIn = checkIn.Date;
-        checkOut = checkOut.Date;
-
-        var cancelledStatusId = BookingStatusCodes.Cancelled;
-
-        return await _context.Rooms
-            .Where(r => r.HotelId == hotelId)
-            .Where(r =>
-                !_context.Bookings.Any(b =>
-                    b.RoomId == r.Id &&
-                    b.Status.BookingStatusCode != cancelledStatusId &&
-                    checkIn < b.CheckOut &&
-                    checkOut > b.CheckIn))
-            .ToListAsync();
-    }
-
 
     public async Task<List<Hotel>> GetByCityAsync(string city)
     {
@@ -67,27 +34,5 @@ public class HotelService : IHotelService
         return await _context.Hotels
             .Include(h => h.Rooms)
             .FirstOrDefaultAsync(h => h.Id == id);
-    }
-
-    public async Task<Hotel> CreateAsync(Hotel hotel)
-    {
-        _context.Hotels.Add(hotel);
-        await _context.SaveChangesAsync();
-        return hotel;
-    }
-
-    public async Task UpdateAsync(Hotel hotel)
-    {
-        _context.Hotels.Update(hotel);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var hotel = await _context.Hotels.FindAsync(id);
-        if (hotel == null) return;
-
-        _context.Hotels.Remove(hotel);
-        await _context.SaveChangesAsync();
     }
 }

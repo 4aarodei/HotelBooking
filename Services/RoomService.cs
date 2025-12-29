@@ -4,21 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Services;
 
-public interface IRoomService
-{
-    Task<List<Room>> GetByHotelAsync(Guid hotelId);
-    Task<Room?> GetByIdAsync(int id);
 
-    Task<List<Room>> SearchAsync(
-        string city,
-        DateTime checkIn,
-        DateTime checkOut);
-
-    Task<Room> CreateAsync(Room room);
-    Task DeleteAsync(int id);
-}
-
-public class RoomService : IRoomService
+public class RoomService 
 {
     private readonly ApplicationDbContext _context;
 

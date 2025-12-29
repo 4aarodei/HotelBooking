@@ -1,6 +1,6 @@
 ﻿using HotelBooking.Models.Hotels;
-using HotelBooking.Models.ViewModels;
 using HotelBooking.Services;
+using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

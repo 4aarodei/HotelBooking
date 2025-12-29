@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using HotelBooking.Models.ViewModels;
+using HotelBooking.ViewModels;
 
 
 namespace HotelBooking.Controllers.Admin;

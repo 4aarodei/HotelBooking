@@ -1,5 +1,5 @@
 ﻿using HotelBooking.Models.Hotels;
-namespace HotelBooking.Models.ViewModels;
+namespace HotelBooking.ViewModels;
 
 public class HotelViewModelIndex
 {
