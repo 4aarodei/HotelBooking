@@ -60,4 +60,15 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+
+Console.WriteLine();
+Console.WriteLine();
+Console.WriteLine();
+
+Console.WriteLine(builder.Environment.EnvironmentName);
+
+Console.WriteLine();
+Console.WriteLine();
+Console.WriteLine();
+
 app.Run();
