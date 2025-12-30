@@ -19,7 +19,7 @@
 </head>
 
 @{
-                    var isHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+                        var isHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
 }
 
 <body class="@ViewData["BodyClass"]">
@@ -41,7 +41,7 @@
 
                 @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
                 {
-                    <a asp-controller="Users" asp-action="Index">Admin Panel</a>
+                    <a asp-controller="Users" asp-action="Index">Role Manager</a>
                     <a asp-controller="AdminStatistics" asp-action="Index">Stats Panel</a>
 
                 }
@@ -51,25 +51,27 @@
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="auth-user">
-                        <div class="auth-profile">
-                            <span class="auth-avatar">
-                                @(User.Identity?.Name?.Substring(0, 1) ?? "?")
-                            </span>
+                        <form asp-controller="UserProfile"
+                              asp-action="Index"
+                              method="get"
+                              class="auth-profile auth-clickable">
 
-                            <span class="auth-name" title="@User.Identity?.Name">
-                                @User.Identity?.Name
-                            </span>
-                        </div>
+                            <input type="hidden"
+                                   name="UserId"
+                                   value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
 
-                        <form asp-area="Identity"
-                              asp-page="/Account/Logout"
-                              method="post"
-                              class="logout-form">
-                            <button type="submit" class="btn-logout">
-                                Вийти
+                            <button type="submit" class="auth-btn">
+                                <span class="auth-avatar">
+                                    @(User.Identity?.Name?.Substring(0, 1) ?? "?")
+                                </span>
+
+                                <span class="auth-name">
+                                    @User.Identity?.Name
+                                </span>
                             </button>
                         </form>
                     </div>
+
                 }
                 else
                 {

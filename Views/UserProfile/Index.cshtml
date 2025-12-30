@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Profile";
+    Layout = "_Layout";
+    var tab = ViewBag.Tab as string ?? "public";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" />
+
+<div class="profile-page">
+
+    <aside class="profile-sidebar">
+        @await Html.PartialAsync("_ProfileNav", tab)
+    </aside>
+
+    <main class="profile-content">
+        @switch (tab)
+        {
+            case "bookings":
+                @await Html.PartialAsync("Sections/_Bookings")
+                break;
+
+            case "security":
+                @await Html.PartialAsync("Sections/_Security")
+                break;
+
+            default:
+                @await Html.PartialAsync("Sections/_Public")
+                break;
+        }
+    </main>
+
+</div>

@@ -1,0 +1,39 @@
+﻿<section class="profile-card">
+
+    <h1>Public profile</h1>
+
+    <form class="profile-form" method="post">
+
+        <div class="profile-field">
+            <label>Name</label>
+            <input type="text"
+                   value="@User.Identity?.Name"
+                   placeholder="Your name" />
+        </div>
+
+        <div class="profile-field">
+            <label>Email</label>
+            <input type="email"
+                   value="@User.Identity?.Name"
+                   disabled />
+        </div>
+
+        <div class="profile-field">
+            <label>Bio</label>
+            <textarea rows="4"
+                      placeholder="Tell something about yourself">c++ / c# enjoyer</textarea>
+        </div>
+
+        <div class="profile-field">
+            <label>Website</label>
+            <input type="url"
+                   placeholder="https://example.com" />
+        </div>
+
+        <button type="submit" class="btn-primary">
+            Save changes
+        </button>
+
+    </form>
+
+</section>
