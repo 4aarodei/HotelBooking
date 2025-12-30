@@ -1,32 +1,37 @@
-﻿@{
-    ViewData["Title"] = "Profile";
-    Layout = "_Layout";
-    var tab = ViewBag.Tab as string ?? "public";
+﻿@model HotelBooking.ViewModels.UserProfileViewModels.UserProfileIndexModel
+
+@{
+    Layout = "~/Views/UserProfile/_Shared/_ProfileLayout.cshtml";
+    ViewData["Title"] = "Public profile";
 }
 
-<link rel="stylesheet" href="~/css/profile.css" />
+<section class="profile-card">
 
-<div class="profile-page">
+    <h1>Public profile</h1>
 
-    <aside class="profile-sidebar">
-        @await Html.PartialAsync("_ProfileNav", tab)
-    </aside>
+    <form asp-action="UpdatePublicProfile" method="post" class="profile-form">
+        @Html.AntiForgeryToken()
 
-    <main class="profile-content">
-        @switch (tab)
-        {
-            case "bookings":
-                @await Html.PartialAsync("Sections/_Bookings")
-                break;
+        <div class="profile-field">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" />
+            <span asp-validation-for="FirstName"></span>
+        </div>
 
-            case "security":
-                @await Html.PartialAsync("Sections/_Security")
-                break;
+        <div class="profile-field">
+            <label asp-for="LastName"></label>
+            <input asp-for="LastName" />
+            <span asp-validation-for="LastName"></span>
+        </div>
 
-            default:
-                @await Html.PartialAsync("Sections/_Public")
-                break;
-        }
-    </main>
+        <div class="profile-field">
+            <label>Email</label>
+            <input type="email" value="@User.Identity?.Name" disabled />
+        </div>
 
-</div>
+        <button type="submit" class="btn-primary">
+            Save changes
+        </button>
+    </form>
+
+</section>

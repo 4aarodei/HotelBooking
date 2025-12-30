@@ -1,0 +1,33 @@
+﻿@{
+    Layout = "~/Views/UserProfile/_Shared/_ProfileLayout.cshtml";
+    ViewData["Title"] = "Security";
+}
+
+<section class="profile-card">
+
+    <h1>Security</h1>
+
+    <form class="profile-form">
+
+        <div class="profile-field">
+            <label>Current password</label>
+            <input type="password" />
+        </div>
+
+        <div class="profile-field">
+            <label>New password</label>
+            <input type="password" />
+        </div>
+
+        <div class="profile-field">
+            <label>Confirm new password</label>
+            <input type="password" />
+        </div>
+
+        <button class="btn-primary">
+            Update password
+        </button>
+
+    </form>
+
+</section>
