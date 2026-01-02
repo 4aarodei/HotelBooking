@@ -13,8 +13,10 @@
     --primary-strong: #7f6bff;
     --primary-soft: rgba(154, 140, 255, 0.14);
     --secondary: #5eb7f1;
-    --text-strong: #f4f6ff;
-    --text-muted: #9ba2c6;
+    --text-strong: #e9ecff;
+    --text-muted: #b4bedb;
+    --text-placeholder: #c6cde8;
+    --text-disabled: #9aa4c4;
     --shadow-soft: 0 18px 60px rgba(5, 7, 16, 0.45);
     --shadow-glow: 0 16px 50px rgba(130, 118, 255, 0.25);
     --radius-lg: 18px;
@@ -124,13 +126,13 @@ a:hover {
 
 .btn-ghost {
     background: transparent;
-    color: var(--text-muted);
-    border-color: var(--border-soft);
+    color: var(--text-strong);
+    border-color: var(--border-strong);
 }
 
 .btn-ghost:hover {
     color: var(--text-strong);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .card,
@@ -142,6 +144,20 @@ a:hover {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(16px);
+}
+
+.dropdown-menu {
+    color: var(--text-strong);
+}
+
+.dropdown-item {
+    color: var(--text-strong);
+}
+
+.dropdown-item:focus,
+.dropdown-item:hover {
+    background: var(--primary-soft);
+    color: var(--text-strong);
 }
 
 .card-header,
@@ -169,6 +185,16 @@ a:hover {
     border-color: var(--border-strong);
 }
 
+.list-group-item-action {
+    color: var(--text-strong);
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-strong);
+}
+
 .form-control,
 .form-select,
 .form-check-input {
@@ -184,6 +210,22 @@ a:hover {
 .form-check-input:focus {
     border-color: rgba(154, 140, 255, 0.4);
     box-shadow: 0 0 0 0.25rem rgba(154, 140, 255, 0.15);
+}
+
+.form-control::placeholder,
+.form-select::placeholder,
+textarea.form-control::placeholder {
+    color: var(--text-placeholder);
+    opacity: 1;
+}
+
+.form-control:disabled,
+.form-select:disabled,
+.form-check-input:disabled {
+    background: var(--bg-700);
+    border-color: var(--border-strong);
+    color: var(--text-disabled);
+    opacity: 1;
 }
 
 .form-label {
