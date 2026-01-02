@@ -5,18 +5,18 @@ using System.Diagnostics;
 using HotelBooking.Data;
 using HotelBooking.ViewModels;
 using HotelBooking.Data.ApplicationDbContext;
+using HotelBooking.Services;
 
 namespace HotelBooking.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context;
-
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        private readonly HotelService _hotelService;
+        public HomeController(ILogger<HomeController> logger, HotelService hotelService)
         {
             _logger = logger;
-            _context = context;
+            _hotelService = hotelService;
         }
         public async Task<IActionResult> Index()
         {
