@@ -1,27 +1,27 @@
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success" role="alert">
+    <div class="alert alert-success mb-3" role="alert">
         <span class="alert-message">@TempData["Success"]</span>
     </div>
 }
 
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger mb-3" role="alert">
         <span class="alert-message">@TempData["Error"]</span>
     </div>
 }
 
 @if (TempData["Info"] != null)
 {
-    <div class="alert alert-info" role="alert">
+    <div class="alert alert-info mb-3" role="alert">
         <span class="alert-message">@TempData["Info"]</span>
     </div>
 }
 
 @if (TempData["Warning"] != null)
 {
-    <div class="alert alert-warning" role="alert">
+    <div class="alert alert-warning mb-3" role="alert">
         <span class="alert-message">@TempData["Warning"]</span>
     </div>
 }
