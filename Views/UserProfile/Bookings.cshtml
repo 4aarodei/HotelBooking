@@ -1,26 +1,26 @@
-﻿@{
+@{
     Layout = "~/Views/UserProfile/_Shared/_ProfileLayout.cshtml";
     ViewData["Title"] = "My bookings";
 }
 
-<section class="profile-card">
-
-    <h1>My bookings</h1>
-
-    <div class="bookings-list">
-
-        <div class="booking-item">
-            <strong>Dniprio Riverside Hotel</strong>
-            <span>30.12.2025 – 31.12.2025</span>
-            <span class="booking-price">1600 ₴ / night</span>
+<section class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h4 mb-3">My bookings</h1>
+        <div class="list-group list-group-flush">
+            <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <strong class="d-block">Dniprio Riverside Hotel</strong>
+                    <small class="text-muted">30.12.2025 – 31.12.2025</small>
+                </div>
+                <span class="badge text-bg-primary">1600 ₴ / night</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <strong class="d-block">Lviv Old Town Inn</strong>
+                    <small class="text-muted">10.01.2026 – 12.01.2026</small>
+                </div>
+                <span class="badge text-bg-primary">1200 ₴ / night</span>
+            </div>
         </div>
-
-        <div class="booking-item">
-            <strong>Lviv Old Town Inn</strong>
-            <span>10.01.2026 – 12.01.2026</span>
-            <span class="booking-price">1200 ₴ / night</span>
-        </div>
-
     </div>
-
 </section>

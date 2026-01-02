@@ -1,107 +1,79 @@
-﻿@using HotelBooking.ViewModels
+@using HotelBooking.ViewModels
 @model HotelDetailsViewModel
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/hotel-details.css" />
-}
-
-<div class="page hotel-details">
-
-    <!-- HOTEL HEADER -->
-    <section class="hotel-header">
-        <h1>@Model.Name</h1>
-        <p>@Model.City · @Model.Address</p>
+<div class="container py-5">
+    <section class="mb-4">
+        <h1 class="display-6 fw-bold mb-2">@Model.Name</h1>
+        <p class="text-muted mb-0">@Model.City · @Model.Address</p>
     </section>
 
-    <!-- MAIN CONTENT -->
-    <section class="hotel-details-main">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Про готель</h2>
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p class="mb-4">@Model.Description</p>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary" role="alert">
+                            Опис для цього готелю поки що відсутній.
+                        </div>
+                    }
 
-        <!-- LEFT COLUMN -->
-        <div class="hotel-details-about">
-
-            <h2>Про готель</h2>
-
-            @if (!string.IsNullOrWhiteSpace(Model.Description))
-            {
-                <p>@Model.Description</p>
-            }
-            else
-            {
-                <p class="empty-state">
-                    Опис для цього готелю поки що відсутній.
-                </p>
-            }
-
-            <!-- ROOMS -->
-            <div class="hotel-rooms">
-
-                <h2>Доступні кімнати</h2>
-
-                @if (!Model.Rooms.Any())
-                {
-                    <p class="empty-state">
-                        Наразі немає доступних кімнат
-                    </p>
-                }
-                else
-                {
-                    <div class="hotel-grid--wide">
-
-                        @foreach (var room in Model.Rooms)
+                    <div class="mt-4">
+                        <h2 class="h5 mb-3">Доступні кімнати</h2>
+                        @if (!Model.Rooms.Any())
                         {
-                            <div class="room-card">
-
-                                <h3>@room.Name</h3>
-
-                                <p>
-                                    👤 @room.Capacity осіб
-                                </p>
-
-                                <div class="price">
-                                    @room.PricePerNight.ToString("0.00") ₴ / ніч
-                                </div>
-
-                                <form asp-controller="Booking"
-                                      asp-action="Create"
-                                      method="get">
-
-                                    <input type="hidden" name="roomId" value="@room.Id" />
-
-                                    <button type="submit" class="btn-primary">
-                                        Забронювати
-                                    </button>
-                                </form>
-
+                            <div class="alert alert-secondary" role="alert">
+                                Наразі немає доступних кімнат
                             </div>
                         }
-
+                        else
+                        {
+                            <div class="row row-cols-1 row-cols-md-2 g-3">
+                                @foreach (var room in Model.Rooms)
+                                {
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm">
+                                            <div class="card-body d-flex flex-column gap-2">
+                                                <h3 class="h6 mb-1">@room.Name</h3>
+                                                <p class="mb-1">👤 @room.Capacity осіб</p>
+                                                <div class="fw-semibold text-primary">@room.PricePerNight.ToString("0.00") ₴ / ніч</div>
+                                                <form asp-controller="Booking" asp-action="Create" method="get" class="mt-auto">
+                                                    <input type="hidden" name="roomId" value="@room.Id" />
+                                                    <button type="submit" class="btn btn-primary w-100">Забронювати</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
-                }
-
+                </div>
             </div>
-
         </div>
 
-        <!-- RIGHT COLUMN / SIDEBAR -->
-        <aside class="hotel-details-meta">
-
-            <div class="meta-card">
-                <span class="meta-label">Місто</span>
-                <strong>@Model.City</strong>
+        <aside class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body d-grid gap-3">
+                    <div>
+                        <span class="text-muted small d-block">Місто</span>
+                        <strong>@Model.City</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Адреса</span>
+                        <strong>@Model.Address</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Доступних кімнат</span>
+                        <strong>@Model.Rooms.Count</strong>
+                    </div>
+                </div>
             </div>
-
-            <div class="meta-card">
-                <span class="meta-label">Адреса</span>
-                <strong>@Model.Address</strong>
-            </div>
-
-            <div class="meta-card">
-                <span class="meta-label">Доступних кімнат</span>
-                <strong>@Model.Rooms.Count</strong>
-            </div>
-
         </aside>
-
-    </section>
-
+    </div>
 </div>

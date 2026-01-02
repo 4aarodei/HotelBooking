@@ -1,60 +1,48 @@
-﻿@using HotelBooking.ViewModels
+@using HotelBooking.ViewModels
 @model List<UserRolesVm>
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/admin-users.css" asp-append-version="true" />
-}
-
-<div class="admin-page">
-
-    <div class="admin-hero">
-        <h1>Користувачі</h1>
-        <p>Керування ролями користувачів системи</p>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h4 mb-1">Користувачі</h1>
+            <p class="text-muted mb-0">Керування ролями користувачів системи</p>
+        </div>
     </div>
 
-    <div class="admin-card">
-        <div class="admin-card">
-
+    <div class="card shadow-sm">
+        <div class="list-group list-group-flush">
             @foreach (var user in Model)
             {
-                <div class="admin-user-item">
-
-                    <div class="admin-user-left">
-                        <div class="admin-user-email">@user.Email</div>
-
-                        <div class="admin-user-roles">
-                            @foreach (var role in user.Roles)
-                            {
-                                <span class="role-chip @role.ToLower()">
-                                    @role
-                                </span>
-                            }
+                <div class="list-group-item">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <div class="fw-semibold">@user.Email</div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                @foreach (var role in user.Roles)
+                                {
+                                    <span class="badge text-bg-primary">@role</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <form asp-action="UpdateRole" method="post" class="row g-2 align-items-center">
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <div class="col-sm-8">
+                                    <select name="role" class="form-select">
+                                        @foreach (var role in user.AllRoles)
+                                        {
+                                            <option value="@role" selected="@(user.Roles.Contains(role))">@role</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 d-grid">
+                                    <button class="btn btn-primary" type="submit">Зберегти</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-
-                    <form asp-action="UpdateRole" method="post" class="admin-user-actions">
-                        <input type="hidden" name="userId" value="@user.UserId" />
-
-                        <select name="role" class="admin-select">
-                            @foreach (var role in user.AllRoles)
-                            {
-                                <option value="@role"
-                                        selected="@(user.Roles.Contains(role))">
-                                    @role
-                                </option>
-                            }
-                        </select>
-
-                        <button class="admin-btn">
-                            Зберегти
-                        </button>
-                    </form>
-
                 </div>
             }
-
         </div>
-
     </div>
-
 </div>
