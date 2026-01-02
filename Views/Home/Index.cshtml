@@ -11,7 +11,7 @@
                 <h1 class="display-5 fw-bold mb-3">Бронюйте готелі просто</h1>
                 <p class="hero-subtitle mb-4">Знайдіть ідеальне місце для подорожі за кілька кліків</p>
 
-                <form class="search-panel p-4 shadow-sm" method="get" asp-controller="Hotel" asp-action="Index">
+                <form class="card search-panel shadow-lg border-0 p-4" method="get" asp-controller="Hotel" asp-action="Index">
                     <div class="row g-3 align-items-end">
                         <div class="col-lg-3 col-sm-6">
                             <label class="form-label text-muted">Місто</label>
@@ -48,7 +48,7 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="section-title h4 mb-0">Популярні готелі</h2>
-            <span class="text-muted">@Model?.PopularHotels?.Count() ?? 0 пропозицій</span>
+            <span class="badge text-bg-primary rounded-pill">@Model?.PopularHotels?.Count() ?? 0 пропозицій</span>
         </div>
 
         @if (Model?.PopularHotels != null && Model.PopularHotels.Any())
