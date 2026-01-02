@@ -1,4 +1,3 @@
-﻿@* Success *@
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success" role="alert">
@@ -6,15 +5,13 @@
     </div>
 }
 
-@* Error *@
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-error" role="alert">
+    <div class="alert alert-danger" role="alert">
         <span class="alert-message">@TempData["Error"]</span>
     </div>
 }
 
-@* Info *@
 @if (TempData["Info"] != null)
 {
     <div class="alert alert-info" role="alert">
@@ -22,7 +19,6 @@
     </div>
 }
 
-@* Warning *@
 @if (TempData["Warning"] != null)
 {
     <div class="alert alert-warning" role="alert">

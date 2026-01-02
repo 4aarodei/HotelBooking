@@ -1,20 +1,16 @@
-﻿@{
+@{
     Layout = "_Layout";
 }
 
-<link rel="stylesheet" href="~/css/profile.css" />
+<div class="container py-5">
+    <div class="row g-4">
+        <aside class="col-lg-4">
+            @await Html.PartialAsync("~/Views/UserProfile/_Shared/_ProfileNav.cshtml")
+        </aside>
 
-<div class="profile-page">
-
-    <aside class="profile-sidebar">
-        @await Html.PartialAsync("~/Views/UserProfile/_Shared/_ProfileNav.cshtml")
-    </aside>
-
-    <main class="profile-content">
-
-        @await Html.PartialAsync("_Notifications")
-
-        @RenderBody()
-    </main>
-
+        <main class="col-lg-8">
+            @await Html.PartialAsync("_Notifications")
+            @RenderBody()
+        </main>
+    </div>
 </div>
