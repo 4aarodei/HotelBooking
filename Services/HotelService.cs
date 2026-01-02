@@ -13,10 +13,7 @@ public class HotelService
     {
         _context = context;
     }
-    public async Task<List<Hotel>> GetPopularHotelsAsync()
-    {
-        List<Hotel> popularHotels = {}
-    }
+
 
     public async Task<List<Hotel>> GetByCityAsync(string city)
     {

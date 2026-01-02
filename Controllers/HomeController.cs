@@ -13,15 +13,16 @@ namespace HotelBooking.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly HotelService _hotelService;
-        public HomeController(ILogger<HomeController> logger, HotelService hotelService)
+        private readonly ApplicationDbContext _context;
+        public HomeController(ILogger<HomeController> logger, HotelService hotelService, ApplicationDbContext context)
         {
             _logger = logger;
             _hotelService = hotelService;
+            _context = context;
         }
         public async Task<IActionResult> Index()
         {
-
-            // Створити список "популярних, або готелів які "на рекламі" і передвати їх в VM
+            //ToDO - Видалити використання контексту напряму, додати список "популярних" готелів в HotelService
             var hotels = await _context.Hotels
                 .Where(h => h.Rooms.Any(r => r.IsActive))
                 .Select(h => new HotelCardVm
