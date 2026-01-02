@@ -13,11 +13,14 @@ namespace HotelBooking.Controllers
     {
         private readonly BookingService _bookingService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public UserProfileController(BookingService bookingService, UserManager<ApplicationUser> userManager)
+
+        public UserProfileController(BookingService bookingService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _bookingService = bookingService;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> Index()
@@ -103,5 +106,14 @@ namespace HotelBooking.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }

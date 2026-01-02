@@ -14,5 +14,17 @@
         <a class="list-group-item list-group-item-action @(action == "Index" ? "active" : "")" asp-action="Index"><i class="bi bi-person"></i> Public profile</a>
         <a class="list-group-item list-group-item-action @(action == "Bookings" ? "active" : "")" asp-action="Bookings"><i class="bi bi-calendar2-check"></i> My bookings</a>
         <a class="list-group-item list-group-item-action @(action == "Security" ? "active" : "")" asp-action="Security"><i class="bi bi-shield-lock"></i> Security</a>
+        <form asp-controller="UserProfile"
+              asp-action="Logout"
+              method="post"
+              class="list-group-item list-group-item-action p-0">
+            @Html.AntiForgeryToken()
+
+            <button type="submit"
+                    class="btn btn-link text-start w-100 text-decoration-none">
+                <i class="bi bi-box-arrow-right"></i> Log Out
+            </button>
+        </form>
+
     </div>
 </div>
