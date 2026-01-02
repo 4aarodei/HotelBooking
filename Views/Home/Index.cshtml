@@ -4,41 +4,45 @@
     ViewData["Title"] = "Головна";
 }
 
-<section class="hero-section text-center">
+<section class="hero-section">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <h1 class="display-5 fw-bold mb-3">Бронюйте готелі просто</h1>
-                <p class="hero-subtitle mb-4">Знайдіть ідеальне місце для подорожі за кілька кліків</p>
-
-                <form class="card search-panel shadow-lg border-0 p-4" method="get" asp-controller="Hotel" asp-action="Index">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-lg-3 col-sm-6">
-                            <label class="form-label text-muted">Місто</label>
-                            <input type="text" name="city" class="form-control" placeholder="Вкажіть місто" />
+        <div class="hero-card text-center">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7 text-lg-start">
+                    <p class="eyebrow text-uppercase mb-2">Нове враження від подорожей</p>
+                    <h1 class="hero-title fw-bold mb-3">Бронюйте готелі в один дотик</h1>
+                    <p class="hero-subtitle mb-0">Сучасний простір для пошуку, вибору та бронювання улюблених готелів по всій Україні.</p>
+                </div>
+                <div class="col-lg-5">
+                    <form class="search-panel p-4" method="get" asp-controller="Hotel" asp-action="Index">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-sm-6">
+                                <label class="form-label text-muted">Місто</label>
+                                <input type="text" name="city" class="form-control" placeholder="Вкажіть місто" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label text-muted">Дата заїзду</label>
+                                <input type="date" name="checkIn" class="form-control" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label text-muted">Дата виїзду</label>
+                                <input type="date" name="checkOut" class="form-control" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label text-muted">Гості</label>
+                                <select name="guests" class="form-select">
+                                    @for (int i = 1; i <= 6; i++)
+                                    {
+                                        <option value="@i">@i гість</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12 d-grid">
+                                <button type="submit" class="btn btn-primary" formnovalidate>Знайти пропозиції</button>
+                            </div>
                         </div>
-                        <div class="col-lg-3 col-sm-6">
-                            <label class="form-label text-muted">Дата заїзду</label>
-                            <input type="date" name="checkIn" class="form-control" />
-                        </div>
-                        <div class="col-lg-3 col-sm-6">
-                            <label class="form-label text-muted">Дата виїзду</label>
-                            <input type="date" name="checkOut" class="form-control" />
-                        </div>
-                        <div class="col-lg-2 col-sm-6">
-                            <label class="form-label text-muted">Гості</label>
-                            <select name="guests" class="form-select">
-                                @for (int i = 1; i <= 6; i++)
-                                {
-                                    <option value="@i">@i гість</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-lg-1 d-grid">
-                            <button type="submit" class="btn btn-primary" formnovalidate>Знайти</button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -46,9 +50,12 @@
 
 <section class="py-5">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title h4 mb-0">Популярні готелі</h2>
-            <span class="badge text-bg-primary rounded-pill">@Model?.PopularHotels?.Count() ?? 0 пропозицій</span>
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow mb-1">Добірка готелів</p>
+                <h2 class="h4 mb-0">Популярні готелі</h2>
+            </div>
+            <span class="tag-pill">@Model?.PopularHotels?.Count() ?? 0 пропозицій</span>
         </div>
 
         @if (Model?.PopularHotels != null && Model.PopularHotels.Any())
@@ -57,11 +64,17 @@
                 @foreach (var hotel in Model.PopularHotels)
                 {
                     <div class="col">
-                        <a asp-controller="Hotel" asp-action="Details" asp-route-hotelId="@hotel.Id" class="card h-100 text-decoration-none text-reset shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <h3 class="h5 mb-2">@hotel.Name</h3>
-                                <p class="text-muted mb-3">@hotel.City · від @hotel.MinPrice.ToString("0") ₴</p>
-                                <span class="mt-auto text-primary fw-semibold">Дивитися деталі →</span>
+                        <a asp-controller="Hotel" asp-action="Details" asp-route-hotelId="@hotel.Id" class="card h-100 hotel-card text-decoration-none text-reset">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h3 class="h5 mb-2">@hotel.Name</h3>
+                                    <span class="badge text-bg-primary">від @hotel.MinPrice.ToString("0") ₴</span>
+                                </div>
+                                <p class="mb-3 text-muted">@hotel.City</p>
+                                <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
+                                    <span class="fw-semibold text-primary">Дивитися деталі</span>
+                                    <i class="bi bi-arrow-right text-primary"></i>
+                                </div>
                             </div>
                         </a>
                     </div>
@@ -70,7 +83,7 @@
         }
         else
         {
-            <div class="alert alert-secondary" role="alert">
+            <div class="alert alert-info" role="alert">
                 Наразі немає популярних готелів
             </div>
         }

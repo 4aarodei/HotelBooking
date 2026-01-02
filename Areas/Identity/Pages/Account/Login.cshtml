@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model LoginModel
 
 @{
@@ -6,14 +6,9 @@
     ViewData["BodyClass"] = "auth-page";
 }
 
-
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/auth.css" asp-append-version="true" />
-}
-
-<div class="auth-wrapper">
+<div class="auth-shell">
     <div class="auth-card">
+        <p class="eyebrow mb-2 text-uppercase">Ласкаво просимо</p>
         <h1 class="auth-title">Вхід</h1>
         <p class="auth-subtitle">Увійдіть у свій акаунт</p>
 
@@ -22,22 +17,22 @@
 
             <div class="form-group">
                 <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" autocomplete="username" />
-                <span asp-validation-for="Input.Email"></span>
+                <input asp-for="Input.Email" autocomplete="username" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" autocomplete="current-password" />
-                <span asp-validation-for="Input.Password"></span>
+                <input asp-for="Input.Password" autocomplete="current-password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
             </div>
 
-            <div class="form-remember">
-                <input asp-for="Input.RememberMe" />
-                <label asp-for="Input.RememberMe"></label>
+            <div class="form-remember d-flex align-items-center gap-2 mb-3">
+                <input asp-for="Input.RememberMe" class="form-check-input" />
+                <label asp-for="Input.RememberMe" class="form-check-label"></label>
             </div>
 
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn btn-primary w-100 mb-2">
                 Увійти
             </button>
         </form>
