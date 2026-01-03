@@ -1,13 +1,13 @@
-﻿using HotelBooking.Models.Identity;
+using HotelBooking.Models.Identity;
+using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using HotelBooking.ViewModels;
-
 
 namespace HotelBooking.Controllers.Admin;
 
 [Authorize(Roles = "SuperAdmin")]
+[Route("Admin/Users")]
 public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -19,6 +19,7 @@ public class UsersController : Controller
         _roleManager = roleManager;
     }
 
+    [HttpGet("")]
     public async Task<IActionResult> Index()
     {
         var users = _userManager.Users.ToList();
@@ -37,10 +38,11 @@ public class UsersController : Controller
             });
         }
 
-        return View(model);
+        return View("~/Views/Admin/Users/Index.cshtml", model);
     }
 
-    [HttpPost]
+    [HttpPost("UpdateRole")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateRole(string userId, string role)
     {
         var user = await _userManager.FindByIdAsync(userId);

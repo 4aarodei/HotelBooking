@@ -100,4 +100,29 @@ public class HotelService
 
         return hotel;
     }
+
+    public async Task<List<Hotel>> GetAllAsync()
+    {
+        return await _context.Hotels
+            .OrderBy(h => h.Name)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<Hotel?> GetByIdAsync(Guid id)
+    {
+        return await _context.Hotels.FirstOrDefaultAsync(h => h.Id == id);
+    }
+
+    public async Task AddAsync(Hotel hotel)
+    {
+        _context.Hotels.Add(hotel);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Hotel hotel)
+    {
+        _context.Hotels.Update(hotel);
+        await _context.SaveChangesAsync();
+    }
 }

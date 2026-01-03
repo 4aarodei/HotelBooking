@@ -39,10 +39,7 @@
                         @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Users" asp-action="Index">Role Manager</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="AdminStatistics" asp-action="Index">Stats Panel</a>
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Адмінка</a>
                             </li>
                         }
                     </ul>
