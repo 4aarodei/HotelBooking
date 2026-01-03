@@ -1,11 +1,16 @@
 @using HotelBooking.ViewModels
 @model IEnumerable<HotelViewModelIndex>
+@{
+    var checkIn = ViewBag.CheckIn is DateTime checkInDate ? checkInDate : DateTime.Today.AddDays(1);
+    var checkOut = ViewBag.CheckOut is DateTime checkOutDate ? checkOutDate : checkIn.AddDays(1);
+}
 
 <section class="hero-section text-center py-5">
     <div class="container">
         <p class="eyebrow mb-2">Результати пошуку</p>
         <h1 class="display-6 fw-bold mb-2">Готелі в місті @ViewBag.City</h1>
-        <p class="text-muted">Знайдено @Model.Count() готелів</p>
+        <p class="text-muted mb-1">Знайдено @Model.Count() готелів</p>
+        <p class="text-muted">Доступні на дати @checkIn:dd.MM.yyyy — @checkOut:dd.MM.yyyy</p>
     </div>
 </section>
 
@@ -15,7 +20,7 @@
             @foreach (var hotel in Model)
             {
                 <div class="col">
-                    <a class="card h-100 hotel-card text-decoration-none text-reset" asp-controller="Hotel" asp-action="Details" asp-route-hotelId="@hotel.Id">
+                    <a class="card h-100 hotel-card text-decoration-none text-reset" asp-controller="Hotel" asp-action="Details" asp-route-hotelId="@hotel.Id" asp-route-checkIn="@checkIn.ToString("yyyy-MM-dd")" asp-route-checkOut="@checkOut.ToString("yyyy-MM-dd")">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <h3 class="h5 mb-2">@hotel.Name</h3>

@@ -20,7 +20,9 @@ public class HotelViewModelIndex
                 Id = hotel.Id,
                 Name = hotel.Name,
                 City = hotel.City,
-                ShortDescription = hotel.Description.Length > 100 ? hotel.Description.Substring(0, 100) + "..." : hotel.Description,
+                ShortDescription = (hotel.Description ?? string.Empty).Length > 100
+                    ? (hotel.Description ?? string.Empty).Substring(0, 100) + "..."
+                    : hotel.Description ?? string.Empty,
                 Price = hotel.Rooms.Min(r => r.PricePerNight),
             };
             result.Add(vm);
