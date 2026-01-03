@@ -1,26 +1,29 @@
 @model List<HotelBooking.Application.Statistics.BookingStatsDto>
 
-<div class="container py-5">
-    <div class="section-heading">
+<div class="container py-5 mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <p class="eyebrow mb-1">Аналітика</p>
-            <h2 class="h4 mb-0">Booking statistics</h2>
+            <h2 class="h4 mb-0">Статистика бронювань</h2>
         </div>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> До панелі
+        </a>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="get" class="row g-3 align-items-end mb-4 search-panel p-3 rounded-3">
+            <form asp-controller="Statistics" method="get" class="row g-3 align-items-end mb-4 search-panel p-3 rounded-3">
                 <div class="col-md-4">
-                    <label class="form-label text-muted">From</label>
+                    <label class="form-label text-muted">Початкова дата</label>
                     <input type="date" name="from" value="@Context.Request.Query["from"]" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label text-muted">To</label>
+                    <label class="form-label text-muted">Кінцева дата</label>
                     <input type="date" name="to" value="@Context.Request.Query["to"]" class="form-control" />
                 </div>
                 <div class="col-md-4 d-grid d-md-flex gap-2 justify-content-md-end">
-                    <button type="submit" class="btn btn-primary">Apply</button>
+                    <button type="submit" class="btn btn-primary">Застосувати</button>
                 </div>
             </form>
 

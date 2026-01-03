@@ -1,0 +1,24 @@
+@model HotelBooking.ViewModels.Admin.AdminHotelFormViewModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Назва</label>
+        <input asp-for="Name" class="form-control" placeholder="Приклад: Grand Hotel" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Місто</label>
+        <input asp-for="City" class="form-control" placeholder="Київ" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Адреса</label>
+        <input asp-for="Address" class="form-control" placeholder="Вул. Хрещатик, 1" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Опис</label>
+        <textarea asp-for="Description" rows="4" class="form-control" placeholder="Коротко про готель та особливості"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+</div>
