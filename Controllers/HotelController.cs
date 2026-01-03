@@ -14,44 +14,57 @@ public class HotelController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(string? city)
+    public async Task<IActionResult> Index(string? city, DateTime? checkIn, DateTime? checkOut)
     {
-        var hotels = new List<Hotel>();
+        var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
 
-        if (string.IsNullOrEmpty(city))
-        {
-            // в цей блок переходимо якщо параметр city не переданий
-            hotels = await _hotelService.GetAllAsync();
-        }
-        else
-        {
-            hotels = await _hotelService.GetByCityAsync(city);
-        }
-        var VM = new HotelViewModelIndex().CreateVM(hotels);
+        var hotels = await _hotelService.GetAvailableHotelsAsync(checkInDate, checkOutDate, city);
 
-        return View(VM);
+        ViewBag.City = string.IsNullOrWhiteSpace(city) ? "Усі міста" : city;
+        ViewBag.CheckIn = checkInDate;
+        ViewBag.CheckOut = checkOutDate;
+
+        var vm = new HotelViewModelIndex().CreateVM(hotels);
+
+        return View(vm);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(Guid hotelId)
+    public async Task<IActionResult> Details(Guid hotelId, DateTime? checkIn, DateTime? checkOut)
     {
-        var Hotel = await _hotelService.GetByIdAsync(hotelId);
-        
-        if (Hotel == null)
+        var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
+        var hotel = await _hotelService.GetByIdWithAvailabilityAsync(hotelId, checkInDate, checkOutDate);
+
+        if (hotel == null)
         {
             return NotFound();
         }
-        
-        var VM = new HotelDetailsViewModel
+
+        var vm = new HotelDetailsViewModel
         {
-            Id = Hotel.Id,
-            Name = Hotel.Name,
-            City = Hotel.City,
-            Address = Hotel.Address,
-            Description = Hotel.Description ?? string.Empty,
-            Rooms = Hotel.Rooms.ToList()
+            Id = hotel.Id,
+            Name = hotel.Name,
+            City = hotel.City,
+            Address = hotel.Address,
+            Description = hotel.Description ?? string.Empty,
+            Rooms = hotel.Rooms.ToList(),
+            CheckIn = checkInDate,
+            CheckOut = checkOutDate
         };
-        return View(VM);
+        return View(vm);
+    }
+
+    private static (DateTime checkIn, DateTime checkOut) ResolveDateRange(DateTime? checkIn, DateTime? checkOut)
+    {
+        var resolvedCheckIn = (checkIn ?? DateTime.Today.AddDays(1)).Date;
+        var resolvedCheckOut = (checkOut ?? resolvedCheckIn.AddDays(1)).Date;
+
+        if (resolvedCheckOut <= resolvedCheckIn)
+        {
+            resolvedCheckOut = resolvedCheckIn.AddDays(1);
+        }
+
+        return (resolvedCheckIn, resolvedCheckOut);
     }
 
 }

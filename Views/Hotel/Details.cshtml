@@ -28,8 +28,11 @@
                     }
 
                     <div class="mt-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h2 class="h5 mb-0">Доступні кімнати</h2>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h2 class="h5 mb-1">Доступні кімнати</h2>
+                                <div class="text-muted small">@Model.CheckIn:dd.MM.yyyy — @Model.CheckOut:dd.MM.yyyy</div>
+                            </div>
                             <span class="text-muted">@Model.Rooms.Count пропозицій</span>
                         </div>
                         @if (!Model.Rooms.Any())
@@ -53,6 +56,8 @@
                                                 <div class="room-meta"><i class="bi bi-people"></i> @room.Capacity осіб</div>
                                                 <form asp-controller="Booking" asp-action="Create" method="get" class="mt-auto">
                                                     <input type="hidden" name="roomId" value="@room.Id" />
+                                                    <input type="hidden" name="checkIn" value="@Model.CheckIn.ToString("yyyy-MM-dd")" />
+                                                    <input type="hidden" name="checkOut" value="@Model.CheckOut.ToString("yyyy-MM-dd")" />
                                                     <button type="submit" class="btn btn-primary w-100">Забронювати</button>
                                                 </form>
                                             </div>
@@ -80,6 +85,10 @@
                     <div>
                         <span class="text-muted small d-block">Доступних кімнат</span>
                         <strong>@Model.Rooms.Count</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Дати бронювання</span>
+                        <strong>@Model.CheckIn:dd.MM.yyyy — @Model.CheckOut:dd.MM.yyyy</strong>
                     </div>
                 </div>
             </div>

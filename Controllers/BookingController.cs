@@ -19,13 +19,21 @@ public class BookingController : Controller
 
     // GET: /Booking/Create?roomId=...
     [HttpGet]
-    public IActionResult Create(Guid roomId)
+    public IActionResult Create(Guid roomId, DateTime? checkIn, DateTime? checkOut)
     {
+        var resolvedCheckIn = (checkIn ?? DateTime.Today.AddDays(1)).Date;
+        var resolvedCheckOut = (checkOut ?? resolvedCheckIn.AddDays(1)).Date;
+
+        if (resolvedCheckOut <= resolvedCheckIn)
+        {
+            resolvedCheckOut = resolvedCheckIn.AddDays(1);
+        }
+
         var model = new CreateBookingRequest
         {
             RoomId = roomId,
-            CheckIn = DateTime.Today,
-            CheckOut = DateTime.Today.AddDays(1)
+            CheckIn = resolvedCheckIn,
+            CheckOut = resolvedCheckOut
         };
 
         return View(model);
