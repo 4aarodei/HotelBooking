@@ -1,14 +1,11 @@
 using HotelBooking.Models.Hotels;
 using HotelBooking.Services;
 using HotelBooking.ViewModels.Admin;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Controllers.Admin;
+namespace HotelBooking.Areas.Admin.Controllers;
 
-[Authorize(Roles = "Admin,SuperAdmin")]
-[Route("Admin/Hotels")]
-public class HotelsController : Controller
+public class HotelsController : AdminControllerBase
 {
     private readonly HotelService _hotelService;
 
@@ -17,7 +14,7 @@ public class HotelsController : Controller
         _hotelService = hotelService;
     }
 
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         var hotels = await _hotelService.GetAllAsync();
@@ -32,22 +29,22 @@ public class HotelsController : Controller
             })
             .ToList();
 
-        return View("~/Views/Admin/Hotels/Index.cshtml", viewModel);
+        return View(viewModel);
     }
 
-    [HttpGet("Create")]
+    [HttpGet]
     public IActionResult Create()
     {
-        return View("~/Views/Admin/Hotels/Create.cshtml", new AdminHotelFormViewModel());
+        return View(new AdminHotelFormViewModel());
     }
 
-    [HttpPost("Create")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AdminHotelFormViewModel model)
     {
         if (!ModelState.IsValid)
         {
-            return View("~/Views/Admin/Hotels/Create.cshtml", model);
+            return View(model);
         }
 
         var hotel = new Hotel
@@ -64,7 +61,7 @@ public class HotelsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    [HttpGet("{id:guid}/Edit")]
+    [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
         var hotel = await _hotelService.GetByIdAsync(id);
@@ -82,16 +79,16 @@ public class HotelsController : Controller
             Description = hotel.Description
         };
 
-        return View("~/Views/Admin/Hotels/Edit.cshtml", model);
+        return View(model);
     }
 
-    [HttpPost("Edit")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(AdminHotelFormViewModel model)
     {
         if (!ModelState.IsValid)
         {
-            return View("~/Views/Admin/Hotels/Edit.cshtml", model);
+            return View(model);
         }
 
         if (model.Id is null)

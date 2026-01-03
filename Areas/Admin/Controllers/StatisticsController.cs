@@ -1,12 +1,9 @@
 using HotelBooking.Application.Statistics;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Controllers.Admin;
+namespace HotelBooking.Areas.Admin.Controllers;
 
-[Authorize(Roles = "Admin,SuperAdmin")]
-[Route("Admin/Statistics")]
-public class StatisticsController : Controller
+public class StatisticsController : AdminControllerBase
 {
     private readonly IBookingStatisticsQuery _bookingStatisticsQuery;
 
@@ -15,7 +12,7 @@ public class StatisticsController : Controller
         _bookingStatisticsQuery = bookingStatisticsQuery;
     }
 
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> Index(DateTime? from, DateTime? to)
     {
         var today = DateTime.Today;
@@ -31,6 +28,6 @@ public class StatisticsController : Controller
         var stats = await _bookingStatisticsQuery
             .GetByDateAsync(fromDate, toDate);
 
-        return View("~/Views/Admin/Statistics/Index.cshtml", stats);
+        return View(stats);
     }
 }
