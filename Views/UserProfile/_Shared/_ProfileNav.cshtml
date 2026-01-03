@@ -11,9 +11,18 @@
         </div>
     </div>
     <div class="list-group list-group-flush">
-        <a class="list-group-item list-group-item-action @(action == "Index" ? "active" : "")" asp-action="Index"><i class="bi bi-person"></i> Public profile</a>
-        <a class="list-group-item list-group-item-action @(action == "Bookings" ? "active" : "")" asp-action="Bookings"><i class="bi bi-calendar2-check"></i> My bookings</a>
-        <a class="list-group-item list-group-item-action @(action == "Security" ? "active" : "")" asp-action="Security"><i class="bi bi-shield-lock"></i> Security</a>
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2 @(action == "Index" ? "active" : "")" asp-action="Index">
+            <i class="bi bi-person"></i>
+            <span>Public profile</span>
+        </a>
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2 @(action == "Bookings" ? "active" : "")" asp-action="Bookings">
+            <i class="bi bi-calendar2-check"></i>
+            <span>My bookings</span>
+        </a>
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2 @(action == "Security" ? "active" : "")" asp-action="Security">
+            <i class="bi bi-shield-lock"></i>
+            <span>Security</span>
+        </a>
         <form asp-controller="UserProfile"
               asp-action="Logout"
               method="post"
@@ -21,8 +30,9 @@
             @Html.AntiForgeryToken()
 
             <button type="submit"
-                    class="btn btn-link text-start w-100 text-decoration-none">
-                <i class="bi bi-box-arrow-right"></i> Log Out
+                    class="btn btn-link text-start w-100 text-decoration-none logout-btn d-flex align-items-center gap-2">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Log Out</span>
             </button>
         </form>
 
