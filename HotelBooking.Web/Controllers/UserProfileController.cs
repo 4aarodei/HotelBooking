@@ -1,5 +1,5 @@
-﻿using HotelBooking.Core.EntitiesModels.Identity;
-using HotelBooking.Core.Services;
+using HotelBooking.Application.Services;
+using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.ViewModels.UserProfileViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +14,6 @@ namespace HotelBooking.Controllers
         private readonly BookingService _bookingService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-
 
         public UserProfileController(BookingService bookingService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
@@ -46,7 +45,6 @@ namespace HotelBooking.Controllers
 
             return View(vm);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -90,16 +88,11 @@ namespace HotelBooking.Controllers
             return View("Index", newUserData);
         }
 
-
-
         public IActionResult Bookings()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // тут потім буде БД
-            // var bookings = _bookingService.GetByUser(userId);
-
-            return View(/* bookings */);
+            return View();
         }
 
         public IActionResult Security()
@@ -114,6 +107,5 @@ namespace HotelBooking.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-
     }
 }

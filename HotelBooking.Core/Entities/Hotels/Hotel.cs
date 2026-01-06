@@ -1,4 +1,4 @@
-﻿namespace HotelBooking.Core.EntitiesModels.Hotels;
+namespace HotelBooking.Domain.Entities.Hotels;
 
 public class Hotel
 {
@@ -9,6 +9,5 @@ public class Hotel
     public string Address { get; set; } = null!;
     public string? Description { get; set; }
 
-    // Готель створюється одразу з номерами
     public ICollection<Room> Rooms { get; set; } = new List<Room>();
 }

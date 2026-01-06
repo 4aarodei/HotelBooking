@@ -1,13 +1,8 @@
-﻿using Dapper;
+using Dapper;
+using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Statistics;
 
 namespace HotelBooking.Infrastructure.Dapper;
-
-public interface IBookingStatisticsQuery
-{
-    Task<List<BookingStatsDto>> GetByDateAsync(
-        DateTime from,
-        DateTime to);
-}
 
 public class BookingStatisticsQuery : IBookingStatisticsQuery
 {
@@ -18,9 +13,7 @@ public class BookingStatisticsQuery : IBookingStatisticsQuery
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<List<BookingStatsDto>> GetByDateAsync(
-        DateTime from,
-        DateTime to)
+    public async Task<List<BookingStatsDto>> GetByDateAsync(DateTime from, DateTime to)
     {
         const string sql = """
     SELECT
@@ -32,7 +25,6 @@ public class BookingStatisticsQuery : IBookingStatisticsQuery
     GROUP BY CAST(b.CheckIn AS date)
     ORDER BY [Date];
     """;
-
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -46,5 +38,4 @@ public class BookingStatisticsQuery : IBookingStatisticsQuery
 
         return result.ToList();
     }
-
 }

@@ -1,5 +1,5 @@
-using HotelBooking.Core.Services;
-using HotelBooking.Models.Hotels;
+using HotelBooking.Application.Services;
+using HotelBooking.Domain.Entities.Hotels;
 using HotelBooking.ViewModels.Admin;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +15,9 @@ public class HotelsController : AdminControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var hotels = await _hotelService.GetAllAsync();
+        var hotels = await _hotelService.GetAllAsync(ct);
 
         var viewModel = hotels
             .Select(h => new AdminHotelListItemViewModel
@@ -40,7 +40,7 @@ public class HotelsController : AdminControllerBase
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AdminHotelFormViewModel model)
+    public async Task<IActionResult> Create(AdminHotelFormViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
         {
@@ -55,16 +55,16 @@ public class HotelsController : AdminControllerBase
             Description = model.Description
         };
 
-        await _hotelService.AddAsync(hotel);
+        await _hotelService.AddAsync(hotel, ct);
 
         TempData["SuccessMessage"] = "Готель успішно додано";
         return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
-    public async Task<IActionResult> Edit(Guid id)
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct)
     {
-        var hotel = await _hotelService.GetByIdAsync(id);
+        var hotel = await _hotelService.GetByIdAsync(id, ct);
         if (hotel == null)
         {
             return NotFound();
@@ -84,7 +84,7 @@ public class HotelsController : AdminControllerBase
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(AdminHotelFormViewModel model)
+    public async Task<IActionResult> Edit(AdminHotelFormViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
         {
@@ -96,7 +96,7 @@ public class HotelsController : AdminControllerBase
             return BadRequest();
         }
 
-        var hotel = await _hotelService.GetByIdAsync(model.Id.Value);
+        var hotel = await _hotelService.GetByIdAsync(model.Id.Value, ct);
         if (hotel == null)
         {
             return NotFound();
@@ -107,7 +107,7 @@ public class HotelsController : AdminControllerBase
         hotel.Address = model.Address!;
         hotel.Description = model.Description;
 
-        await _hotelService.UpdateAsync(hotel);
+        await _hotelService.UpdateAsync(hotel, ct);
 
         TempData["SuccessMessage"] = "Дані готелю оновлено";
         return RedirectToAction(nameof(Index));

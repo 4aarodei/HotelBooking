@@ -1,11 +1,18 @@
-﻿using HotelBooking.Models.Identity;
+using HotelBooking.Domain.Entities.Identity;
+using System.ComponentModel.DataAnnotations;
 
-namespace HotelBooking.ViewModels.UserProfileViewModels;
-
-public class UserProfileIndexModel
+namespace HotelBooking.ViewModels.UserProfileViewModels
 {
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? Email { get; set; }
+    public class UserProfileIndexModel
+    {
+        public string? Email { get; set; }
 
+        [Required(ErrorMessage = "Ім'я є обов'язковим")]
+        [Display(Name = "Ім'я")]
+        public string? FirstName { get; set; }
+
+        [Required(ErrorMessage = "Прізвище є обов'язковим")]
+        [Display(Name = "Прізвище")]
+        public string? LastName { get; set; }
+    }
 }

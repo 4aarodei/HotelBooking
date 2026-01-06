@@ -1,12 +1,12 @@
 using HotelBooking.Application;
-using HotelBooking.Core.EntitiesModels.Identity;
+using HotelBooking.Domain.Entities.Identity;
+using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -17,25 +17,19 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddInfrastructure();
+builder.Services.AddApplication();
+
 builder.Services.AddControllersWithViews();
-
-
-// Зареєстрував кастомні сервіси
-builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Ініціалізація даних Identity (створення ролей та адміністратора)
-// Автоматично видаємо роль SuperAdminEmail користувачу значиним емайлом (Admin@email.com)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await IdentitySeeder.SeedAsync(services);
 }
 
-
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -43,7 +37,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -64,16 +57,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
-
-
-Console.WriteLine();
-Console.WriteLine();
-Console.WriteLine();
-
-Console.WriteLine(builder.Environment.EnvironmentName);
-
-Console.WriteLine();
-Console.WriteLine();
-Console.WriteLine();
 
 app.Run();

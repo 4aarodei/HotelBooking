@@ -1,5 +1,4 @@
-﻿using HotelBooking.Core.Services;
-using HotelBooking.Models.Hotels;
+using HotelBooking.Application.Services;
 using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +16,6 @@ public class BookingController : Controller
         _bookingService = bookingService;
     }
 
-    // GET: /Booking/Create?roomId=...
     [HttpGet]
     public IActionResult Create(Guid roomId, DateTime? checkIn, DateTime? checkOut)
     {
@@ -61,10 +59,7 @@ public class BookingController : Controller
         }
         catch (InvalidOperationException ex)
         {
-            // Ось це і є "гарна помилка" для UI
             ModelState.AddModelError(string.Empty, ex.Message);
-
-            // Повертаємо ту саму сторінку, без падіння
             return View(request);
         }
 

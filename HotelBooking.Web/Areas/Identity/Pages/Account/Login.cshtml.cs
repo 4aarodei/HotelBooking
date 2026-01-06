@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using HotelBooking.Core.EntitiesModels.Identity;
+using HotelBooking.Domain.Entities.Identity;
 
 namespace HotelBooking.Areas.Identity.Pages.Account
 {

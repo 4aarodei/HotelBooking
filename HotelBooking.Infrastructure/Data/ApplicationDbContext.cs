@@ -1,6 +1,6 @@
-﻿using HotelBooking.Models.Bookings;
-using HotelBooking.Models.Hotels;
-using HotelBooking.Models.Identity;
+using HotelBooking.Domain.Entities.Bookings;
+using HotelBooking.Domain.Entities.Hotels;
+using HotelBooking.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

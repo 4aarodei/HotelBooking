@@ -1,4 +1,4 @@
-using HotelBooking.Infrastructure.Dapper;
+using HotelBooking.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBooking.Areas.Admin.Controllers;

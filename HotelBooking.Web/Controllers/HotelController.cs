@@ -1,13 +1,13 @@
-﻿using HotelBooking.Models.Hotels;
+using HotelBooking.Application.Services;
 using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using HotelBooking.Core.Services;
 
 namespace HotelBooking.Controllers;
 
 public class HotelController : Controller
 {
-    public readonly HotelService _hotelService;
+    private readonly HotelService _hotelService;
+
     public HotelController(HotelService hotelService)
     {
         _hotelService = hotelService;
@@ -66,6 +66,4 @@ public class HotelController : Controller
 
         return (resolvedCheckIn, resolvedCheckOut);
     }
-
 }
-
