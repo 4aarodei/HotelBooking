@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using HotelBooking.Data;
 using HotelBooking.ViewModels;
-using HotelBooking.Data.ApplicationDbContext;
-using HotelBooking.Services;
+using HotelBooking.Infrastructure.Data;
+using HotelBooking.Core.Services;
 
 namespace HotelBooking.Controllers
 {

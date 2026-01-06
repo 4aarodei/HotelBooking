@@ -1,5 +1,5 @@
-﻿using HotelBooking.Models.Hotels;
-using HotelBooking.Services;
+﻿using HotelBooking.Core.Services;
+using HotelBooking.Models.Hotels;
 using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

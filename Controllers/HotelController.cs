@@ -1,7 +1,7 @@
 ﻿using HotelBooking.Models.Hotels;
 using HotelBooking.ViewModels;
-using HotelBooking.Services;
 using Microsoft.AspNetCore.Mvc;
+using HotelBooking.Core.Services;
 
 namespace HotelBooking.Controllers;
 

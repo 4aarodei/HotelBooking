@@ -1,7 +1,6 @@
 using HotelBooking.Application;
-using HotelBooking.Data.ApplicationDbContext;
-using HotelBooking.Data.IdentitySeeder;
-using HotelBooking.Models.Identity;
+using HotelBooking.Core.EntitiesModels.Identity;
+using HotelBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

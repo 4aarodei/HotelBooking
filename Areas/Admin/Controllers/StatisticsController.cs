@@ -1,4 +1,4 @@
-using HotelBooking.Application.Statistics;
+using HotelBooking.Infrastructure.Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBooking.Areas.Admin.Controllers;

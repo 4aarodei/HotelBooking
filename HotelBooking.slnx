@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="HotelBooking.csproj" />
+  <Project Path="../HotelBooking.Core/HotelBooking.Core.csproj" Id="4a012f23-d2eb-4380-92ff-59d8b49aa881" />
+  <Project Path="../HotelBooking.Infrastructure/HotelBooking.Infrastructure.csproj" Id="889e27b2-96f4-43fa-aac5-cb6aa079bbf6" />
+  <Project Path="HotelBooking.Web.csproj" />
 </Solution>

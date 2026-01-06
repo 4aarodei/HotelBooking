@@ -1,4 +1,4 @@
-﻿using HotelBooking.Models.Hotels;
+﻿using HotelBooking.Core.EntitiesModels.Hotels;
 
 namespace HotelBooking.ViewModels;
 
