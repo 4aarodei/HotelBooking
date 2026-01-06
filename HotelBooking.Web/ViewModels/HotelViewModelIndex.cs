@@ -1,12 +1,13 @@
+using HotelBooking.Web.ViewModels;
 using HotelBooking.Domain.Entities.Hotels;
 
-namespace HotelBooking.ViewModels;
+namespace HotelBooking.Web.ViewModels;
 
 public class HotelViewModelIndex
 {
     public List<HomeHotelDto> Hotels { get; set; } = new();
 
-    public HotelViewModelIndex CreateVM(IEnumerable<Hotel> hotels)
+    public HotelViewModelIndex CreateVm(IEnumerable<Hotel> hotels)
     {
         Hotels = hotels.Select(h => new HomeHotelDto
         {

@@ -1,5 +1,5 @@
 @using HotelBooking.ViewModels
-@model IEnumerable<HotelViewModelIndex>
+@model IEnumerable<HotelBooking.Web.ViewModels.HotelViewModelIndex>
 @{
     var checkIn = ViewBag.CheckIn is DateTime checkInDate ? checkInDate : DateTime.Today.AddDays(1);
     var checkOut = ViewBag.CheckOut is DateTime checkOutDate ? checkOutDate : checkIn.AddDays(1);

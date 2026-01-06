@@ -3,6 +3,7 @@ using HotelBooking.Domain.Entities;
 using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using HotelBooking.Web.ViewModels;
 
 namespace HotelBooking.Controllers
 {

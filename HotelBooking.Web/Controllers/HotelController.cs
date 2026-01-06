@@ -1,5 +1,6 @@
 using HotelBooking.Application.Services;
 using HotelBooking.ViewModels;
+using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBooking.Controllers;
@@ -24,7 +25,7 @@ public class HotelController : Controller
         ViewBag.CheckIn = checkInDate;
         ViewBag.CheckOut = checkOutDate;
 
-        var vm = new HotelViewModelIndex().CreateVM(hotels);
+        var vm = new HotelViewModelIndex().CreateVm(hotels);
 
         return View(vm);
     }
