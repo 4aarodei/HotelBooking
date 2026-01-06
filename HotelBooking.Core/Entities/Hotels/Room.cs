@@ -1,4 +1,4 @@
-﻿namespace HotelBooking.Core.EntitiesModels.Hotels;
+namespace HotelBooking.Domain.Entities.Hotels;
 
 public class Room
 {
@@ -11,7 +11,6 @@ public class Room
     public int Capacity { get; set; }
     public decimal PricePerNight { get; set; }
 
-    // Кількість номерів цього типу
     public int Quantity { get; set; } = 1;
 
     public bool IsActive { get; set; } = true;

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 
-namespace HotelBooking.Core.EntitiesModels.Identity;
+namespace HotelBooking.Domain.Entities.Identity;
 
 public class ApplicationUser : IdentityUser
 {

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using HotelBooking.Models.Identity;
+using HotelBooking.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
@@ -13,7 +13,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
-using HotelBooking.Core.EntitiesModels.Identity;
+using HotelBooking.Domain.Entities.Identity;
 
 
 namespace HotelBooking.Areas.Identity.Pages.Account

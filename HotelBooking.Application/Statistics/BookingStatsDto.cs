@@ -1,4 +1,4 @@
-﻿namespace HotelBooking.Core.EntitiesModels.Statistics;
+namespace HotelBooking.Application.Statistics;
 
 public class BookingStatsDto
 {

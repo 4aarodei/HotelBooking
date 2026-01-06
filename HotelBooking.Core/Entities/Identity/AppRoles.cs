@@ -1,7 +1,7 @@
-﻿namespace HotelBooking.Core.EntitiesModels.Identity;
+namespace HotelBooking.Domain.Entities.Identity;
 
 public static class AppRoles
 {
-    public const string Admin = "Admin";
-    public const string Client = "Client";
+    public const string Admin = nameof(Admin);
+    public const string SuperAdmin = nameof(SuperAdmin);
 }

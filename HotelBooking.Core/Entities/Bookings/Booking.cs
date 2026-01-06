@@ -1,7 +1,7 @@
-﻿using HotelBooking.Core.EntitiesModels.Hotels;
-using HotelBooking.Core.EntitiesModels.Identity;
+using HotelBooking.Domain.Entities.Hotels;
+using HotelBooking.Domain.Entities.Identity;
 
-namespace HotelBooking.Core.EntitiesModels.Bookings;
+namespace HotelBooking.Domain.Entities.Bookings;
 
 public class Booking
 {
@@ -19,7 +19,6 @@ public class Booking
     public DateTime CheckIn { get; set; }
     public DateTime CheckOut { get; set; }
 
-    // Фіксація ціни на момент бронювання
     public decimal PricePerNightSnapshot { get; set; }
     public int Nights { get; set; }
     public decimal TotalPrice { get; set; }

@@ -1,11 +1,8 @@
-using HotelBooking.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using HotelBooking.Data;
+using HotelBooking.Application.Services;
+using HotelBooking.Domain.Entities;
 using HotelBooking.ViewModels;
-using HotelBooking.Infrastructure.Data;
-using HotelBooking.Core.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace HotelBooking.Controllers
 {
@@ -13,36 +10,38 @@ namespace HotelBooking.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly HotelService _hotelService;
-        private readonly ApplicationDbContext _context;
-        public HomeController(ILogger<HomeController> logger, HotelService hotelService, ApplicationDbContext context)
+
+        public HomeController(ILogger<HomeController> logger, HotelService hotelService)
         {
             _logger = logger;
             _hotelService = hotelService;
-            _context = context;
         }
-        public async Task<IActionResult> Index()
+
+        public async Task<IActionResult> Index(CancellationToken ct)
         {
-            //ToDO - ¬идалити використанн€ контексту напр€му, додати список "попул€рних" готел≥в в HotelService
-            var hotels = await _context.Hotels
-                .Where(h => h.Rooms.Any(r => r.IsActive))
-                .Select(h => new HotelCardVm
-                {
-                    Id = h.Id,
-                    Name = h.Name,
-                    City = h.City,
-                    MinPrice = h.Rooms
-                        .Where(r => r.IsActive)
-                        .Min(r => r.PricePerNight)
-                })
-                .Take(6)
-                .ToListAsync();
+            var hotels = await _hotelService.GetFeaturedAsync(6, ct);
 
             var vm = new HomeViewModel
             {
                 PopularHotels = hotels
+                    .Where(h => h.Rooms.Any(r => r.IsActive))
+                    .Select(h => new HotelCardVm
+                    {
+                        Id = h.Id,
+                        Name = h.Name,
+                        City = h.City,
+                        MinPrice = h.Rooms.Where(r => r.IsActive).Min(r => r.PricePerNight)
+                    })
+                    .ToList()
             };
 
             return View(vm);
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

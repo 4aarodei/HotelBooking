@@ -1,18 +1,17 @@
-﻿using HotelBooking.Models.Identity;
+using HotelBooking.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace HotelBooking.Infrastructure.Data;
 
 public static class IdentitySeeder
 {
-    private const string SuperAdminEmail = "Admin@testAkk"; // ← ТУТ СВІЙ EMAIL
+    private const string SuperAdminEmail = "Admin@testAkk";
 
     public static async Task SeedAsync(IServiceProvider services)
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-        // 1. Roles
         string[] roles = { "SuperAdmin", "Admin", "User" };
 
         foreach (var role in roles)
@@ -23,14 +22,10 @@ public static class IdentitySeeder
             }
         }
 
-        // 2. SuperAdmin
         var superAdmin = await userManager.FindByEmailAsync(SuperAdminEmail);
-        if (superAdmin != null)
+        if (superAdmin != null && !await userManager.IsInRoleAsync(superAdmin, "SuperAdmin"))
         {
-            if (!await userManager.IsInRoleAsync(superAdmin, "SuperAdmin"))
-            {
-                await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
-            }
+            await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
         }
     }
 }
