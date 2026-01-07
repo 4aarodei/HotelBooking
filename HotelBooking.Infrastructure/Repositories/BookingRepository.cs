@@ -14,17 +14,6 @@ public class BookingRepository : IBookingRepository
         _context = context;
     }
 
-    public Task<bool> HasOverlapAsync(Guid roomId, DateTime checkIn, DateTime checkOut, Guid cancelledStatusCode, CancellationToken ct)
-    {
-        return _context.Bookings
-            .AnyAsync(b =>
-                b.RoomId == roomId &&
-                b.Status.BookingStatusCode != cancelledStatusCode &&
-                checkIn < b.CheckOut &&
-                checkOut > b.CheckIn,
-                ct);
-    }
-
     public async Task<Dictionary<Guid, int>> GetActiveBookingsCountByRoomAsync(IEnumerable<Guid> roomIds, DateTime checkIn, DateTime checkOut, Guid cancelledStatusCode, CancellationToken ct)
     {
         return await _context.Bookings
@@ -42,5 +31,17 @@ public class BookingRepository : IBookingRepository
     {
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task<List<Booking>> GetByUserAsync(string userId, CancellationToken ct)
+    {
+        return await _context.Bookings
+            .Include(b => b.Room)
+            .ThenInclude(r => r.Hotel)
+            .Include(b => b.Status)
+            .AsNoTracking()
+            .Where(b => b.UserId == userId)
+            .OrderByDescending(b => b.CreatedAtUtc)
+            .ToListAsync(ct);
     }
 }
