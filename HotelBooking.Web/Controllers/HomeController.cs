@@ -1,11 +1,10 @@
+using System.Diagnostics;
 using HotelBooking.Application.Services;
 using HotelBooking.Domain.Entities;
-using HotelBooking.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using HotelBooking.Web.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Controllers
+namespace HotelBooking.Web.Controllers
 {
     public class HomeController : Controller
     {

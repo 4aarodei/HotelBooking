@@ -3,7 +3,7 @@ using HotelBooking.Domain.Entities.Hotels;
 using HotelBooking.ViewModels.Admin;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Areas.Admin.Controllers;
+namespace HotelBooking.Web.Areas.Admin.Controllers;
 
 public class HotelsController : AdminControllerBase
 {

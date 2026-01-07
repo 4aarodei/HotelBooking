@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Areas.Admin.Controllers;
+namespace HotelBooking.Web.Areas.Admin.Controllers;
 
 [Authorize(Roles = "SuperAdmin")]
 public class UsersController : AdminControllerBase

@@ -1,7 +1,7 @@
 using HotelBooking.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Areas.Admin.Controllers;
+namespace HotelBooking.Web.Areas.Admin.Controllers;
 
 public class StatisticsController : AdminControllerBase
 {

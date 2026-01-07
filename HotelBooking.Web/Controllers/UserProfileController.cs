@@ -1,12 +1,12 @@
+using System.Security.Claims;
 using HotelBooking.Application.Services;
 using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.ViewModels.UserProfileViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
-namespace HotelBooking.Controllers
+namespace HotelBooking.Web.Controllers
 {
     [Authorize]
     public class UserProfileController : Controller

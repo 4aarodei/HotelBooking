@@ -3,7 +3,7 @@ using HotelBooking.ViewModels;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelBooking.Controllers;
+namespace HotelBooking.Web.Controllers;
 
 public class HotelController : Controller
 {
@@ -21,11 +21,7 @@ public class HotelController : Controller
 
         var hotels = await _hotelService.GetAvailableHotelsAsync(checkInDate, checkOutDate, city);
 
-        ViewBag.City = string.IsNullOrWhiteSpace(city) ? "Усі міста" : city;
-        ViewBag.CheckIn = checkInDate;
-        ViewBag.CheckOut = checkOutDate;
-
-        var vm = new HotelViewModelIndex().CreateVm(hotels);
+        var vm = HotelIndexViewModel.Create(hotels, city, checkInDate, checkOutDate);
 
         return View(vm);
     }
@@ -41,17 +37,8 @@ public class HotelController : Controller
             return NotFound();
         }
 
-        var vm = new HotelDetailsViewModel
-        {
-            Id = hotel.Id,
-            Name = hotel.Name,
-            City = hotel.City,
-            Address = hotel.Address,
-            Description = hotel.Description ?? string.Empty,
-            Rooms = hotel.Rooms.ToList(),
-            CheckIn = checkInDate,
-            CheckOut = checkOutDate
-        };
+        var vm = HotelDetailsViewModel.Create(hotel, checkInDate, checkOutDate);
+
         return View(vm);
     }
 
