@@ -1,3 +1,5 @@
+@model List<HotelBooking.Web.ViewModels.UserProfileViewModels.UserBookingItemViewModel>
+
 @{
     Layout = "~/Views/UserProfile/_Shared/_ProfileLayout.cshtml";
     ViewData["Title"] = "My bookings";
@@ -12,20 +14,27 @@
             </div>
         </div>
         <div class="list-group list-group-flush">
-            <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <strong class="d-block">Dniprio Riverside Hotel</strong>
-                    <small class="text-muted">30.12.2025 – 31.12.2025</small>
-                </div>
-                <span class="badge text-bg-primary">1600 ₴ / night</span>
-            </div>
-            <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <strong class="d-block">Lviv Old Town Inn</strong>
-                    <small class="text-muted">10.01.2026 – 12.01.2026</small>
-                </div>
-                <span class="badge text-bg-primary">1200 ₴ / night</span>
-            </div>
+            @if (Model.Count == 0)
+            {
+                <div class="list-group-item text-muted">Бронювань ще немає.</div>
+            }
+            else
+            {
+                @foreach (var booking in Model)
+                {
+                    <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <strong class="d-block">@booking.HotelName — @booking.RoomName</strong>
+                            <small class="text-muted">
+                                @booking.CheckIn:dd.MM.yyyy – @booking.CheckOut:dd.MM.yyyy
+                                · @booking.Nights ночей
+                            </small>
+                            <div class="text-muted small">@booking.StatusName</div>
+                        </div>
+                        <span class="badge text-bg-primary">@booking.TotalPrice ₴</span>
+                    </div>
+                }
+            }
         </div>
     </div>
 </section>

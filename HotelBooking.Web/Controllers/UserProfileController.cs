@@ -2,6 +2,7 @@ using System.Security.Claims;
 using HotelBooking.Application.Services;
 using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.ViewModels.UserProfileViewModels;
+using HotelBooking.Web.ViewModels.UserProfileViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -88,16 +89,30 @@ namespace HotelBooking.Web.Controllers
             return View("Index", newUserData);
         }
 
-        public IActionResult Bookings()
+        public async Task<IActionResult> Bookings(CancellationToken ct)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
 
-            return View();
-        }
+            var bookings = await _bookingService.GetByUserAsync(userId, ct);
 
-        public IActionResult Security()
-        {
-            return View();
+            var viewModel = bookings
+                .Select(booking => new UserBookingItemViewModel
+                {
+                    HotelName = booking.Room.Hotel.Name,
+                    RoomName = booking.Room.Name,
+                    CheckIn = booking.CheckIn,
+                    CheckOut = booking.CheckOut,
+                    Nights = booking.Nights,
+                    TotalPrice = booking.TotalPrice,
+                    StatusName = booking.Status.Name
+                })
+                .ToList();
+
+            return View(viewModel);
         }
 
         [HttpPost]
