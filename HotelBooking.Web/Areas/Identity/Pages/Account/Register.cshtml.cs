@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using HotelBooking.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
@@ -121,6 +120,16 @@ namespace HotelBooking.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+                    var roleResult = await _userManager.AddToRoleAsync(user, AppRoles.User);
+                    if (!roleResult.Succeeded)
+                    {
+                        foreach (var error in roleResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+
+                        return Page();
+                    }
                     var Code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     Code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(Code));
                     var callbackUrl = Url.Page(

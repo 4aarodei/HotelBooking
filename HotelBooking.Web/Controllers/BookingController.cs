@@ -1,12 +1,14 @@
 using HotelBooking.Application.Services;
+using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace HotelBooking.Controllers;
+namespace HotelBooking.Web.Controllers;
 
 [Authorize]
+[Authorize(Roles = AppRoles.User)]
 public class BookingController : Controller
 {
     private readonly BookingService _bookingService;
