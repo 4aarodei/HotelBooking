@@ -1,4 +1,4 @@
-namespace HotelBooking.Domain.Entities;
+namespace HotelBooking.Web.ViewModels;
 
 public class ErrorViewModel
 {
