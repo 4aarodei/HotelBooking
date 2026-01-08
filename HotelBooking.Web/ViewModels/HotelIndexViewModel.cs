@@ -4,29 +4,31 @@ namespace HotelBooking.Web.ViewModels;
 
 public class HotelIndexViewModel
 {
-    public string CityName { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
     public DateTime CheckIn { get; set; }
     public DateTime CheckOut { get; set; }
-    public List<HotelIndexItemViewModel> Hotels { get; set; } = new();
+    public List<HotelCardViewModel> Hotels { get; set; } = new();
 
     public static HotelIndexViewModel Create(IEnumerable<Hotel> hotels, string? city, DateTime checkIn, DateTime checkOut)
     {
         var vm = new HotelIndexViewModel
         {
-            CityName = string.IsNullOrWhiteSpace(city) ? "�� ����" : city!,
+            City = string.IsNullOrWhiteSpace(city) ? "Усі міста" : city!,
             CheckIn = checkIn,
             CheckOut = checkOut
         };
 
         foreach (var hotel in hotels)
         {
-            vm.Hotels.Add(new HotelIndexItemViewModel
+            vm.Hotels.Add(new HotelCardViewModel
             {
                 Id = hotel.Id,
                 Name = hotel.Name,
-                City = hotel.City,
-                Description = hotel.Description ?? "���� ��������",
-                LowestPrice = GetMinActivePrice(hotel.Rooms)
+                Summary = hotel.Description ?? "Опис відсутній",
+                PriceText = $"від {GetMinActivePrice(hotel.Rooms)} ₴",
+                ActionText = "Переглянути",
+                CheckIn = checkIn.ToString("yyyy-MM-dd"),
+                CheckOut = checkOut.ToString("yyyy-MM-dd")
             });
         }
 
@@ -42,13 +44,4 @@ public class HotelIndexViewModel
 
         return activePrices.Min();
     }
-}
-
-public class HotelIndexItemViewModel
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public decimal LowestPrice { get; set; }
 }

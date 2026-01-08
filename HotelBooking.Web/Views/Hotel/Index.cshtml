@@ -1,15 +1,11 @@
 @model HotelBooking.Web.ViewModels.HotelIndexViewModel
-@{
-    var checkIn = ViewBag.CheckIn is DateTime checkInDate ? checkInDate : DateTime.Today.AddDays(1);
-    var checkOut = ViewBag.CheckOut is DateTime checkOutDate ? checkOutDate : checkIn.AddDays(1);
-}
 
 <section class="hero-section text-center py-5">
     <div class="container">
         <p class="eyebrow mb-2">Результати пошуку</p>
-        <h1 class="display-6 fw-bold mb-2">Готелі в місті @ViewBag.City</h1>
+        <h1 class="display-6 fw-bold mb-2">Готелі в місті @Model.City</h1>
         <p class="text-muted mb-1">Знайдено @Model.Hotels.Count готелів</p>
-        <p class="text-muted">Доступні на дати @checkIn:dd.MM.yyyy — @checkOut:dd.MM.yyyy</p>
+        <p class="text-muted">Доступні на дати @Model.CheckIn:dd.MM.yyyy — @Model.CheckOut:dd.MM.yyyy</p>
     </div>
 </section>
 
@@ -19,24 +15,7 @@
             @foreach (var hotel in Model.Hotels)
             {
                 <div class="col">
-                    <a class="card h-100 hotel-card text-decoration-none text-reset"
-                       asp-controller="Hotel"
-                       asp-action="Details"
-                       asp-route-hotelId="@hotel.Id"
-                       asp-route-checkIn="@checkIn.ToString("yyyy-MM-dd")"
-                       asp-route-checkOut="@checkOut.ToString("yyyy-MM-dd")">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h3 class="h5 mb-2">@hotel.Name</h3>
-                                <span class="badge text-bg-primary">від @hotel.LowestPrice ₴</span>
-                            </div>
-                            <p class="text-muted mb-3">@hotel.Description</p>
-                            <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
-                                <span class="fw-semibold text-primary">Переглянути</span>
-                                <i class="bi bi-arrow-right text-primary"></i>
-                            </div>
-                        </div>
-                    </a>
+                    <partial name="_HotelCard" model="hotel" />
                 </div>
             }
         </div>

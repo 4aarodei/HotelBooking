@@ -25,12 +25,18 @@ namespace HotelBooking.Web.Controllers
             {
                 PopularHotels = hotels
                     .Where(h => h.Rooms.Any(r => r.IsActive))
-                    .Select(h => new HotelCardVm
+                    .Select(h =>
                     {
-                        Id = h.Id,
-                        Name = h.Name,
-                        City = h.City,
-                        MinPrice = h.Rooms.Where(r => r.IsActive).Min(r => r.PricePerNight)
+                        var minPrice = h.Rooms.Where(r => r.IsActive).Min(r => r.PricePerNight);
+
+                        return new HotelCardViewModel
+                        {
+                            Id = h.Id,
+                            Name = h.Name,
+                            Summary = h.City,
+                            PriceText = $"від {minPrice:0} ₴",
+                            ActionText = "Дивитися деталі"
+                        };
                     })
                     .ToList()
             };

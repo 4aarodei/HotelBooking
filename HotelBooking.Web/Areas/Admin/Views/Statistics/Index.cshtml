@@ -16,12 +16,12 @@
         <div class="card-body">
             <form asp-controller="Statistics" method="get" class="row g-3 align-items-end mb-4 search-panel p-3 rounded-3">
                 <div class="col-md-4">
-                    <label class="form-label text-muted">Початкова дата</label>
-                    <input type="date" name="from" value="@Context.Request.Query["from"]" class="form-control" />
+                    <label class="form-label text-muted" for="stats-from">Початкова дата</label>
+                    <input type="date" id="stats-from" name="from" value="@Context.Request.Query["from"]" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label text-muted">Кінцева дата</label>
-                    <input type="date" name="to" value="@Context.Request.Query["to"]" class="form-control" />
+                    <label class="form-label text-muted" for="stats-to">Кінцева дата</label>
+                    <input type="date" id="stats-to" name="to" value="@Context.Request.Query["to"]" class="form-control" />
                 </div>
                 <div class="col-md-4 d-grid d-md-flex gap-2 justify-content-md-end">
                     <button type="submit" class="btn btn-primary">Застосувати</button>
@@ -32,8 +32,8 @@
                 <table class="table table-surface table-striped align-middle">
                     <thead>
                         <tr>
-                            <th scope="col">Date</th>
-                            <th scope="col" class="text-center">Bookings</th>
+                            <th scope="col">Дата</th>
+                            <th scope="col" class="text-center">Бронювання</th>
                         </tr>
                     </thead>
                     <tbody>

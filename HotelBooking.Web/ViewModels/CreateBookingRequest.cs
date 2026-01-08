@@ -4,11 +4,15 @@ namespace HotelBooking.Web.ViewModels
 {
     public class CreateBookingRequest : IValidatableObject
     {
-        [Required] public Guid RoomId { get; set; }
+        [Required(ErrorMessage = "Оберіть номер.")] public Guid RoomId { get; set; }
 
-        [Required][DataType(DataType.Date)] public DateTime CheckIn { get; set; }
+        [Required(ErrorMessage = "Вкажіть дату заїзду.")]
+        [DataType(DataType.Date)]
+        public DateTime CheckIn { get; set; }
 
-        [Required][DataType(DataType.Date)] public DateTime CheckOut { get; set; }
+        [Required(ErrorMessage = "Вкажіть дату виїзду.")]
+        [DataType(DataType.Date)]
+        public DateTime CheckOut { get; set; }
 
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -16,7 +20,7 @@ namespace HotelBooking.Web.ViewModels
             if (CheckOut <= CheckIn)
             {
                 yield return new ValidationResult(
-                    "Check-out має бути пізніше Check-in",
+                    "Дата виїзду має бути пізніше дати заїзду.",
                     new[] { nameof(CheckOut) });
             }
         }
