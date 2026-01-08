@@ -29,6 +29,7 @@
     --spacing-4: 16px;
     --spacing-5: 24px;
     --spacing-6: 32px;
+    --nav-height: 82px;
 }
 
 * {
@@ -42,7 +43,7 @@ body {
         linear-gradient(180deg, var(--bg-900), var(--bg-800) 45%, var(--bg-800));
     color: var(--text-strong);
     min-height: 100vh;
-    padding-top: 82px;
+    padding-top: 0;
     letter-spacing: 0.02em;
     line-height: 1.6;
 }
@@ -193,7 +194,14 @@ a:hover {
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+}
+
+.card .card,
+.card .list-group-item,
+.card .modal-content,
+.card .dropdown-menu {
+    backdrop-filter: none;
 }
 
 .dropdown-menu {
@@ -319,7 +327,7 @@ textarea.form-control::placeholder {
 }
 
 .hero-section {
-    padding: 4rem 0 2.5rem;
+    padding: 3rem 0 2.5rem;
 }
 
 .hero-card {
@@ -522,7 +530,7 @@ textarea.form-control::placeholder {
 }
 
 .auth-shell {
-    min-height: calc(100vh - 82px);
+    min-height: calc(100vh - var(--nav-height));
     display: grid;
     place-items: center;
     padding: 3rem 1rem;
@@ -589,8 +597,11 @@ textarea.form-control::placeholder {
 }
 
 @media (max-width: 991px) {
-    body { padding-top: 72px; }
+    :root { --nav-height: 72px; }
     .navbar .nav-link { padding: 0.6rem 0.9rem; }
     .hero-card { padding: 1.5rem; }
     .auth-shell { padding: 2rem 1.25rem; }
+}
+#app {
+    padding-top: var(--nav-height);
 }

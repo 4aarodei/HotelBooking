@@ -4,6 +4,7 @@ using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using HotelBooking.Web.ViewModels;
 
 namespace HotelBooking.Web.Controllers;
 
