@@ -52,10 +52,6 @@ h1, h2, h3, h4, h5 {
     line-height: 1.3;
 }
 
-p, small, label, span, li {
-    color: var(--text-muted);
-}
-
 a {
     color: var(--primary);
 }
@@ -306,8 +302,20 @@ textarea.form-control::placeholder {
     border: 1px solid var(--border-soft);
 }
 
+.badge-soft-success {
+    background: rgba(94, 183, 241, 0.12);
+    color: var(--secondary);
+    border-color: rgba(94, 183, 241, 0.35);
+}
+
+.badge-soft-warning {
+    background: rgba(255, 200, 87, 0.14);
+    color: #f2c85d;
+    border-color: rgba(255, 200, 87, 0.35);
+}
+
 .text-muted {
-    color: var(--text-muted) !important;
+    color: var(--text-muted);
 }
 
 .hero-section {

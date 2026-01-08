@@ -1,0 +1,35 @@
+@model HotelBooking.Web.ViewModels.HotelCardViewModel
+
+@{
+    var routeValues = new Dictionary<string, string>
+    {
+        ["hotelId"] = Model.Id.ToString()
+    };
+
+    if (!string.IsNullOrWhiteSpace(Model.CheckIn))
+    {
+        routeValues["checkIn"] = Model.CheckIn;
+    }
+
+    if (!string.IsNullOrWhiteSpace(Model.CheckOut))
+    {
+        routeValues["checkOut"] = Model.CheckOut;
+    }
+}
+
+<a class="card h-100 hotel-card text-decoration-none text-reset"
+   asp-controller="Hotel"
+   asp-action="Details"
+   asp-all-route-data="routeValues">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <h3 class="h5 mb-2">@Model.Name</h3>
+            <span class="badge text-bg-primary">@Model.PriceText</span>
+        </div>
+        <p class="text-muted mb-3">@Model.Summary</p>
+        <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
+            <span class="fw-semibold text-primary">@Model.ActionText</span>
+            <i class="bi bi-arrow-right text-primary"></i>
+        </div>
+    </div>
+</a>

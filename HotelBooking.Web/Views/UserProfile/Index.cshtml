@@ -2,7 +2,7 @@
 
 @{
     Layout = "~/Views/UserProfile/_Shared/_ProfileLayout.cshtml";
-    ViewData["Title"] = "Public profile";
+    ViewData["Title"] = "Публічний профіль";
 }
 
 <section class="card shadow-sm">
@@ -10,7 +10,7 @@
         <div class="section-heading mb-3">
             <div>
                 <p class="eyebrow mb-1">Облікові дані</p>
-                <h1 class="h4 mb-0">Public profile</h1>
+                <h1 class="h4 mb-0">Публічний профіль</h1>
             </div>
         </div>
         <form asp-action="UpdatePublicProfile" method="post" class="profile-form row g-3">
@@ -29,12 +29,12 @@
             </div>
 
             <div class="col-12">
-                <label class="form-label">Email</label>
+                <label class="form-label">Електронна пошта</label>
                 <input type="email" value="@User.Identity?.Name" class="form-control" disabled />
             </div>
 
             <div class="col-12 d-grid d-sm-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-primary">Save changes</button>
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
             </div>
         </form>
     </div>
