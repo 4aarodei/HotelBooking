@@ -16,19 +16,17 @@
                 <form method="get" asp-controller="Hotel" asp-action="Index" class="row g-3 align-items-end">
                     <div class="col-md-4">
                         <label class="form-label" for="filter-city">Місто</label>
-                        <input type="search"
-                               id="filter-city"
-                               name="city"
-                               list="city-options"
-                               value="@(Model.City == "Усі міста" ? "" : Model.City)"
-                               class="form-control"
-                               placeholder="Всі міста" />
-                        <datalist id="city-options">
+                        <select id="filter-city"
+                                name="city"
+                                class="form-select">
+                            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.City) || Model.City == "Усі міста")">
+                                Всі міста
+                            </option>
                             @foreach (var city in Model.Cities)
                             {
-                                <option value="@city"></option>
+                                <option value="@city" selected="@(city == Model.City)">@city</option>
                             }
-                        </datalist>
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label" for="filter-check-in">Дата заїзду</label>
@@ -83,6 +81,10 @@
         }
     </div>
 </section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/hotel-index.css" asp-append-version="true" />
+}
 
 @section Scripts {
     <script src="~/js/hotel-index.js" asp-append-version="true"></script>
