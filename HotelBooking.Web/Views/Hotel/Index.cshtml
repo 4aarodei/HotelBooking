@@ -5,19 +5,85 @@
         <p class="eyebrow mb-2">Результати пошуку</p>
         <h1 class="display-6 fw-bold mb-2">Готелі в місті @Model.City</h1>
         <p class="text-muted mb-1">Знайдено @Model.Hotels.Count готелів</p>
-        <p class="text-muted">Доступні на дати @Model.CheckIn:dd.MM.yyyy — @Model.CheckOut:dd.MM.yyyy</p>
     </div>
 </section>
 
 <section class="pb-5">
     <div class="container">
-        <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
-            @foreach (var hotel in Model.Hotels)
-            {
-                <div class="col">
-                    <partial name="_HotelCard" model="hotel" />
-                </div>
-            }
+        <!-- Форма фільтрації -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" asp-controller="Hotel" asp-action="Index" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label" for="filter-city">Місто</label>
+                        <input type="search"
+                               id="filter-city"
+                               name="city"
+                               list="city-options"
+                               value="@(Model.City == "Усі міста" ? "" : Model.City)"
+                               class="form-control"
+                               placeholder="Всі міста" />
+                        <datalist id="city-options">
+                            @foreach (var city in Model.Cities)
+                            {
+                                <option value="@city"></option>
+                            }
+                        </datalist>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="filter-check-in">Дата заїзду</label>
+                        <input type="date"
+                               id="filter-check-in"
+                               name="checkIn"
+                               value="@Model.CheckInFormatted"
+                               min="@Model.MinCheckInDate"
+                               class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="filter-check-out">Дата виїзду</label>
+                        <input type="date"
+                               id="filter-check-out"
+                               name="checkOut"
+                               value="@Model.CheckOutFormatted"
+                               min="@Model.MinCheckOutDate"
+                               class="form-control" />
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Оновити
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
+
+        <!-- Інформація про обрані дати -->
+        <p class="text-muted text-center mb-4">
+            Доступні на дати: <strong>@Model.CheckIn.ToString("dd.MM.yyyy")</strong> — <strong>@Model.CheckOut.ToString("dd.MM.yyyy")</strong>
+        </p>
+
+        <!-- Список готелів -->
+        @if (Model.Hotels.Any())
+        {
+            <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+                @foreach (var hotel in Model.Hotels)
+                {
+                    <div class="col">
+                        <partial name="_HotelCard" model="hotel" />
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                На обрані дати готелів не знайдено. Спробуйте змінити параметри пошуку.
+            </div>
+        }
     </div>
 </section>
+
+@section Scripts {
+    <script src="~/js/hotel-index.js" asp-append-version="true"></script>
+}

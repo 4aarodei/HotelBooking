@@ -13,15 +13,15 @@ public class HotelController : Controller
     {
         _hotelService = hotelService;
     }
-
     [HttpGet]
     public async Task<IActionResult> Index(string? city, DateTime? checkIn, DateTime? checkOut)
     {
         var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
 
         var hotels = await _hotelService.GetAvailableHotelsAsync(checkInDate, checkOutDate, city);
+        var cities = await _hotelService.GetAvailableCitiesAsync();
 
-        var vm = HotelIndexViewModel.Create(hotels, city, checkInDate, checkOutDate);
+        var vm = HotelIndexViewModel.Create(hotels, city, checkInDate, checkOutDate, cities);
 
         return View(vm);
     }

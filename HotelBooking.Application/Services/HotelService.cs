@@ -15,6 +15,19 @@ public class HotelService
         _bookingRepository = bookingRepository;
     }
 
+    public async Task<List<string>> GetAvailableCitiesAsync(CancellationToken ct = default)
+    {
+        var hotels = await _hotelRepository.GetWithActiveRoomsAsync(null, ct);
+
+        return hotels
+            .Select(h => h.City)
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Select(c => c.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
     public async Task<List<Hotel>> GetAvailableHotelsAsync(DateTime checkIn, DateTime checkOut, string? city, CancellationToken ct = default)
     {
         checkIn = checkIn.Date;

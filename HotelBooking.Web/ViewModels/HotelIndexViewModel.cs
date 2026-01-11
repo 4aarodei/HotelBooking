@@ -4,18 +4,26 @@ namespace HotelBooking.Web.ViewModels;
 
 public class HotelIndexViewModel
 {
+
     public string City { get; set; } = string.Empty;
     public DateTime CheckIn { get; set; }
     public DateTime CheckOut { get; set; }
     public List<HotelCardViewModel> Hotels { get; set; } = new();
+    public IReadOnlyList<string> Cities { get; init; } = Array.Empty<string>();
 
-    public static HotelIndexViewModel Create(IEnumerable<Hotel> hotels, string? city, DateTime checkIn, DateTime checkOut)
+    public string CheckInFormatted => CheckIn.ToString("yyyy-MM-dd");
+    public string CheckOutFormatted => CheckOut.ToString("yyyy-MM-dd");
+    public string MinCheckInDate => DateTime.Today.AddDays(1).ToString("yyyy-MM-dd");
+    public string MinCheckOutDate => CheckIn.AddDays(1).ToString("yyyy-MM-dd");
+
+    public static HotelIndexViewModel Create(IEnumerable<Hotel> hotels, string? city, DateTime checkIn, DateTime checkOut, IReadOnlyList<string> cities)
     {
         var vm = new HotelIndexViewModel
         {
             City = string.IsNullOrWhiteSpace(city) ? "Усі міста" : city!,
             CheckIn = checkIn,
-            CheckOut = checkOut
+            CheckOut = checkOut,
+            Cities = cities
         };
 
         foreach (var hotel in hotels)
@@ -42,6 +50,6 @@ public class HotelIndexViewModel
             .Select(r => r.PricePerNight)
             .ToList();
 
-        return activePrices.Min();
+        return activePrices.Any() ? activePrices.Min() : 0;
     }
 }

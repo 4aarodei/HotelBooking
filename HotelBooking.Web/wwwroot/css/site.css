@@ -30,6 +30,26 @@
     --spacing-5: 24px;
     --spacing-6: 32px;
     --nav-height: 82px;
+    --bs-body-bg: var(--bg-900);
+    --bs-body-color: var(--text-strong);
+    --bs-secondary-color: var(--text-muted);
+    --bs-tertiary-color: var(--text-disabled);
+    --bs-border-color: var(--border-soft);
+    --bs-link-color: var(--primary);
+    --bs-link-hover-color: #c5bcff;
+    --bs-emphasis-color: var(--text-strong);
+    --bs-secondary-bg: var(--surface);
+    --bs-tertiary-bg: var(--surface-strong);
+    
+    /* Семантичні кольори для темної теми */
+    --success: #4ade80;
+    --success-soft: rgba(74, 222, 128, 0.15);
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, 0.15);
+    --warning: #fbbf24;
+    --warning-soft: rgba(251, 191, 36, 0.15);
+    --info: #60a5fa;
+    --info-soft: rgba(96, 165, 250, 0.15);
 }
 
 * {
@@ -48,9 +68,17 @@ body {
     line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5 {
+/* HTML заголовки ТА Bootstrap утилітарні класи .h1-.h6 */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
     color: var(--text-strong);
     line-height: 1.3;
+}
+
+/* Bootstrap display класи */
+.display-1, .display-2, .display-3, 
+.display-4, .display-5, .display-6 {
+    color: var(--text-strong);
 }
 
 a {
@@ -144,6 +172,7 @@ a:hover {
 
 .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.1);
+    color: var(--text-strong);
 }
 
 .btn-ghost {
@@ -157,10 +186,61 @@ a:hover {
     background: rgba(255, 255, 255, 0.06);
 }
 
+/* Кольорові кнопки для темної теми */
+.btn-success {
+    background: var(--success);
+    border-color: var(--success);
+    color: #0c0f1c;
+}
+
+.btn-success:hover {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #0c0f1c;
+}
+
+.btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #0c0f1c;
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #0c0f1c;
+}
+
+.btn-warning {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: #0c0f1c;
+}
+
+.btn-warning:hover {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #0c0f1c;
+}
+
+.btn-info {
+    background: var(--info);
+    border-color: var(--info);
+    color: #0c0f1c;
+}
+
+.btn-info:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #0c0f1c;
+}
+
 .btn-outline-primary,
 .btn-outline-secondary,
 .btn-outline-success,
-.btn-outline-warning {
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-outline-info {
     color: var(--text-strong);
     border-color: var(--border-soft);
     background: transparent;
@@ -169,7 +249,9 @@ a:hover {
 .btn-outline-primary:hover,
 .btn-outline-secondary:hover,
 .btn-outline-success:hover,
-.btn-outline-warning:hover {
+.btn-outline-warning:hover,
+.btn-outline-danger:hover,
+.btn-outline-info:hover {
     background: var(--bg-contrast);
     color: var(--text-strong);
     border-color: var(--border-strong);
@@ -184,6 +266,16 @@ a:hover {
 .btn-link:hover {
     color: #c5bcff;
     text-decoration: underline;
+}
+
+/* Кнопка закриття для темної теми */
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.7;
+}
+
+.btn-close:hover {
+    opacity: 1;
 }
 
 .card,
@@ -264,6 +356,12 @@ a:hover {
     min-height: 46px;
 }
 
+/* Виправлення для select options */
+.form-select option {
+    background: var(--bg-800);
+    color: var(--text-strong);
+}
+
 .form-check-input {
     width: 1.1rem;
     height: 1.1rem;
@@ -277,6 +375,8 @@ a:hover {
 .form-check-input:focus {
     border-color: rgba(154, 140, 255, 0.4);
     box-shadow: var(--focus-ring);
+    background: var(--surface-strong);
+    color: var(--text-strong);
 }
 
 .form-control::placeholder,
@@ -300,6 +400,12 @@ textarea.form-control::placeholder {
     font-weight: 600;
 }
 
+.form-text,
+small,
+.card-subtitle {
+    color: var(--text-muted);
+}
+
 .badge.text-bg-primary {
     padding: 0.5rem 0.9rem;
     border-radius: 999px;
@@ -310,20 +416,120 @@ textarea.form-control::placeholder {
     border: 1px solid var(--border-soft);
 }
 
+/* Семантичні badge стилі */
+.badge.text-bg-success,
+.badge.bg-success {
+    background: var(--success) !important;
+    color: #0c0f1c !important;
+    border-color: var(--success);
+}
+
+.badge.text-bg-danger,
+.badge.bg-danger {
+    background: var(--danger) !important;
+    color: #0c0f1c !important;
+    border-color: var(--danger);
+}
+
+.badge.text-bg-warning,
+.badge.bg-warning {
+    background: var(--warning) !important;
+    color: #0c0f1c !important;
+    border-color: var(--warning);
+}
+
+.badge.text-bg-info,
+.badge.bg-info {
+    background: var(--info) !important;
+    color: #0c0f1c !important;
+    border-color: var(--info);
+}
+
 .badge-soft-success {
-    background: rgba(94, 183, 241, 0.12);
-    color: var(--secondary);
-    border-color: rgba(94, 183, 241, 0.35);
+    background: var(--success-soft);
+    color: var(--success);
+    border-color: rgba(74, 222, 128, 0.35);
 }
 
 .badge-soft-warning {
-    background: rgba(255, 200, 87, 0.14);
-    color: #f2c85d;
-    border-color: rgba(255, 200, 87, 0.35);
+    background: var(--warning-soft);
+    color: var(--warning);
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.badge-soft-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: rgba(248, 113, 113, 0.35);
+}
+
+.badge-soft-info {
+    background: var(--info-soft);
+    color: var(--info);
+    border-color: rgba(96, 165, 250, 0.35);
+}
+
+/* Семантичні текстові кольори для темної теми */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+.text-danger {
+    color: var(--danger) !important;
+}
+
+.text-warning {
+    color: var(--warning) !important;
+}
+
+.text-info {
+    color: var(--info) !important;
 }
 
 .text-muted {
+    color: var(--text-muted) !important;
+    opacity: 1;
+    --bs-text-opacity: 1;
+}
+
+/* Валідаційні повідомлення */
+.field-validation-error,
+.validation-summary-errors,
+span.text-danger {
+    color: var(--danger) !important;
+    font-size: 0.875rem;
+}
+
+.validation-summary-errors ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
+
+.input-validation-error {
+    border-color: var(--danger) !important;
+}
+
+.breadcrumb,
+.breadcrumb .breadcrumb-item,
+.breadcrumb .breadcrumb-item a {
     color: var(--text-muted);
+}
+
+.breadcrumb .breadcrumb-item.active {
+    color: var(--text-strong);
+}
+
+/* Eyebrow стиль */
+.eyebrow {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .hero-section {
@@ -341,6 +547,12 @@ textarea.form-control::placeholder {
 .hero-title {
     font-size: clamp(2.2rem, 4vw, 3rem);
     line-height: 1.2;
+    color: var(--text-strong);
+}
+
+.hero-subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
 }
 
 .section-heading {
@@ -388,6 +600,38 @@ textarea.form-control::placeholder {
     --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
     --bs-table-color: var(--text-strong);
     border-color: var(--border-soft);
+}
+
+.table {
+    --bs-table-bg: var(--surface);
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+    --bs-table-striped-color: var(--text-strong);
+    --bs-table-hover-bg: var(--bg-contrast);
+    --bs-table-hover-color: var(--text-strong);
+    --bs-table-color: var(--text-strong);
+    --bs-table-border-color: var(--border-soft);
+    background-color: var(--surface);
+    color: var(--text-strong);
+    border-color: var(--border-soft);
+}
+
+.table thead th {
+    background: var(--surface-strong);
+    color: var(--text-muted);
+}
+
+.table tbody td {
+    color: var(--text-strong);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.02);
+    color: var(--text-strong);
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: var(--bg-contrast);
+    color: var(--text-strong);
 }
 
 .table-surface {
@@ -465,10 +709,33 @@ textarea.form-control::placeholder {
     color: var(--text-strong);
 }
 
-.alert-success { border-color: rgba(46, 204, 113, 0.3); background: rgba(46, 204, 113, 0.08); }
-.alert-danger { border-color: rgba(255, 99, 132, 0.25); background: rgba(255, 99, 132, 0.08); }
-.alert-info { border-color: rgba(94, 183, 241, 0.3); background: rgba(94, 183, 241, 0.08); }
-.alert-warning { border-color: rgba(255, 187, 92, 0.35); background: rgba(255, 187, 92, 0.1); }
+.alert-success { 
+    border-color: rgba(74, 222, 128, 0.4); 
+    background: var(--success-soft); 
+    color: var(--text-strong);
+}
+
+.alert-danger { 
+    border-color: rgba(248, 113, 113, 0.4); 
+    background: var(--danger-soft); 
+    color: var(--text-strong);
+}
+
+.alert-info { 
+    border-color: rgba(96, 165, 250, 0.4); 
+    background: var(--info-soft); 
+    color: var(--text-strong);
+}
+
+.alert-warning { 
+    border-color: rgba(251, 191, 36, 0.4); 
+    background: var(--warning-soft); 
+    color: var(--text-strong);
+}
+
+.alert-heading {
+    color: var(--text-strong);
+}
 
 .profile-shell {
     display: grid;
@@ -548,10 +815,12 @@ textarea.form-control::placeholder {
 .auth-title {
     margin-bottom: 0.5rem;
     font-weight: 700;
+    color: var(--text-strong);
 }
 
 .auth-subtitle {
     margin-bottom: 1.5rem;
+    color: var(--text-muted);
 }
 
 .auth-card form .form-group {
@@ -576,7 +845,7 @@ textarea.form-control::placeholder {
 
 .auth-error {
     margin-bottom: 1rem;
-    color: #ff9b9b;
+    color: var(--danger);
 }
 
 .tag-pill {
@@ -596,12 +865,67 @@ textarea.form-control::placeholder {
     color: var(--text-muted);
 }
 
+/* Іконки в badge для Dashboard */
+.badge.bg-primary.bg-opacity-10 {
+    background: var(--primary-soft) !important;
+}
+
+.badge.bg-primary.bg-opacity-10 .text-primary,
+.badge.bg-primary.bg-opacity-10.text-primary {
+    color: var(--primary) !important;
+}
+
+/* Виправлення для Bootstrap утиліт bg-opacity */
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.bg-opacity-10 {
+    --bs-bg-opacity: 0.1;
+}
+
+/* Модальні вікна */
+.modal-header,
+.modal-footer {
+    border-color: var(--border-soft);
+}
+
+.modal-title {
+    color: var(--text-strong);
+}
+
+/* Пагінація */
+.page-link {
+    background: var(--surface);
+    border-color: var(--border-soft);
+    color: var(--text-strong);
+}
+
+.page-link:hover {
+    background: var(--bg-contrast);
+    border-color: var(--border-strong);
+    color: var(--text-strong);
+}
+
+.page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.page-item.disabled .page-link {
+    background: var(--bg-700);
+    border-color: var(--border-soft);
+    color: var(--text-disabled);
+}
+
 @media (max-width: 991px) {
     :root { --nav-height: 72px; }
     .navbar .nav-link { padding: 0.6rem 0.9rem; }
     .hero-card { padding: 1.5rem; }
     .auth-shell { padding: 2rem 1.25rem; }
 }
+
 #app {
     padding-top: var(--nav-height);
 }

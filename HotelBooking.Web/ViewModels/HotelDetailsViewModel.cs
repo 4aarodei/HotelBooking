@@ -1,6 +1,6 @@
 using HotelBooking.Domain.Entities.Hotels;
 
-namespace HotelBooking.ViewModels;
+namespace HotelBooking.Web.ViewModels;
 
 public class HotelDetailsViewModel
 {
