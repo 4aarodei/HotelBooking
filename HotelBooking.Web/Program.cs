@@ -1,35 +1,29 @@
-using HotelBooking.Application;
+﻿using HotelBooking.Application;
 using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-if (string.IsNullOrWhiteSpace(environmentName))
-{
-    environmentName = Environments.Development;
-}
+var builder = WebApplication.CreateBuilder(args);
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    Args = args,
-    ContentRootPath = AppContext.BaseDirectory,
-    EnvironmentName = environmentName
-});
+// 🔹 Connection string (auto: Development / Production)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
-    options.SignIn.RequireConfirmedAccount = true)
+// 🔹 Identity
+builder.Services
+    .AddDefaultIdentity<ApplicationUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+    })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// 🔹 Clean architecture layers
 builder.Services.AddInfrastructure();
 builder.Services.AddApplication();
 
@@ -37,12 +31,16 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+
+// 🔹 Seeder — ТІЛЬКИ в Development
+if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
     await IdentitySeeder.SeedAsync(services);
 }
 
+// 🔹 Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -69,6 +67,7 @@ app.MapAreaControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
 
 app.Run();
