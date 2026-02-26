@@ -88,28 +88,30 @@ Booking *??1 ApplicationUser
 
 ## Структура проєкту
 
-```
-??? HotelBooking.Core/             # Domain-сутності
-?   ??? Entities/
-?       ??? Hotels/                 # Hotel, Room
-?       ??? Bookings/              # Booking, BookingStatus, BookingStatusCodes
-?       ??? Identity/              # ApplicationUser, AppRoles
-?
-??? HotelBooking.Application/      # Бізнес-логіка
-?   ??? Services/                  # HotelService, BookingService, RoomService
-?   ??? Interfaces/                # IHotelRepository, IBookingRepository, IRoomRepository
-?
-??? HotelBooking.Infrastructure/   # Доступ до даних
-?   ??? Data/                      # ApplicationDbContext, Migrations, IdentitySeeder
-?   ??? Repositories/              # EF Core реалізації репозиторіїв
-?   ??? Dapper/                    # DapperConnectionFactory, BookingStatisticsQuery
-?
-??? HotelBooking.Web/              # Презентаційний шар
-    ??? Controllers/               # HomeController, HotelController, BookingController
-    ??? Areas/Admin/Controllers/   # HotelsController, RoomsController, DashboardController
-    ??? Views/                     # Razor Views
-    ??? ViewModels/                # ViewModel-класи
-```
+HotelBooking/
+│
+├── HotelBooking.Core/                  # Domain-сутності
+│   ├── Entities/
+│   │   ├── Hotels/                     # Hotel, Room
+│   │   ├── Bookings/                   # Booking, BookingStatus, BookingStatusCodes
+│   │   └── Identity/                   # ApplicationUser, AppRoles
+│
+├── HotelBooking.Application/           # Бізнес-логіка
+│   ├── Services/                       # HotelService, BookingService, RoomService
+│   └── Interfaces/                     # IHotelRepository, IBookingRepository, IRoomRepository
+│
+├── HotelBooking.Infrastructure/        # Доступ до даних
+│   ├── Data/                           # ApplicationDbContext, Migrations, IdentitySeeder
+│   ├── Repositories/                   # EF Core реалізації репозиторіїв
+│   └── Dapper/                         # DapperConnectionFactory, BookingStatisticsQuery
+│
+└── HotelBooking.Web/                   # Презентаційний шар
+    ├── Controllers/                    # HomeController, HotelController, BookingController
+    ├── Areas/
+    │   └── Admin/
+    │       └── Controllers/            # HotelsController, RoomsController, DashboardController
+    ├── Views/                          # Razor Views
+    └── ViewModels/                     # ViewModel-класи
 
 ## Ключові архітектурні рішення
 
