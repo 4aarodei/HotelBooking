@@ -18,7 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = !builder.Environment.IsDevelopment();
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -32,7 +32,7 @@ builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 
-// 🔹 Seeder — ТІЛЬКИ в Development
+// 🔹 Seeder — демо-дані та ролі для локального запуску
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
