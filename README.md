@@ -1,140 +1,178 @@
-🏨 HotelBooking
+<div align="center">
 
-Веб-застосунок для пошуку та бронювання готелів, побудований на ASP.NET Core 8 (MVC) з використанням принципів Clean Architecture.
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Hotel.png" alt="Hotel" width="80" />
 
-🧱 Архітектура
-Шари системи
+#  HotelBooking
 
-HotelBooking.Core (Domain)
-    └─ Сутності, бізнес-правила, ролі
-HotelBooking.Application
-    └─ Сервіси, інтерфейси репозиторіїв
-HotelBooking.Infrastructure
-    └─ EF Core, Dapper, Identity, реалізації репозиторіїв
-HotelBooking.Web
-    └─ Controllers, Views, ViewModels, Areas
+**Сучасний веб-застосунок для пошуку та бронювання готелів**
 
-✅ Core не залежить від жодного шару
-✅ Залежності спрямовані всередину (Dependency Rule)
-✅ Infrastructure реалізує контракти з Application
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-MVC-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://learn.microsoft.com/aspnet/core)
+[![Entity Framework](https://img.shields.io/badge/EF_Core-8.0-512BD4?style=for-the-badge&logo=nuget&logoColor=white)](https://learn.microsoft.com/ef/core/)
+[![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
 
-🛠 Технології
-Шар	Технології
-Web	ASP.NET Core 8 MVC, Razor Views, Bootstrap 5.3
-Application	Сервісний шар (HotelService, BookingService, RoomService)
-Infrastructure	Entity Framework Core 8, Dapper, SQL Server, ASP.NET Identity
-Domain	POCO-сутності (Hotel, Room, Booking, BookingStatus, ApplicationUser)
-✨ Основні можливості
-🔍 Пошук готелів
+</div>
 
-Фільтрація за містом та датами
+---
 
-Перевірка доступності номерів у реальному часі
+## 📐 Архітектура
 
-🏨 Бронювання
+Проєкт побудований за принципами **Clean Architecture** — чіткий розподіл відповідальностей між шарами, залежності спрямовані до ядра домену.
 
-Валідація доступності номерів
+```
+┌─────────────────────────────────────────────────────────┐
+│                    HotelBooking.Web                     │
+│         Controllers · Views · ViewModels · Areas        │
+├─────────────────────────────────────────────────────────┤
+│                HotelBooking.Infrastructure              │
+│      EF Core · Dapper · Repositories · Identity Seeder  │
+├─────────────────────────────────────────────────────────┤
+│                 HotelBooking.Application                │
+│         Services · Repository Interfaces · DTOs         │
+├─────────────────────────────────────────────────────────┤
+│                    HotelBooking.Core                    │
+│          POCO Entities · Business Rules · Roles         │
+└─────────────────────────────────────────────────────────┘
+```
 
-Снепшот ціни на момент бронювання
+> **Core** не залежить від жодного іншого шару — це чисте доменне ядро без зовнішніх залежностей.
 
-Статуси: Pending, Confirmed, Cancelled
+---
 
-🔐 Авторизація
+## 🗂️ Структура проєкту
 
-ASP.NET Identity
+```
+HotelBooking/
+├── HotelBooking.Core/               # 🔵 Domain — сутності та бізнес-правила
+│   └── Entities/
+│       ├── Hotels/                  # Hotel, Room
+│       ├── Bookings/                # Booking, BookingStatus, BookingStatusCodes
+│       └── Identity/                # ApplicationUser, AppRoles
+│
+├── HotelBooking.Application/        # 🟢 Application — бізнес-логіка
+│   ├── Services/                    # HotelService, BookingService, RoomService
+│   └── Interfaces/                  # IHotelRepository, IBookingRepository, IRoomRepository
+│
+├── HotelBooking.Infrastructure/     # 🟡 Infrastructure — доступ до даних
+│   ├── Data/                        # ApplicationDbContext, Migrations, IdentitySeeder
+│   ├── Repositories/                # EF Core реалізації репозиторіїв
+│   └── Dapper/                      # DapperConnectionFactory, BookingStatisticsQuery
+│
+└── HotelBooking.Web/                # 🔴 Presentation — UI та API
+    ├── Controllers/                  # HomeController, HotelController, BookingController
+    ├── Areas/Admin/Controllers/      # HotelsController, RoomsController, DashboardController
+    ├── Views/                        # Razor Views
+    └── ViewModels/                   # ViewModel-класи
+```
 
-Ролі: User, Admin, SuperAdmin
+---
 
-🛠 Адмін-панель
+## ✨ Функціональність
 
-Area Admin
+| Можливість | Опис |
+|---|---|
+| 🔍 **Пошук готелів** | Фільтрація за містом та датами, перевірка доступності в реальному часі |
+| 📅 **Бронювання** | Створення бронювань з валідацією доступності та снепшотом ціни |
+| 🔐 **Автентифікація** | ASP.NET Identity з роллю `User`, `Admin`, `SuperAdmin` |
+| 🛠️ **Адмін-панель** | Area `Admin` — повний CRUD для готелів та номерів |
+| 📊 **Статистика** | Dapper-запити для агрегації та аналітики бронювань |
+| 🌱 **Auto Seeding** | Автоматичне створення ролей та SuperAdmin у Development |
 
-CRUD для готелів та номерів
+---
 
-Dashboard зі статистикою
+## 🗺️ Предметна область
 
-📊 Статистика
+```
+Hotel ──────┐
+            │ 1 : many
+            ▼
+           Room ────┐
+                    │ 1 : many
+                    ▼
+                 Booking ──────► BookingStatus  (Pending / Confirmed / Cancelled)
+                    │
+                    └──────────► ApplicationUser
+```
 
-Dapper для агрегаційних запитів
+---
 
-Оптимізація читання через lightweight ORM
+## 🛠️ Технологічний стек
 
-🌱 Seeding
+| Шар | Технології |
+|---|---|
+| **Web** | ASP.NET Core 8 MVC, Razor Views, Bootstrap 5.3 |
+| **Application** | Service Layer (HotelService, BookingService, RoomService) |
+| **Infrastructure** | Entity Framework Core 8, Dapper, SQL Server, ASP.NET Identity |
+| **Domain** | POCO Entities (Hotel, Room, Booking, BookingStatus, ApplicationUser) |
 
-Автоматичне створення ролей
+---
 
-Створення SuperAdmin в середовищі Development
+## ⚙️ Ключові архітектурні рішення
 
-🧩 Предметна область
-Hotel 1 ── * Room
-Room 1 ── * Booking
-Booking * ── 1 BookingStatus
-Booking * ── 1 ApplicationUser
-🚀 Запуск локально
-Вимоги
+**Clean Architecture** — шари чітко розділені; залежності спрямовані виключно до ядра домену.
 
-.NET 8 SDK
-SQL Server або LocalDB
+**Repository Pattern** — інтерфейси визначені в `Application`, реалізації — в `Infrastructure`. Це дозволяє легко замінити джерело даних без змін у бізнес-логіці.
 
-1️⃣ Клонування репозиторію
+**EF Core + Dapper** — EF Core для стандартних CRUD-операцій, Dapper для складних аналітичних запитів, де важлива продуктивність.
+
+**DI через extension-методи** — `AddApplication()` / `AddInfrastructure()` забезпечують чисту реєстрацію залежностей без "забруднення" `Program.cs`.
+
+**CancellationToken** — підтримка скасування у всіх асинхронних операціях для коректної обробки запитів.
+
+---
+
+## 🚀 Запуск локально
+
+### Вимоги
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- SQL Server або [LocalDB](https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb)
+
+### Кроки
+
+**1. Клонувати репозиторій**
+
+```bash
 git clone https://github.com/4aarodei/HotelBooking.git
 cd HotelBooking
-2️⃣ Налаштування connection string (User Secrets)
+```
+
+**2. Налаштувати рядок підключення через User Secrets**
+
+```bash
 cd HotelBooking.Web
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=(localdb)\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;MultipleActiveResultSets=true"
-3️⃣ Застосування міграцій
-dotnet ef database update --project HotelBooking.Infrastructure --startup-project HotelBooking.Web
-4️⃣ Запуск застосунку
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
+  "Server=(localdb)\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;MultipleActiveResultSets=true"
+```
+
+**3. Застосувати міграції бази даних**
+
+```bash
+dotnet ef database update \
+  --project HotelBooking.Infrastructure \
+  --startup-project HotelBooking.Web
+```
+
+**4. Запустити застосунок**
+
+```bash
 dotnet run --project HotelBooking.Web
-🔑 Тестовий акаунт (Development)
+```
+
+> 🌱 При першому запуску в `Development`-середовищі **Seeder** автоматично створить ролі (`SuperAdmin`, `Admin`, `User`) та обліковий запис адміністратора.
+
+### 🔑 Тестовий доступ
+
+```
 Email:    admin@hotelbooking.local
 Password: Admin123!
-📁 Структура проєкту
-HotelBooking/
-│
-├── HotelBooking.Core/
-│   ├── Entities/
-│   │   ├── Hotels/
-│   │   ├── Bookings/
-│   │   └── Identity/
-│
-├── HotelBooking.Application/
-│   ├── Services/
-│   └── Interfaces/
-│
-├── HotelBooking.Infrastructure/
-│   ├── Data/
-│   ├── Repositories/
-│   └── Dapper/
-│
-└── HotelBooking.Web/
-    ├── Controllers/
-    ├── Areas/Admin/Controllers/
-    ├── Views/
-    └── ViewModels/
-🏗 Ключові архітектурні рішення
-✔ Clean Architecture
+```
 
-Чітке розділення відповідальностей та контроль напрямку залежностей.
+---
 
-✔ Repository Pattern
+<div align="center">
 
-Інтерфейси в Application, реалізації в Infrastructure.
+Made with ❤️ using **ASP.NET Core 8** & **Clean Architecture**
 
-✔ DI через Extension Methods
-builder.Services
-    .AddApplication()
-    .AddInfrastructure(configuration);
-✔ EF Core + Dapper
-
-EF Core — транзакційний CRUD
-
-Dapper — оптимізовані аналітичні запити
-
-✔ CancellationToken
-
-Підтримка скасування у всіх асинхронних операціях.
-
-✔ Availability Check
-
-Перевірка доступності номерів через підрахунок активних бронювань.
+</div>
