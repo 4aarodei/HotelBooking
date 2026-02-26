@@ -1,44 +1,44 @@
 # ?? HotelBooking
 
-Веб-застосунок для пошуку та бронювання готелів, побудований на **ASP.NET Core 8 (MVC)** з використанням **Clean Architecture**.
+Р’РµР±-Р·Р°СЃС‚РѕСЃСѓРЅРѕРє РґР»СЏ РїРѕС€СѓРєСѓ С‚Р° Р±СЂРѕРЅСЋРІР°РЅРЅСЏ РіРѕС‚РµР»С–РІ, РїРѕР±СѓРґРѕРІР°РЅРёР№ РЅР° **ASP.NET Core 8 (MVC)** Р· РІРёРєРѕСЂРёСЃС‚Р°РЅРЅСЏРј **Clean Architecture**.
 
-## Архітектура
+## РђСЂС…С–С‚РµРєС‚СѓСЂР°
 
 ```
-HotelBooking.Core (Domain)        — Сутності, константи, ролі
-HotelBooking.Application          — Сервіси, інтерфейси репозиторіїв
-HotelBooking.Infrastructure       — EF Core, Dapper, Repositories, Identity Seeder
-HotelBooking.Web                  — Controllers, Views, ViewModels, Areas
+HotelBooking.Core (Domain)        вЂ” РЎСѓС‚РЅРѕСЃС‚С–, РєРѕРЅСЃС‚Р°РЅС‚Рё, СЂРѕР»С–
+HotelBooking.Application          вЂ” РЎРµСЂРІС–СЃРё, С–РЅС‚РµСЂС„РµР№СЃРё СЂРµРїРѕР·РёС‚РѕСЂС–С—РІ
+HotelBooking.Infrastructure       вЂ” EF Core, Dapper, Repositories, Identity Seeder
+HotelBooking.Web                  вЂ” Controllers, Views, ViewModels, Areas
 ```
 
-### Діаграма залежностей
+### Р”С–Р°РіСЂР°РјР° Р·Р°Р»РµР¶РЅРѕСЃС‚РµР№
 
 ```
 Web ? Application ? Core (Domain)
 Web ? Infrastructure ? Application ? Core
 ```
 
-> **Core** не залежить від жодного шару — це ядро, яке містить лише POCO-сутності та бізнес-правила.
+> **Core** РЅРµ Р·Р°Р»РµР¶РёС‚СЊ РІС–Рґ Р¶РѕРґРЅРѕРіРѕ С€Р°СЂСѓ вЂ” С†Рµ СЏРґСЂРѕ, СЏРєРµ РјС–СЃС‚РёС‚СЊ Р»РёС€Рµ POCO-СЃСѓС‚РЅРѕСЃС‚С– С‚Р° Р±С–Р·РЅРµСЃ-РїСЂР°РІРёР»Р°.
 
-## Технології
+## РўРµС…РЅРѕР»РѕРіС–С—
 
-| Шар | Технології |
+| РЁР°СЂ | РўРµС…РЅРѕР»РѕРіС–С— |
 
 | **Web** | ASP.NET Core 8 MVC, Razor Views, Bootstrap 5.3 |
-| **Application** | Сервісний шар (HotelService, BookingService, RoomService) |
+| **Application** | РЎРµСЂРІС–СЃРЅРёР№ С€Р°СЂ (HotelService, BookingService, RoomService) |
 | **Infrastructure** | Entity Framework Core 8, Dapper, SQL Server, ASP.NET Identity |
-| **Domain** | POCO-сутності (Hotel, Room, Booking, BookingStatus, ApplicationUser) |
+| **Domain** | POCO-СЃСѓС‚РЅРѕСЃС‚С– (Hotel, Room, Booking, BookingStatus, ApplicationUser) |
 
-## Основні можливості
+## РћСЃРЅРѕРІРЅС– РјРѕР¶Р»РёРІРѕСЃС‚С–
 
-- ?? **Пошук готелів** — фільтрація за містом та датами, перевірка доступності номерів у реальному часі
-- ??? **Бронювання** — створення бронювань з валідацією доступності, снепшот ціни на момент бронювання
-- ?? **Автентифікація / Авторизація** — ASP.NET Identity з 3 ролями: `User`, `Admin`, `SuperAdmin`
-- ??? **Адмін-панель** — Area `Admin` для управління готелями та номерами (CRUD)
-- ?? **Статистика бронювань** — Dapper-запити для агрегації даних
-- ?? **Seeding** — автоматичне створення ролей та облікового запису SuperAdmin у Development
+- ?? **РџРѕС€СѓРє РіРѕС‚РµР»С–РІ** вЂ” С„С–Р»СЊС‚СЂР°С†С–СЏ Р·Р° РјС–СЃС‚РѕРј С‚Р° РґР°С‚Р°РјРё, РїРµСЂРµРІС–СЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚С– РЅРѕРјРµСЂС–РІ Сѓ СЂРµР°Р»СЊРЅРѕРјСѓ С‡Р°СЃС–
+- ??? **Р‘СЂРѕРЅСЋРІР°РЅРЅСЏ** вЂ” СЃС‚РІРѕСЂРµРЅРЅСЏ Р±СЂРѕРЅСЋРІР°РЅСЊ Р· РІР°Р»С–РґР°С†С–С”СЋ РґРѕСЃС‚СѓРїРЅРѕСЃС‚С–, СЃРЅРµРїС€РѕС‚ С†С–РЅРё РЅР° РјРѕРјРµРЅС‚ Р±СЂРѕРЅСЋРІР°РЅРЅСЏ
+- ?? **РђРІС‚РµРЅС‚РёС„С–РєР°С†С–СЏ / РђРІС‚РѕСЂРёР·Р°С†С–СЏ** вЂ” ASP.NET Identity Р· 3 СЂРѕР»СЏРјРё: `User`, `Admin`, `SuperAdmin`
+- ??? **РђРґРјС–РЅ-РїР°РЅРµР»СЊ** вЂ” Area `Admin` РґР»СЏ СѓРїСЂР°РІР»С–РЅРЅСЏ РіРѕС‚РµР»СЏРјРё С‚Р° РЅРѕРјРµСЂР°РјРё (CRUD)
+- ?? **РЎС‚Р°С‚РёСЃС‚РёРєР° Р±СЂРѕРЅСЋРІР°РЅСЊ** вЂ” Dapper-Р·Р°РїРёС‚Рё РґР»СЏ Р°РіСЂРµРіР°С†С–С— РґР°РЅРёС…
+- ?? **Seeding** вЂ” Р°РІС‚РѕРјР°С‚РёС‡РЅРµ СЃС‚РІРѕСЂРµРЅРЅСЏ СЂРѕР»РµР№ С‚Р° РѕР±Р»С–РєРѕРІРѕРіРѕ Р·Р°РїРёСЃСѓ SuperAdmin Сѓ Development
 
-## Предметна область
+## РџСЂРµРґРјРµС‚РЅР° РѕР±Р»Р°СЃС‚СЊ
 
 ```
 Hotel 1??* Room
@@ -47,75 +47,75 @@ Booking *??1 BookingStatus (Pending / Confirmed / Cancelled)
 Booking *??1 ApplicationUser
 ```
 
-## Запуск локально
+## Р—Р°РїСѓСЃРє Р»РѕРєР°Р»СЊРЅРѕ
 
-### Вимоги
+### Р’РёРјРѕРіРё
 
 - .NET 8 SDK
-- SQL Server (або LocalDB)
+- SQL Server (Р°Р±Рѕ LocalDB)
 
-### Кроки
+### РљСЂРѕРєРё
 
-1. **Клонувати репозиторій:**
+1. **РљР»РѕРЅСѓРІР°С‚Рё СЂРµРїРѕР·РёС‚РѕСЂС–Р№:**
 
    ```bash
    git clone https://github.com/4aarodei/HotelBooking.git
    cd HotelBooking
    ```
 
-2. **Налаштувати connection string через User Secrets:**
+2. **РќР°Р»Р°С€С‚СѓРІР°С‚Рё connection string С‡РµСЂРµР· User Secrets:**
 
    ```bash
    cd HotelBooking.Web
    dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=(localdb)\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;MultipleActiveResultSets=true"
    ```
 
-3. **Застосувати міграції:**
+3. **Р—Р°СЃС‚РѕСЃСѓРІР°С‚Рё РјС–РіСЂР°С†С–С—:**
 
    ```bash
    dotnet ef database update --project HotelBooking.Infrastructure --startup-project HotelBooking.Web
    ```
 
-4. **Запустити:**
+4. **Р—Р°РїСѓСЃС‚РёС‚Рё:**
 
    ```bash
    dotnet run --project HotelBooking.Web
    ```
 
-> При першому запуску в `Development`-середовищі Seeder автоматично створить ролі (`SuperAdmin`, `Admin`, `User`) та обліковий запис адміністратора.
+> РџСЂРё РїРµСЂС€РѕРјСѓ Р·Р°РїСѓСЃРєСѓ РІ `Development`-СЃРµСЂРµРґРѕРІРёС‰С– Seeder Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ СЃС‚РІРѕСЂРёС‚СЊ СЂРѕР»С– (`SuperAdmin`, `Admin`, `User`) С‚Р° РѕР±Р»С–РєРѕРІРёР№ Р·Р°РїРёСЃ Р°РґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂР°.
 >
-> **Тестовий вхід:** `admin@hotelbooking.local` / `Admin123!`
+> **РўРµСЃС‚РѕРІРёР№ РІС…С–Рґ:** `admin@hotelbooking.local` / `Admin123!`
 
-## Структура проєкту
+## РЎС‚СЂСѓРєС‚СѓСЂР° РїСЂРѕС”РєС‚Сѓ
 
 ```
-??? HotelBooking.Core/             # Domain-сутності
+??? HotelBooking.Core/             # Domain-СЃСѓС‚РЅРѕСЃС‚С–
 ?   ??? Entities/
 ?       ??? Hotels/                 # Hotel, Room
 ?       ??? Bookings/              # Booking, BookingStatus, BookingStatusCodes
 ?       ??? Identity/              # ApplicationUser, AppRoles
 ?
-??? HotelBooking.Application/      # Бізнес-логіка
+??? HotelBooking.Application/      # Р‘С–Р·РЅРµСЃ-Р»РѕРіС–РєР°
 ?   ??? Services/                  # HotelService, BookingService, RoomService
 ?   ??? Interfaces/                # IHotelRepository, IBookingRepository, IRoomRepository
 ?
-??? HotelBooking.Infrastructure/   # Доступ до даних
+??? HotelBooking.Infrastructure/   # Р”РѕСЃС‚СѓРї РґРѕ РґР°РЅРёС…
 ?   ??? Data/                      # ApplicationDbContext, Migrations, IdentitySeeder
-?   ??? Repositories/              # EF Core реалізації репозиторіїв
+?   ??? Repositories/              # EF Core СЂРµР°Р»С–Р·Р°С†С–С— СЂРµРїРѕР·РёС‚РѕСЂС–С—РІ
 ?   ??? Dapper/                    # DapperConnectionFactory, BookingStatisticsQuery
 ?
-??? HotelBooking.Web/              # Презентаційний шар
+??? HotelBooking.Web/              # РџСЂРµР·РµРЅС‚Р°С†С–Р№РЅРёР№ С€Р°СЂ
     ??? Controllers/               # HomeController, HotelController, BookingController
     ??? Areas/Admin/Controllers/   # HotelsController, RoomsController, DashboardController
     ??? Views/                     # Razor Views
-    ??? ViewModels/                # ViewModel-класи
+    ??? ViewModels/                # ViewModel-РєР»Р°СЃРё
 ```
 
-## Ключові архітектурні рішення
+## РљР»СЋС‡РѕРІС– Р°СЂС…С–С‚РµРєС‚СѓСЂРЅС– СЂС–С€РµРЅРЅСЏ
 
-1. **Clean Architecture** — шари чітко розділені; залежності спрямовані до ядра
-2. **Repository Pattern** — інтерфейси в Application, реалізації в Infrastructure
-3. **DI-реєстрація через extension-методи** — `AddApplication()` / `AddInfrastructure()`
-4. **EF Core + Dapper** — EF для CRUD, Dapper для аналітичних запитів
-5. **CancellationToken** — підтримка скасування у всіх асинхронних операціях
-6. **Availability check** — перевірка доступності номерів через підрахунок активних бронювань
+1. **Clean Architecture** вЂ” С€Р°СЂРё С‡С–С‚РєРѕ СЂРѕР·РґС–Р»РµРЅС–; Р·Р°Р»РµР¶РЅРѕСЃС‚С– СЃРїСЂСЏРјРѕРІР°РЅС– РґРѕ СЏРґСЂР°
+2. **Repository Pattern** вЂ” С–РЅС‚РµСЂС„РµР№СЃРё РІ Application, СЂРµР°Р»С–Р·Р°С†С–С— РІ Infrastructure
+3. **DI-СЂРµС”СЃС‚СЂР°С†С–СЏ С‡РµСЂРµР· extension-РјРµС‚РѕРґРё** вЂ” `AddApplication()` / `AddInfrastructure()`
+4. **EF Core + Dapper** вЂ” EF РґР»СЏ CRUD, Dapper РґР»СЏ Р°РЅР°Р»С–С‚РёС‡РЅРёС… Р·Р°РїРёС‚С–РІ
+5. **CancellationToken** вЂ” РїС–РґС‚СЂРёРјРєР° СЃРєР°СЃСѓРІР°РЅРЅСЏ Сѓ РІСЃС–С… Р°СЃРёРЅС…СЂРѕРЅРЅРёС… РѕРїРµСЂР°С†С–СЏС…
+6. **Availability check** вЂ” РїРµСЂРµРІС–СЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚С– РЅРѕРјРµСЂС–РІ С‡РµСЂРµР· РїС–РґСЂР°С…СѓРЅРѕРє Р°РєС‚РёРІРЅРёС… Р±СЂРѕРЅСЋРІР°РЅСЊ
