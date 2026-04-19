@@ -97,18 +97,18 @@ namespace HotelBooking.Web.Controllers
                 return Unauthorized();
             }
 
-            var bookings = await _bookingService.GetByUserAsync(userId, ct);
+            var bookings = await _bookingService.GetBookingsByUserAsync(userId, ct);
 
             var viewModel = bookings
                 .Select(booking => new UserBookingItemViewModel
                 {
-                    HotelName = booking.Room.Hotel.Name,
-                    RoomName = booking.Room.Name,
+                    HotelName = booking.Room?.Hotel?.Name ?? string.Empty,
+                    RoomName = booking.Room?.Name ?? string.Empty,
                     CheckIn = booking.CheckIn,
                     CheckOut = booking.CheckOut,
                     Nights = booking.Nights,
                     TotalPrice = booking.TotalPrice,
-                    StatusName = booking.Status.Name
+                    StatusName = booking.Status.ToString()
                 })
                 .ToList();
 

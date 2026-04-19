@@ -13,20 +13,19 @@ public class StatisticsController : AdminControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(DateTime? from, DateTime? to)
+    public async Task<IActionResult> Index(DateOnly? from, DateOnly? to)
     {
-        var today = DateTime.Today;
+        var today = DateOnly.FromDateTime(DateTime.Today);
 
-        var fromDate = (from ?? today.AddDays(-7)).Date;
-        var toDate = (to ?? today).Date;
+        var fromDate = from ?? today.AddDays(-7);
+        var toDate = to ?? today;
 
         if (toDate < fromDate)
         {
             (fromDate, toDate) = (toDate, fromDate);
         }
 
-        var stats = await _bookingStatisticsQuery
-            .GetByDateAsync(fromDate, toDate);
+        var stats = await _bookingStatisticsQuery.GetByDateAsync(fromDate, toDate);
 
         return View(stats);
     }

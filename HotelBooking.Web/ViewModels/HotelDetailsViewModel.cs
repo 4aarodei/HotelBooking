@@ -5,14 +5,15 @@ namespace HotelBooking.Web.ViewModels;
 public class HotelDetailsViewModel
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = null!;
-    public string City { get; set; } = null!;
-    public string Address { get; set; } = null!;
+    public string Name { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public List<Room> Rooms { get; set; } = new();
-    public DateTime CheckIn { get; set; }
-    public DateTime CheckOut { get; set; }
-    public static HotelDetailsViewModel Create(Hotel hotel, DateTime checkIn, DateTime checkOut)
+    public DateOnly CheckIn { get; set; }
+    public DateOnly CheckOut { get; set; }
+
+    public static HotelDetailsViewModel Create(Hotel hotel, DateOnly checkIn, DateOnly checkOut)
     {
         return new HotelDetailsViewModel
         {

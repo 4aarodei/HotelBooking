@@ -5,9 +5,9 @@ public class Room
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public Guid HotelId { get; set; }
-    public Hotel Hotel { get; set; } = null!;
+    public Hotel? Hotel { get; set; }
 
-    public string Name { get; set; } = null!;
+    public required string Name { get; set; }
     public int Capacity { get; set; }
     public decimal PricePerNight { get; set; }
 

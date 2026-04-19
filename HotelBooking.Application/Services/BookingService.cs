@@ -1,3 +1,4 @@
+using HotelBooking.Application.Exceptions;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities.Bookings;
 
@@ -6,69 +7,62 @@ namespace HotelBooking.Application.Services;
 public class BookingService
 {
     private readonly IBookingRepository _bookingRepository;
-    private readonly IBookingStatusRepository _bookingStatusRepository;
     private readonly IRoomRepository _roomRepository;
 
     public BookingService(
         IBookingRepository bookingRepository,
-        IBookingStatusRepository bookingStatusRepository,
         IRoomRepository roomRepository)
     {
         _bookingRepository = bookingRepository;
-        _bookingStatusRepository = bookingStatusRepository;
         _roomRepository = roomRepository;
     }
 
-    public async Task<Booking> CreateAsync(string userId, Guid roomId, DateTime checkIn, DateTime checkOut, CancellationToken ct = default)
+    public async Task<Booking> CreateBookingAsync(string userId, Guid roomId, DateOnly checkIn, DateOnly checkOut, CancellationToken ct = default)
     {
-        checkIn = checkIn.Date;
-        checkOut = checkOut.Date;
-
         if (checkOut <= checkIn)
         {
-            throw new InvalidOperationException("Check-out має бути пізніше Check-in");
+            throw new BookingRuleViolationException("Check-out date must be later than check-in date.");
         }
 
         var room = await _roomRepository.GetByIdAsync(roomId, ct)
-                   ?? throw new InvalidOperationException("Кімната не знайдена");
+                   ?? throw new BookingRuleViolationException("Room was not found.");
 
         if (!room.IsActive)
         {
-            throw new InvalidOperationException("Кімната недоступна для бронювання");
+            throw new BookingRuleViolationException("Room is not available for booking.");
         }
 
-        var bookingsByRoom = await _bookingRepository.GetActiveBookingsCountByRoomAsync(
+        var bookingsByRoom = await _bookingRepository.GetOverlappingActiveBookingsCountByRoomAsync(
             new[] { roomId },
             checkIn,
             checkOut,
-            BookingStatusCodes.Cancelled,
             ct);
 
         if (bookingsByRoom.GetValueOrDefault(roomId, 0) >= room.Quantity)
         {
-            throw new InvalidOperationException("Кімната вже заброньована на ці дати");
+            throw new BookingRuleViolationException("Room is already fully booked for these dates.");
         }
 
-        var pendingStatus = await _bookingStatusRepository.GetByCodeAsync(BookingStatusCodes.Pending, ct)
-                            ?? throw new InvalidOperationException("Статус очікування не знайдено");
+        var nights = checkOut.DayNumber - checkIn.DayNumber;
 
         var booking = new Booking
         {
             UserId = userId,
             RoomId = roomId,
-            StatusId = pendingStatus.Id,
+            Status = BookingStatus.Pending,
             CheckIn = checkIn,
             CheckOut = checkOut,
             PricePerNightSnapshot = room.PricePerNight,
-            Nights = (checkOut - checkIn).Days,
-            TotalPrice = (checkOut - checkIn).Days * room.PricePerNight,
-            CreatedAtUtc = DateTime.UtcNow
+            Nights = nights,
+            TotalPrice = nights * room.PricePerNight,
+            CreatedAtUtc = DateTimeOffset.UtcNow
         };
 
         await _bookingRepository.AddAsync(booking, ct);
 
         return booking;
     }
-    public Task<List<Booking>> GetByUserAsync(string userId, CancellationToken ct = default) =>
+
+    public Task<List<Booking>> GetBookingsByUserAsync(string userId, CancellationToken ct = default) =>
         _bookingRepository.GetByUserAsync(userId, ct);
 }

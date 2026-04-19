@@ -1,10 +1,10 @@
+using HotelBooking.Application.Exceptions;
 using HotelBooking.Application.Services;
 using HotelBooking.Domain.Entities.Identity;
-using HotelBooking.ViewModels;
+using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using HotelBooking.Web.ViewModels;
 
 namespace HotelBooking.Web.Controllers;
 
@@ -20,10 +20,11 @@ public class BookingController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create(Guid roomId, DateTime? checkIn, DateTime? checkOut)
+    public IActionResult Create(Guid roomId, DateOnly? checkIn, DateOnly? checkOut)
     {
-        var resolvedCheckIn = (checkIn ?? DateTime.Today.AddDays(1)).Date;
-        var resolvedCheckOut = (checkOut ?? resolvedCheckIn.AddDays(1)).Date;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var resolvedCheckIn = checkIn ?? today.AddDays(1);
+        var resolvedCheckOut = checkOut ?? resolvedCheckIn.AddDays(1);
 
         if (resolvedCheckOut <= resolvedCheckIn)
         {
@@ -45,22 +46,26 @@ public class BookingController : Controller
     public async Task<IActionResult> Create(CreateBookingRequest request, CancellationToken ct)
     {
         if (!ModelState.IsValid)
+        {
             return View(request);
+        }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
+        {
             return Unauthorized();
+        }
 
         try
         {
-            await _bookingService.CreateAsync(
+            await _bookingService.CreateBookingAsync(
                 userId,
                 request.RoomId,
                 request.CheckIn,
                 request.CheckOut,
                 ct);
         }
-        catch (InvalidOperationException ex)
+        catch (BookingRuleViolationException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
             return View(request);

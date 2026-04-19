@@ -1,152 +1,78 @@
-<div align="center">
+# HotelBooking
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Hotel.png" alt="Hotel" width="80" />
+A web application for searching hotels and creating bookings, built with ASP.NET Core MVC and EF Core.
 
-#  HotelBooking
+## Current architecture (after refactor)
 
-**Сучасний веб-застосунок для пошуку та бронювання готелів**
+- **HotelBooking.Web**
+  - MVC controllers, Razor views, view models, Identity UI.
+- **HotelBooking.Application**
+  - Application services with real orchestration (`BookingService`, `HotelService`).
+  - Contracts for repositories and statistics queries.
+  - Domain-level booking rule exception (`BookingRuleViolationException`).
+- **HotelBooking.Infrastructure**
+  - EF Core `ApplicationDbContext`.
+  - Repository implementations.
+  - Dapper read model for booking statistics.
+- **HotelBooking.Core**
+  - Domain entities and booking status enum.
 
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-MVC-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://learn.microsoft.com/aspnet/core)
-[![Entity Framework](https://img.shields.io/badge/EF_Core-8.0-512BD4?style=for-the-badge&logo=nuget&logoColor=white)](https://learn.microsoft.com/ef/core/)
-[![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+## Key design decisions
 
-</div>
+1. **Removed thin proxy services**
+   - `RoomService` and `BookingStatusService` were removed because they only forwarded repository calls.
 
----
+2. **Kept only meaningful application orchestration**
+   - `BookingService` now owns booking rules: date validation, availability check, nights/total calculation, and initial status assignment.
+   - `HotelService` keeps availability orchestration for hotel search/details.
 
-## 📐 Архітектура
+3. **Simplified booking status model**
+   - Replaced duplicated identity status model (`StatusId` + external status code GUIDs) with a single `BookingStatus` enum on `Booking`.
 
-Проєкт побудований за принципами **Clean Architecture** — чіткий розподіл відповідальностей між шарами, залежності спрямовані до ядра домену.
+4. **Improved date/time modeling**
+   - Booking stay range uses `DateOnly` (`CheckIn`, `CheckOut`).
+   - Creation timestamp uses `DateTimeOffset` (`CreatedAtUtc`).
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    HotelBooking.Web                     │
-│         Controllers · Views · ViewModels · Areas        │
-├─────────────────────────────────────────────────────────┤
-│                HotelBooking.Infrastructure              │
-│      EF Core · Dapper · Repositories · Identity Seeder  │
-├─────────────────────────────────────────────────────────┤
-│                 HotelBooking.Application                │
-│         Services · Repository Interfaces · DTOs         │
-├─────────────────────────────────────────────────────────┤
-│                    HotelBooking.Core                    │
-│          POCO Entities · Business Rules · Roles         │
-└─────────────────────────────────────────────────────────┘
-```
+5. **Safer null handling**
+   - Replaced multiple `null!` property initializations in domain entities with `required` or nullable navigation references where appropriate.
 
-> **Core** не залежить від жодного іншого шару — це чисте доменне ядро без зовнішніх залежностей.
+6. **Exception handling for booking rules**
+   - Introduced `BookingRuleViolationException` and mapped it in MVC controller handling.
 
----
+7. **Automated booking rule tests**
+   - Added `HotelBooking.Tests` with unit tests for `BookingService` booking rules.
 
-## 🗂️ Структура проєкту
+## Booking rules covered in tests
 
-```
-HotelBooking/
-├── HotelBooking.Core/               # 🔵 Domain — сутності та бізнес-правила
-│   └── Entities/
-│       ├── Hotels/                  # Hotel, Room
-│       ├── Bookings/                # Booking, BookingStatus, BookingStatusCodes
-│       └── Identity/                # ApplicationUser, AppRoles
-│
-├── HotelBooking.Application/        # 🟢 Application — бізнес-логіка
-│   ├── Services/                    # HotelService, BookingService, RoomService
-│   └── Interfaces/                  # IHotelRepository, IBookingRepository, IRoomRepository
-│
-├── HotelBooking.Infrastructure/     # 🟡 Infrastructure — доступ до даних
-│   ├── Data/                        # ApplicationDbContext, Migrations, IdentitySeeder
-│   ├── Repositories/                # EF Core реалізації репозиторіїв
-│   └── Dapper/                      # DapperConnectionFactory, BookingStatisticsQuery
-│
-└── HotelBooking.Web/                # 🔴 Presentation — UI та API
-    ├── Controllers/                  # HomeController, HotelController, BookingController
-    ├── Areas/Admin/Controllers/      # HotelsController, RoomsController, DashboardController
-    ├── Views/                        # Razor Views
-    └── ViewModels/                   # ViewModel-класи
-```
+- check-out must be later than check-in
+- room must exist
+- room must be active
+- room capacity must not be exceeded for overlapping dates
+- successful booking must set pending status, nights, and total price correctly
 
----
+## Run locally
 
-## ✨ Функціональність
+### Prerequisites
 
-| Можливість | Опис |
-|---|---|
-| 🔍 **Пошук готелів** | Фільтрація за містом та датами, перевірка доступності в реальному часі |
-| 📅 **Бронювання** | Створення бронювань з валідацією доступності та снепшотом ціни |
-| 🔐 **Автентифікація** | ASP.NET Identity з роллю `User`, `Admin`, `SuperAdmin` |
-| 🛠️ **Адмін-панель** | Area `Admin` — повний CRUD для готелів та номерів |
-| 📊 **Статистика** | Dapper-запити для агрегації та аналітики бронювань |
-| 🌱 **Auto Seeding** | Автоматичне створення ролей та SuperAdmin у Development |
+- .NET 8 SDK
+- SQL Server / LocalDB
 
----
-
-## 🗺️ Предметна область
-
-```
-Hotel ──────┐
-            │ 1 : many
-            ▼
-           Room ────┐
-                    │ 1 : many
-                    ▼
-                 Booking ──────► BookingStatus  (Pending / Confirmed / Cancelled)
-                    │
-                    └──────────► ApplicationUser
-```
-
----
-
-## 🛠️ Технологічний стек
-
-| Шар | Технології |
-|---|---|
-| **Web** | ASP.NET Core 8 MVC, Razor Views, Bootstrap 5.3 |
-| **Application** | Service Layer (HotelService, BookingService, RoomService) |
-| **Infrastructure** | Entity Framework Core 8, Dapper, SQL Server, ASP.NET Identity |
-| **Domain** | POCO Entities (Hotel, Room, Booking, BookingStatus, ApplicationUser) |
-
----
-
-## ⚙️ Ключові архітектурні рішення
-
-**Clean Architecture** — шари чітко розділені; залежності спрямовані виключно до ядра домену.
-
-**Repository Pattern** — інтерфейси визначені в `Application`, реалізації — в `Infrastructure`. Це дозволяє легко замінити джерело даних без змін у бізнес-логіці.
-
-**EF Core + Dapper** — EF Core для стандартних CRUD-операцій, Dapper для складних аналітичних запитів, де важлива продуктивність.
-
-**DI через extension-методи** — `AddApplication()` / `AddInfrastructure()` забезпечують чисту реєстрацію залежностей без "забруднення" `Program.cs`.
-
-**CancellationToken** — підтримка скасування у всіх асинхронних операціях для коректної обробки запитів.
-
----
-
-## 🚀 Запуск локально
-
-### Вимоги
-
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- SQL Server або [LocalDB](https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb)
-
-### Кроки
-
-**1. Клонувати репозиторій**
+### Setup
 
 ```bash
 git clone https://github.com/4aarodei/HotelBooking.git
 cd HotelBooking
 ```
 
-**2. Налаштувати рядок підключення через User Secrets**
+Set connection string (example):
 
 ```bash
 cd HotelBooking.Web
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
-  "Server=(localdb)\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;MultipleActiveResultSets=true"
+  "Server=(localdb)\\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;MultipleActiveResultSets=true"
 ```
 
-**3. Застосувати міграції бази даних**
+Apply migrations:
 
 ```bash
 dotnet ef database update \
@@ -154,25 +80,14 @@ dotnet ef database update \
   --startup-project HotelBooking.Web
 ```
 
-**4. Запустити застосунок**
+Run app:
 
 ```bash
 dotnet run --project HotelBooking.Web
 ```
 
-> 🌱 При першому запуску в `Development`-середовищі **Seeder** автоматично створить ролі (`SuperAdmin`, `Admin`, `User`) та обліковий запис адміністратора.
+## Test command
 
-### 🔑 Тестовий доступ
-
+```bash
+dotnet test HotelBooking.Tests/HotelBooking.Tests.csproj
 ```
-Email:    admin@hotelbooking.local
-Password: Admin123!
-```
-
----
-
-<div align="center">
-
-Made with ❤️ using **ASP.NET Core 8** & **Clean Architecture**
-
-</div>
