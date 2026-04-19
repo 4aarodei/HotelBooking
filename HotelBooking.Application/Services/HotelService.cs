@@ -1,5 +1,4 @@
 using HotelBooking.Application.Interfaces;
-using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Domain.Entities.Hotels;
 
 namespace HotelBooking.Application.Services;
@@ -28,24 +27,20 @@ public class HotelService
             .ToList();
     }
 
-    public async Task<List<Hotel>> GetAvailableHotelsAsync(DateTime checkIn, DateTime checkOut, string? city, CancellationToken ct = default)
+    public async Task<List<Hotel>> GetAvailableHotelsAsync(DateOnly checkIn, DateOnly checkOut, string? city, CancellationToken ct = default)
     {
-        checkIn = checkIn.Date;
-        checkOut = checkOut.Date;
-
         var hotels = await _hotelRepository.GetWithActiveRoomsAsync(city, ct);
         var roomIds = hotels.SelectMany(h => h.Rooms).Select(r => r.Id).ToList();
 
-        if (!roomIds.Any())
+        if (roomIds.Count == 0)
         {
-            return new List<Hotel>();
+            return [];
         }
 
-        var bookingsByRoom = await _bookingRepository.GetActiveBookingsCountByRoomAsync(
+        var bookingsByRoom = await _bookingRepository.GetOverlappingActiveBookingsCountByRoomAsync(
             roomIds,
             checkIn,
             checkOut,
-            BookingStatusCodes.Cancelled,
             ct);
 
         foreach (var hotel in hotels)
@@ -58,11 +53,8 @@ public class HotelService
         return hotels.Where(h => h.Rooms.Any()).ToList();
     }
 
-    public async Task<Hotel?> GetByIdWithAvailabilityAsync(Guid id, DateTime checkIn, DateTime checkOut, CancellationToken ct = default)
+    public async Task<Hotel?> GetByIdWithAvailabilityAsync(Guid id, DateOnly checkIn, DateOnly checkOut, CancellationToken ct = default)
     {
-        checkIn = checkIn.Date;
-        checkOut = checkOut.Date;
-
         var hotel = await _hotelRepository.GetWithRoomsByIdAsync(id, ct);
         if (hotel is null)
         {
@@ -70,11 +62,10 @@ public class HotelService
         }
 
         var roomIds = hotel.Rooms.Select(r => r.Id).ToList();
-        var bookingsByRoom = await _bookingRepository.GetActiveBookingsCountByRoomAsync(
+        var bookingsByRoom = await _bookingRepository.GetOverlappingActiveBookingsCountByRoomAsync(
             roomIds,
             checkIn,
             checkOut,
-            BookingStatusCodes.Cancelled,
             ct);
 
         hotel.Rooms = hotel.Rooms
@@ -83,18 +74,6 @@ public class HotelService
 
         return hotel;
     }
-
-    public Task<List<Hotel>> GetAllAsync(CancellationToken ct = default) =>
-        _hotelRepository.GetAllAsync(ct);
-
-    public Task<Hotel?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
-        _hotelRepository.GetByIdAsync(id, ct);
-
-    public Task AddAsync(Hotel hotel, CancellationToken ct = default) =>
-        _hotelRepository.AddAsync(hotel, ct);
-
-    public Task UpdateAsync(Hotel hotel, CancellationToken ct = default) =>
-        _hotelRepository.UpdateAsync(hotel, ct);
 
     public async Task<List<Hotel>> GetFeaturedAsync(int count, CancellationToken ct = default)
     {

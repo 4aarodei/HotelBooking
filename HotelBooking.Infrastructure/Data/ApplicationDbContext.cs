@@ -14,7 +14,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Hotel> Hotels => Set<Hotel>();
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<Booking> Bookings => Set<Booking>();
-    public DbSet<BookingStatus> BookingStatuses => Set<BookingStatus>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -43,10 +42,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Booking>()
-            .HasOne(b => b.Status)
-            .WithMany()
-            .HasForeignKey(b => b.StatusId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .Property(b => b.Status)
+            .HasConversion<string>()
+            .HasMaxLength(32);
 
         builder.Entity<Booking>()
             .Property(b => b.PricePerNightSnapshot)
@@ -55,9 +53,5 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Booking>()
             .Property(b => b.TotalPrice)
             .HasPrecision(10, 2);
-
-        builder.Entity<BookingStatus>()
-            .HasIndex(x => x.BookingStatusCode)
-            .IsUnique();
     }
 }

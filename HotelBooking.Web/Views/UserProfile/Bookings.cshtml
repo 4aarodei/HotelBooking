@@ -1,41 +1,52 @@
-@model HotelBooking.ViewModels.UserProfileViewModels.UserProfileIndexModel
+@model IReadOnlyList<HotelBooking.Web.ViewModels.UserProfileViewModels.UserBookingItemViewModel>
 
 @{
     Layout = "~/Views/UserProfile/_Shared/_ProfileLayout.cshtml";
-    ViewData["Title"] = "Публічний профіль";
+    ViewData["Title"] = "My bookings";
 }
 
 <section class="card shadow-sm">
     <div class="card-body">
         <div class="section-heading mb-3">
             <div>
-                <p class="eyebrow mb-1">Облікові дані</p>
-                <h1 class="h4 mb-0">Публічний профіль</h1>
+                <p class="eyebrow mb-1">Bookings</p>
+                <h1 class="h4 mb-0">My bookings</h1>
             </div>
         </div>
-        <form asp-action="UpdatePublicProfile" method="post" class="profile-form row g-3">
-            @Html.AntiForgeryToken()
 
-            <div class="col-md-6">
-                <label asp-for="FirstName" class="form-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger small"></span>
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info mb-0">You do not have bookings yet.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Hotel</th>
+                            <th>Room</th>
+                            <th>Dates</th>
+                            <th>Nights</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.HotelName</td>
+                                <td>@item.RoomName</td>
+                                <td>@item.CheckIn.ToString("dd.MM.yyyy") — @item.CheckOut.ToString("dd.MM.yyyy")</td>
+                                <td>@item.Nights</td>
+                                <td>@item.TotalPrice.ToString("0.##") ₴</td>
+                                <td><span class="badge text-bg-secondary">@item.StatusName</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-
-            <div class="col-md-6">
-                <label asp-for="LastName" class="form-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger small"></span>
-            </div>
-
-            <div class="col-12">
-                <label class="form-label">Електронна пошта</label>
-                <input type="email" value="@User.Identity?.Name" class="form-control" disabled />
-            </div>
-
-            <div class="col-12 d-grid d-sm-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-            </div>
-        </form>
+        }
     </div>
 </section>

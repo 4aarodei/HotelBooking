@@ -1,11 +1,8 @@
-﻿namespace HotelBooking.ViewModels;
+namespace HotelBooking.ViewModels;
 
-    public class UserRolesVm
-    {
-        public string UserId { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public IList<string> Roles { get; set; } = new List<string>();
-        public List<string> AllRoles { get; set; } = new();
-    }
-
-
+public class UserRolesVm
+{
+    public string UserId { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public List<string> Roles { get; set; } = new();
+}

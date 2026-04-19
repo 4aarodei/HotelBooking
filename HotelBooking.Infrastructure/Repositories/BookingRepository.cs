@@ -14,12 +14,12 @@ public class BookingRepository : IBookingRepository
         _context = context;
     }
 
-    public async Task<Dictionary<Guid, int>> GetActiveBookingsCountByRoomAsync(IEnumerable<Guid> roomIds, DateTime checkIn, DateTime checkOut, Guid cancelledStatusCode, CancellationToken ct)
+    public async Task<Dictionary<Guid, int>> GetOverlappingActiveBookingsCountByRoomAsync(IEnumerable<Guid> roomIds, DateOnly checkIn, DateOnly checkOut, CancellationToken ct)
     {
         return await _context.Bookings
             .Where(b =>
                 roomIds.Contains(b.RoomId) &&
-                b.Status.BookingStatusCode != cancelledStatusCode &&
+                b.Status != BookingStatus.Cancelled &&
                 b.CheckIn < checkOut &&
                 b.CheckOut > checkIn)
             .GroupBy(b => b.RoomId)
@@ -37,8 +37,7 @@ public class BookingRepository : IBookingRepository
     {
         return await _context.Bookings
             .Include(b => b.Room)
-            .ThenInclude(r => r.Hotel)
-            .Include(b => b.Status)
+            .ThenInclude(r => r!.Hotel)
             .AsNoTracking()
             .Where(b => b.UserId == userId)
             .OrderByDescending(b => b.CreatedAtUtc)

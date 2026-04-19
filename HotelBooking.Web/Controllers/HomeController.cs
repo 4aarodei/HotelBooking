@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using HotelBooking.Application.Services;
-using HotelBooking.Domain.Entities;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 

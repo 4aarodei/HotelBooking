@@ -1,5 +1,4 @@
 using HotelBooking.Application.Services;
-using HotelBooking.ViewModels;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +12,9 @@ public class HotelController : Controller
     {
         _hotelService = hotelService;
     }
+
     [HttpGet]
-    public async Task<IActionResult> Index(string? city, DateTime? checkIn, DateTime? checkOut)
+    public async Task<IActionResult> Index(string? city, DateOnly? checkIn, DateOnly? checkOut)
     {
         var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
 
@@ -27,7 +27,7 @@ public class HotelController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(Guid hotelId, DateTime? checkIn, DateTime? checkOut)
+    public async Task<IActionResult> Details(Guid hotelId, DateOnly? checkIn, DateOnly? checkOut)
     {
         var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
         var hotel = await _hotelService.GetByIdWithAvailabilityAsync(hotelId, checkInDate, checkOutDate);
@@ -42,10 +42,11 @@ public class HotelController : Controller
         return View(vm);
     }
 
-    private static (DateTime checkIn, DateTime checkOut) ResolveDateRange(DateTime? checkIn, DateTime? checkOut)
+    private static (DateOnly checkIn, DateOnly checkOut) ResolveDateRange(DateOnly? checkIn, DateOnly? checkOut)
     {
-        var resolvedCheckIn = (checkIn ?? DateTime.Today.AddDays(1)).Date;
-        var resolvedCheckOut = (checkOut ?? resolvedCheckIn.AddDays(1)).Date;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var resolvedCheckIn = checkIn ?? today.AddDays(1);
+        var resolvedCheckOut = checkOut ?? resolvedCheckIn.AddDays(1);
 
         if (resolvedCheckOut <= resolvedCheckIn)
         {

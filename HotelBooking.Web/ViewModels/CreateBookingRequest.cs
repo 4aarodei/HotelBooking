@@ -1,19 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelBooking.Web.ViewModels
 {
     public class CreateBookingRequest : IValidatableObject
     {
-        [Required(ErrorMessage = "Оберіть номер.")] public Guid RoomId { get; set; }
+        [Required(ErrorMessage = "Оберіть номер.")]
+        public Guid RoomId { get; set; }
 
         [Required(ErrorMessage = "Вкажіть дату заїзду.")]
         [DataType(DataType.Date)]
-        public DateTime CheckIn { get; set; }
+        public DateOnly CheckIn { get; set; }
 
         [Required(ErrorMessage = "Вкажіть дату виїзду.")]
         [DataType(DataType.Date)]
-        public DateTime CheckOut { get; set; }
-
+        public DateOnly CheckOut { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -24,6 +24,5 @@ namespace HotelBooking.Web.ViewModels
                     new[] { nameof(CheckOut) });
             }
         }
-
     }
 }

@@ -7,21 +7,20 @@ public class Booking
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string UserId { get; set; } = null!;
-    public ApplicationUser User { get; set; } = null!;
+    public required string UserId { get; set; }
+    public ApplicationUser? User { get; set; }
 
     public Guid RoomId { get; set; }
-    public Room Room { get; set; } = null!;
+    public Room? Room { get; set; }
 
-    public Guid StatusId { get; set; }
-    public BookingStatus Status { get; set; } = null!;
+    public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
-    public DateTime CheckIn { get; set; }
-    public DateTime CheckOut { get; set; }
+    public DateOnly CheckIn { get; set; }
+    public DateOnly CheckOut { get; set; }
 
     public decimal PricePerNightSnapshot { get; set; }
     public int Nights { get; set; }
     public decimal TotalPrice { get; set; }
 
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 }

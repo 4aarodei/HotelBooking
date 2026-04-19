@@ -13,29 +13,20 @@ public class BookingStatisticsQuery : IBookingStatisticsQuery
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<List<BookingStatsDto>> GetByDateAsync(DateTime from, DateTime to)
+    public async Task<List<BookingStatsDto>> GetByDateAsync(DateOnly from, DateOnly to)
     {
-        const string sql = """
+        const string sql = @"
     SELECT
-        CAST(b.CheckIn AS date) AS [Date],
-        COUNT(*) AS BookingsCount
+        b.CheckIn AS [Date],
+        COUNT(*)  AS [BookingsCount]
     FROM Bookings b
     WHERE b.CheckIn >= @From
-      AND b.CheckIn < DATEADD(day, 1, @To)
-    GROUP BY CAST(b.CheckIn AS date)
-    ORDER BY [Date];
-    """;
+      AND b.CheckIn <= @To
+    GROUP BY b.CheckIn
+    ORDER BY [Date];";
 
-        using var connection = _connectionFactory.CreateConnection();
-
-        var result = await connection.QueryAsync<BookingStatsDto>(
-            sql,
-            new
-            {
-                From = from,
-                To = to
-            });
-
-        return result.ToList();
+        await using var connection = _connectionFactory.Create();
+        var rows = await connection.QueryAsync<BookingStatsDto>(sql, new { From = from, To = to });
+        return rows.ToList();
     }
 }

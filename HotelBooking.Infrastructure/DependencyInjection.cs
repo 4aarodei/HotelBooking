@@ -12,7 +12,6 @@ public static class DependencyInjection
         services.AddScoped<IHotelRepository, HotelRepository>();
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
-        services.AddScoped<IBookingStatusRepository, BookingStatusRepository>();
 
         services.AddScoped<DapperConnectionFactory>();
         services.AddScoped<IBookingStatisticsQuery, BookingStatisticsQuery>();
