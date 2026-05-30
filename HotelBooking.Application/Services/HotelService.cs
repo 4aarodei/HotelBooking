@@ -1,4 +1,5 @@
 using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Hotels;
 using HotelBooking.Domain.Entities.Hotels;
 
 namespace HotelBooking.Application.Services;
@@ -6,11 +7,13 @@ namespace HotelBooking.Application.Services;
 public class HotelService : IHotelService
 {
     private readonly IHotelRepository _hotelRepository;
+    private readonly IRoomRepository _roomRepository;
     private readonly IBookingRepository _bookingRepository;
 
-    public HotelService(IHotelRepository hotelRepository, IBookingRepository bookingRepository)
+    public HotelService(IHotelRepository hotelRepository, IRoomRepository roomRepository, IBookingRepository bookingRepository)
     {
         _hotelRepository = hotelRepository;
+        _roomRepository = roomRepository;
         _bookingRepository = bookingRepository;
     }
 
@@ -65,6 +68,26 @@ public class HotelService : IHotelService
             .ToList();
 
         return hotel;
+    }
+
+    public async Task<RoomAvailabilityDetails?> GetRoomByIdWithAvailabilityAsync(Guid roomId, DateOnly checkIn, DateOnly checkOut, CancellationToken ct = default)
+    {
+        var room = await _roomRepository.GetByIdWithHotelAndImagesAsync(roomId, ct);
+        if (room is null || !room.IsActive)
+        {
+            return null;
+        }
+
+        var bookingsByRoom = await _bookingRepository.GetOverlappingActiveBookingsCountByRoomAsync(
+            [room.Id],
+            checkIn,
+            checkOut,
+            ct);
+
+        var bookedQuantity = bookingsByRoom.GetValueOrDefault(room.Id, 0);
+        var availableQuantity = Math.Max(room.Quantity - bookedQuantity, 0);
+
+        return new RoomAvailabilityDetails(room, availableQuantity);
     }
 
     public async Task<List<Hotel>> GetFeaturedAsync(int count, CancellationToken ct = default)

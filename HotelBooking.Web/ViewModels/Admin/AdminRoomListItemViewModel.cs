@@ -9,4 +9,6 @@ public class AdminRoomListItemViewModel
     public decimal PricePerNight { get; init; }
     public bool IsActive { get; init; }
     public string? CoverImageUrl { get; init; }
+    public int? CoverImageWidth { get; init; }
+    public int? CoverImageHeight { get; init; }
 }

@@ -66,6 +66,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasMaxLength(150);
 
         builder.Entity<Room>()
+            .Property(r => r.Description)
+            .HasMaxLength(1200);
+
+        builder.Entity<Room>()
+            .Property(r => r.Amenities)
+            .HasMaxLength(1000);
+
+        builder.Entity<Room>()
             .HasIndex(r => new { r.HotelId, r.IsActive })
             .HasDatabaseName("IX_Rooms_HotelId_IsActive");
 

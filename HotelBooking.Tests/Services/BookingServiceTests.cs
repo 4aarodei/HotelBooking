@@ -84,6 +84,9 @@ public class BookingServiceTests
         public Task<Room?> GetByIdWithImagesAsync(Guid id, CancellationToken ct)
             => GetByIdAsync(id, ct);
 
+        public Task<Room?> GetByIdWithHotelAndImagesAsync(Guid id, CancellationToken ct)
+            => GetByIdAsync(id, ct);
+
         public Task AddAsync(Room room, CancellationToken ct)
             => Task.CompletedTask;
 

@@ -1,0 +1,156 @@
+@model HotelBooking.Web.ViewModels.RoomPageViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container py-5">
+    <section class="mb-4">
+        <a asp-controller="Hotel"
+           asp-action="Details"
+           asp-route-hotelId="@Model.HotelId"
+           asp-route-checkIn="@Model.CheckIn.ToString("yyyy-MM-dd")"
+           asp-route-checkOut="@Model.CheckOut.ToString("yyyy-MM-dd")"
+           class="btn btn-link px-0 text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Back to hotel
+        </a>
+        <p class="eyebrow mb-2">@Model.HotelName</p>
+        <h1 class="display-6 fw-bold mb-2">@Model.Name</h1>
+        <p class="text-muted mb-0">@Model.HotelCity &middot; @Model.HotelAddress</p>
+    </section>
+
+    @if (Model.Images.Any())
+    {
+        <section class="hotel-gallery pswp-gallery mb-4" id="room-gallery">
+            @for (var i = 0; i < Model.Images.Count; i++)
+            {
+                var image = Model.Images[i];
+                <a href="@image.Url"
+                   data-pswp-width="@(image.Width > 0 ? image.Width : 1600)"
+                   data-pswp-height="@(image.Height > 0 ? image.Height : 1000)"
+                   class="hotel-gallery-item @(i == 0 ? "hotel-gallery-main" : string.Empty)"
+                   target="_blank">
+                    <img src="@image.Url" alt="@image.AltText" width="@(image.Width > 0 ? image.Width : null)" height="@(image.Height > 0 ? image.Height : null)" loading="@(i == 0 ? "eager" : "lazy")" />
+                </a>
+            }
+        </section>
+    }
+    else
+    {
+        <section class="hotel-gallery-empty mb-4">
+            <i class="bi bi-door-open"></i>
+        </section>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <span class="tag-pill"><i class="bi bi-people"></i> @Model.Capacity guests</span>
+                        @if (Model.IncludesBreakfast)
+                        {
+                            <span class="tag-pill"><i class="bi bi-cup-hot"></i> Breakfast included</span>
+                        }
+                        @if (Model.HasPrivateBathroom)
+                        {
+                            <span class="tag-pill"><i class="bi bi-droplet"></i> Private bathroom</span>
+                        }
+                        @if (Model.HasSaunaAccess)
+                        {
+                            <span class="tag-pill"><i class="bi bi-thermometer-sun"></i> Sauna access</span>
+                        }
+                        @if (Model.HasBalcony)
+                        {
+                            <span class="tag-pill"><i class="bi bi-brightness-high"></i> Balcony</span>
+                        }
+                        @if (Model.HasWorkspace)
+                        {
+                            <span class="tag-pill"><i class="bi bi-laptop"></i> Workspace</span>
+                        }
+                        @if (Model.HasAirConditioning)
+                        {
+                            <span class="tag-pill"><i class="bi bi-wind"></i> Air conditioning</span>
+                        }
+                    </div>
+
+                    <h2 class="h5 mb-3">Room details</h2>
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p>@Model.Description</p>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            Description is not available yet.
+                        </div>
+                    }
+
+                    @if (Model.Amenities.Any())
+                    {
+                        <h2 class="h5 mt-4 mb-3">Amenities</h2>
+                        <div class="row row-cols-1 row-cols-sm-2 g-2">
+                            @foreach (var amenity in Model.Amenities)
+                            {
+                                <div class="col">
+                                    <div class="room-meta"><i class="bi bi-check2-circle"></i> @amenity</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <aside class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body d-grid gap-3">
+                    <div>
+                        <span class="text-muted small d-block">Dates</span>
+                        <strong>@Model.CheckIn.ToString("dd.MM.yyyy") - @Model.CheckOut.ToString("dd.MM.yyyy")</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Available rooms</span>
+                        <strong>@Model.AvailableQuantity of @Model.Quantity</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Price</span>
+                        <strong>@Model.PricePerNight.ToString("0.00") UAH / night</strong>
+                    </div>
+
+                    @if (Model.AvailableQuantity > 0)
+                    {
+                        <form asp-controller="Booking" asp-action="Create" method="get">
+                            <input type="hidden" name="roomId" value="@Model.Id" />
+                            <input type="hidden" name="checkIn" value="@Model.CheckIn.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="checkOut" value="@Model.CheckOut.ToString("yyyy-MM-dd")" />
+                            <button type="submit" class="btn btn-primary w-100">Book this room</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary w-100" disabled>Not available</button>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+}
+
+@section Scripts {
+    <script type="module">
+        import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js';
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallery: '.pswp-gallery',
+            children: 'a[data-pswp-width][data-pswp-height]',
+            pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.min.js')
+        });
+
+        lightbox.init();
+    </script>
+}

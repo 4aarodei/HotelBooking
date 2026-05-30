@@ -14,11 +14,11 @@
             {
                 var image = Model.Images[i];
                 <a href="@image.Url"
-                   data-pswp-width="1600"
-                   data-pswp-height="1000"
+                   data-pswp-width="@(image.Width > 0 ? image.Width : 1600)"
+                   data-pswp-height="@(image.Height > 0 ? image.Height : 1000)"
                    class="hotel-gallery-item @(i == 0 ? "hotel-gallery-main" : string.Empty)"
                    target="_blank">
-                    <img src="@image.Url" alt="@image.AltText" loading="@(i == 0 ? "eager" : "lazy")" />
+                    <img src="@image.Url" alt="@image.AltText" width="@(image.Width > 0 ? image.Width : null)" height="@(image.Height > 0 ? image.Height : null)" loading="@(i == 0 ? "eager" : "lazy")" />
                 </a>
             }
         </section>
@@ -69,15 +69,15 @@
                                 @foreach (var room in Model.Rooms)
                                 {
                                     <div class="col">
-                                        <article class="card h-100 shadow-sm room-card">
+                                        <article class="card h-100 shadow-sm room-card pswp-gallery">
                                             @if (!string.IsNullOrWhiteSpace(room.ImageUrl))
                                             {
                                                 <a href="@room.ImageUrl"
                                                    class="room-card-image pswp-gallery-item"
-                                                   data-pswp-width="1600"
-                                                   data-pswp-height="1000"
+                                                   data-pswp-width="@(room.ImageWidth.GetValueOrDefault() > 0 ? room.ImageWidth : 1600)"
+                                                   data-pswp-height="@(room.ImageHeight.GetValueOrDefault() > 0 ? room.ImageHeight : 1000)"
                                                    target="_blank">
-                                                    <img src="@room.ImageUrl" alt="@room.Name" loading="lazy" />
+                                                    <img src="@room.ImageUrl" alt="@room.Name" width="@(room.ImageWidth.GetValueOrDefault() > 0 ? room.ImageWidth : null)" height="@(room.ImageHeight.GetValueOrDefault() > 0 ? room.ImageHeight : null)" loading="lazy" />
                                                 </a>
                                             }
                                             else
@@ -92,23 +92,47 @@
                                                     <span class="badge text-bg-primary">@room.PricePerNight.ToString("0.00") UAH / night</span>
                                                 </div>
                                                 <div class="room-meta"><i class="bi bi-people"></i> @room.Capacity guests</div>
+                                                <div class="d-flex flex-wrap gap-2 small">
+                                                    @if (room.IncludesBreakfast)
+                                                    {
+                                                        <span class="tag-pill"><i class="bi bi-cup-hot"></i> Breakfast</span>
+                                                    }
+                                                    @if (room.HasPrivateBathroom)
+                                                    {
+                                                        <span class="tag-pill"><i class="bi bi-droplet"></i> Private bath</span>
+                                                    }
+                                                    @if (room.HasBalcony)
+                                                    {
+                                                        <span class="tag-pill"><i class="bi bi-brightness-high"></i> Balcony</span>
+                                                    }
+                                                </div>
                                                 @if (room.Images.Count > 1)
                                                 {
                                                     <div class="room-gallery-row pswp-gallery">
                                                         @foreach (var image in room.Images)
                                                         {
-                                                            <a href="@image.Url" data-pswp-width="1600" data-pswp-height="1000" target="_blank">
-                                                                <img src="@image.Url" alt="@image.AltText" loading="lazy" />
+                                                            <a href="@image.Url" data-pswp-width="@(image.Width > 0 ? image.Width : 1600)" data-pswp-height="@(image.Height > 0 ? image.Height : 1000)" target="_blank">
+                                                                <img src="@image.Url" alt="@image.AltText" width="@(image.Width > 0 ? image.Width : null)" height="@(image.Height > 0 ? image.Height : null)" loading="lazy" />
                                                             </a>
                                                         }
                                                     </div>
                                                 }
-                                                <form asp-controller="Booking" asp-action="Create" method="get" class="mt-auto">
-                                                    <input type="hidden" name="roomId" value="@room.Id" />
-                                                    <input type="hidden" name="checkIn" value="@Model.CheckIn.ToString("yyyy-MM-dd")" />
-                                                    <input type="hidden" name="checkOut" value="@Model.CheckOut.ToString("yyyy-MM-dd")" />
-                                                    <button type="submit" class="btn btn-primary w-100">Book now</button>
-                                                </form>
+                                                <div class="d-grid gap-2 mt-auto">
+                                                    <a asp-controller="Rooms"
+                                                       asp-action="Details"
+                                                       asp-route-roomId="@room.Id"
+                                                       asp-route-checkIn="@Model.CheckIn.ToString("yyyy-MM-dd")"
+                                                       asp-route-checkOut="@Model.CheckOut.ToString("yyyy-MM-dd")"
+                                                       class="btn btn-outline-primary">
+                                                        View details
+                                                    </a>
+                                                    <form asp-controller="Booking" asp-action="Create" method="get">
+                                                        <input type="hidden" name="roomId" value="@room.Id" />
+                                                        <input type="hidden" name="checkIn" value="@Model.CheckIn.ToString("yyyy-MM-dd")" />
+                                                        <input type="hidden" name="checkOut" value="@Model.CheckOut.ToString("yyyy-MM-dd")" />
+                                                        <button type="submit" class="btn btn-primary w-100">Book now</button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </article>
                                     </div>
@@ -150,8 +174,8 @@
         import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js';
 
         const lightbox = new PhotoSwipeLightbox({
-            gallery: '.pswp-gallery, .room-card',
-            children: 'a[href]',
+            gallery: '.pswp-gallery',
+            children: 'a[data-pswp-width][data-pswp-height]',
             pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.min.js')
         });
 

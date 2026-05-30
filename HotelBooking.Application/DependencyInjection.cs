@@ -11,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<IClock, SystemClock>();
         services.AddScoped<IHotelService, HotelService>();
+        services.AddScoped<IAdminHotelManagementService, AdminHotelManagementService>();
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IImageProcessor, ImageProcessor>();
 

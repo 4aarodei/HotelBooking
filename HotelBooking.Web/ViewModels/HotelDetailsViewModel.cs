@@ -29,29 +29,46 @@ public class HotelDetailsViewModel
                 .Select(i => new ImageViewModel
                 {
                     Url = i.Url,
-                    AltText = i.AltText ?? hotel.Name
+                    AltText = i.AltText ?? hotel.Name,
+                    Width = i.Width,
+                    Height = i.Height
                 })
                 .ToList(),
             Rooms = hotel.Rooms
                 .OrderBy(r => r.PricePerNight)
                 .ThenBy(r => r.Capacity)
-                .Select(r => new RoomDetailsViewModel
+                .Select(r =>
                 {
-                    Id = r.Id,
-                    Name = r.Name,
-                    ImageUrl = GetRoomCoverUrl(r),
-                    Images = r.Images
-                        .OrderByDescending(i => i.IsCover)
-                        .ThenBy(i => i.SortOrder)
-                        .Select(i => new ImageViewModel
-                        {
-                            Url = i.Url,
-                            AltText = i.AltText ?? r.Name
-                        })
-                        .ToList(),
-                    Capacity = r.Capacity,
-                    Quantity = r.Quantity,
-                    PricePerNight = r.PricePerNight
+                    var coverImage = GetRoomCoverImage(r);
+                    return new RoomDetailsViewModel
+                    {
+                        Id = r.Id,
+                        Name = r.Name,
+                        ImageUrl = coverImage?.Url,
+                        ImageWidth = coverImage?.Width,
+                        ImageHeight = coverImage?.Height,
+                        Images = r.Images
+                            .OrderByDescending(i => i.IsCover)
+                            .ThenBy(i => i.SortOrder)
+                            .Select(i => new ImageViewModel
+                            {
+                                Url = i.Url,
+                                AltText = i.AltText ?? r.Name,
+                                Width = i.Width,
+                                Height = i.Height
+                            })
+                            .ToList(),
+                        Capacity = r.Capacity,
+                        Quantity = r.Quantity,
+                        Description = r.Description ?? string.Empty,
+                        IncludesBreakfast = r.IncludesBreakfast,
+                        HasPrivateBathroom = r.HasPrivateBathroom,
+                        HasSaunaAccess = r.HasSaunaAccess,
+                        HasBalcony = r.HasBalcony,
+                        HasWorkspace = r.HasWorkspace,
+                        HasAirConditioning = r.HasAirConditioning,
+                        PricePerNight = r.PricePerNight
+                    };
                 })
                 .ToList(),
             CheckIn = checkIn,
@@ -59,12 +76,11 @@ public class HotelDetailsViewModel
         };
     }
 
-    private static string? GetRoomCoverUrl(Room room)
+    private static RoomImage? GetRoomCoverImage(Room room)
     {
         return room.Images
                    .OrderByDescending(i => i.IsCover)
                    .ThenBy(i => i.SortOrder)
-                   .Select(i => i.Url)
                    .FirstOrDefault();
     }
 }

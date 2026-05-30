@@ -114,7 +114,7 @@ Development image uploads use local disk by default:
 dotnet user-secrets set "ImageStorage:Provider" "Local"
 ```
 
-Production should use Azure Blob Storage and environment variables or managed secret storage:
+Production and staging must use Azure Blob Storage and environment variables or managed secret storage:
 
 ```bash
 ImageStorage__Provider=AzureBlob
@@ -125,6 +125,17 @@ ConnectionStrings__DefaultConnection=<azure-sql-connection-string>
 ```
 
 The app exposes `/health` for container and platform health probes. Do not rely on `wwwroot/uploads` as persistent production storage; the Docker image ignores uploaded files and expects durable media to live in Blob Storage.
+
+Outside `Development`, the app refuses to start unless:
+
+```bash
+ImageStorage__Provider=AzureBlob
+ImageStorage__AzureBlob__ConnectionString=<azure-storage-connection-string>
+ImageStorage__AzureBlob__ContainerName=<container-name>
+ImageStorage__AzureBlob__PublicBaseUrl=https://<cdn-or-storage-host>/<container-name>
+```
+
+This prevents accidental production deployment with local file storage.
 
 Apply migrations:
 
@@ -162,8 +173,46 @@ docker run --rm -p 8080:8080 \
   -e ConnectionStrings__DefaultConnection="<connection-string>" \
   -e ImageStorage__Provider=AzureBlob \
   -e ImageStorage__AzureBlob__ConnectionString="<storage-connection-string>" \
+  -e ImageStorage__AzureBlob__ContainerName="hotel-images" \
+  -e ImageStorage__AzureBlob__PublicBaseUrl="https://<cdn-or-storage-host>/hotel-images" \
   hotelbooking
 ```
+
+## Environment model
+
+- `Development`
+  - Runs with `dotnet run` as the primary workflow.
+  - May use LocalDB and `ImageStorage=Local`.
+  - Applies migrations and development seed data on startup.
+- `Staging`
+  - Intended for future Docker/Azure Container Apps deployment.
+  - Must use Azure SQL and `ImageStorage=AzureBlob`.
+  - Must receive secrets from environment variables or managed secret storage.
+- `Production`
+  - Intended for Docker + Azure Container Apps.
+  - Must use Azure SQL and `ImageStorage=AzureBlob`.
+  - Must not execute automatic DB migrations in web startup.
+
+## Azure Container Apps target
+
+Planned production deployment model:
+
+- Docker image built in CI
+- Image pushed to Azure Container Registry
+- Azure Container App updated to the new image revision
+- Azure SQL used as the application database
+- Azure Blob Storage used for hotel and room images
+- Optional next steps: Key Vault and Application Insights
+
+## Pre-Docker readiness checklist
+
+- `dotnet build` passes
+- `dotnet test` passes
+- `dotnet publish` passes
+- Production startup fails fast when Blob Storage is not configured
+- No production image flow depends on `wwwroot/uploads`
+- Public/admin views render room and hotel images from image metadata
+- Production DB migrations are planned as a separate deployment step
 
 ## CI
 

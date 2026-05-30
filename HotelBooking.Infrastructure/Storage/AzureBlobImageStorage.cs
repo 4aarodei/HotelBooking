@@ -49,7 +49,7 @@ public sealed class AzureBlobImageStorage : IImageStorage
 
     private async Task<StoredImage> SaveAsync(string prefix, ProcessedImage image, CancellationToken ct)
     {
-        await _container.CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: ct);
+        await _container.CreateIfNotExistsAsync(cancellationToken: ct);
 
         var blobName = $"{prefix}/{Guid.NewGuid():N}{image.FileExtension}";
         var blob = _container.GetBlobClient(blobName);

@@ -50,9 +50,15 @@ public static class DemoDataSeeder
                 {
                     Id = Guid.Parse("2ee99bb6-5d78-49df-9cac-23768c7df101"),
                     Name = "Standard Riverside",
+                    Description = "A calm double room for short city stays with a compact seating area and a partial river view.",
+                    Amenities = "Queen bed, Blackout curtains, Coffee station, Smart TV",
                     Capacity = 2,
                     PricePerNight = 3400m,
                     Quantity = 4,
+                    IncludesBreakfast = true,
+                    HasPrivateBathroom = true,
+                    HasWorkspace = true,
+                    HasAirConditioning = true,
                     IsActive = true,
                     Images =
                     [
@@ -75,9 +81,16 @@ public static class DemoDataSeeder
                 {
                     Id = Guid.Parse("661ab7ea-cc01-4f71-8372-25ac63cf7102"),
                     Name = "Deluxe Panorama",
+                    Description = "A larger room with open city views, a lounge corner, and upgraded bathroom amenities.",
+                    Amenities = "King bed, Espresso machine, Premium toiletries, Reading lights",
                     Capacity = 3,
                     PricePerNight = 4900m,
                     Quantity = 2,
+                    IncludesBreakfast = true,
+                    HasPrivateBathroom = true,
+                    HasBalcony = true,
+                    HasWorkspace = true,
+                    HasAirConditioning = true,
                     IsActive = true,
                     Images =
                     [
@@ -100,9 +113,16 @@ public static class DemoDataSeeder
                 {
                     Id = Guid.Parse("28ff5645-a1e2-49d9-b3d5-c1f347738103"),
                     Name = "Family Courtyard Suite",
+                    Description = "A family-friendly suite with separate sleeping zones, generous storage, and quiet courtyard-facing windows.",
+                    Amenities = "Two sleeping areas, Sofa bed, Mini fridge, Extra towels",
                     Capacity = 4,
                     PricePerNight = 6200m,
                     Quantity = 2,
+                    IncludesBreakfast = true,
+                    HasPrivateBathroom = true,
+                    HasSaunaAccess = true,
+                    HasWorkspace = true,
+                    HasAirConditioning = true,
                     IsActive = true,
                     Images =
                     [
