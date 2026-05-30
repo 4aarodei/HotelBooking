@@ -56,8 +56,14 @@ if (!hasSmtpEmail)
 {
     builder.Services.AddTransient<IEmailSender, LoggingEmailSender>();
 }
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.FromMinutes(5);
+});
+builder.Services.AddScoped<RoomDraftImageUploadService>();
 
 var imageStorageProvider = builder.Configuration.GetValue<string>("ImageStorage:Provider") ?? "Local";
+ValidateImageStorageConfiguration(builder.Environment, imageStorageProvider, builder.Configuration);
 if (imageStorageProvider.Equals("AzureBlob", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddScoped<IImageStorage, AzureBlobImageStorage>();
@@ -113,8 +119,48 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapControllers();
+
 app.MapRazorPages();
 
 app.MapHealthChecks("/health");
 
 app.Run();
+
+static void ValidateImageStorageConfiguration(IHostEnvironment environment, string imageStorageProvider, IConfiguration configuration)
+{
+    if (environment.IsDevelopment())
+    {
+        return;
+    }
+
+    if (!imageStorageProvider.Equals("AzureBlob", StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException(
+            $"Image storage provider '{imageStorageProvider}' is not allowed in {environment.EnvironmentName}. Use 'AzureBlob'.");
+    }
+
+    var connectionString = configuration["ImageStorage:AzureBlob:ConnectionString"];
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException(
+            "ImageStorage:AzureBlob:ConnectionString is required outside Development.");
+    }
+
+    var containerName = configuration["ImageStorage:AzureBlob:ContainerName"];
+    if (string.IsNullOrWhiteSpace(containerName))
+    {
+        throw new InvalidOperationException(
+            "ImageStorage:AzureBlob:ContainerName is required outside Development.");
+    }
+
+    var publicBaseUrl = configuration["ImageStorage:AzureBlob:PublicBaseUrl"];
+    if (string.IsNullOrWhiteSpace(publicBaseUrl) ||
+        !Uri.TryCreate(publicBaseUrl, UriKind.Absolute, out var parsedUri) ||
+        string.IsNullOrWhiteSpace(parsedUri.Scheme) ||
+        string.IsNullOrWhiteSpace(parsedUri.Host))
+    {
+        throw new InvalidOperationException(
+            "ImageStorage:AzureBlob:PublicBaseUrl must be a valid absolute URL outside Development.");
+    }
+}

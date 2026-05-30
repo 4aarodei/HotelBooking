@@ -48,7 +48,7 @@
                         <div class="card h-100 admin-room-card">
                             @if (!string.IsNullOrWhiteSpace(room.CoverImageUrl))
                             {
-                                <img src="@room.CoverImageUrl" class="admin-room-thumb" alt="@room.Name" loading="lazy" />
+                                <img src="@room.CoverImageUrl" class="admin-room-thumb" alt="@room.Name" width="@(room.CoverImageWidth > 0 ? room.CoverImageWidth : null)" height="@(room.CoverImageHeight > 0 ? room.CoverImageHeight : null)" loading="lazy" />
                             }
                             else
                             {

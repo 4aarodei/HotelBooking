@@ -22,7 +22,7 @@ public class AdminHotelFormViewModel
     [StringLength(1000, ErrorMessage = "Description must be shorter than 1000 characters")]
     public string? Description { get; set; }
 
-    public IFormFileCollection? Photos { get; set; }
+    public List<IFormFile> Photos { get; set; } = [];
     public List<Guid> RemoveImageIds { get; set; } = [];
     public IReadOnlyList<AdminImageViewModel> ExistingImages { get; set; } = [];
     public IReadOnlyList<AdminRoomListItemViewModel> Rooms { get; set; } = [];

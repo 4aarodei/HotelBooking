@@ -22,6 +22,7 @@
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="HotelId" />
                     <input type="hidden" asp-for="HotelName" />
+                    <input type="hidden" asp-for="DraftUploadId" />
 
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -51,9 +52,64 @@
                             </div>
                         </div>
                         <div class="col-12">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" rows="4" class="form-control" placeholder="Quiet room with river view, soft lighting, and a comfortable seating area."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Amenities" class="form-label">Additional amenities</label>
+                            <textarea asp-for="Amenities" rows="3" class="form-control" placeholder="King bed, coffee machine, blackout curtains, premium toiletries"></textarea>
+                            <div class="form-text">Use commas or new lines for room-specific advantages.</div>
+                            <span asp-validation-for="Amenities" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="row g-2">
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input asp-for="IncludesBreakfast" class="form-check-input" />
+                                        <label asp-for="IncludesBreakfast" class="form-check-label">Breakfast included</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input asp-for="HasPrivateBathroom" class="form-check-input" />
+                                        <label asp-for="HasPrivateBathroom" class="form-check-label">Private bathroom</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input asp-for="HasSaunaAccess" class="form-check-input" />
+                                        <label asp-for="HasSaunaAccess" class="form-check-label">Sauna access</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input asp-for="HasBalcony" class="form-check-input" />
+                                        <label asp-for="HasBalcony" class="form-check-label">Balcony</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input asp-for="HasWorkspace" class="form-check-input" />
+                                        <label asp-for="HasWorkspace" class="form-check-label">Workspace</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input asp-for="HasAirConditioning" class="form-check-input" />
+                                        <label asp-for="HasAirConditioning" class="form-check-label">Air conditioning</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
                             <label asp-for="Photos" class="form-label">Room photos</label>
-                            <input asp-for="Photos" type="file" accept="image/jpeg,image/png,image/webp" multiple class="form-control" />
+                            <input asp-for="Photos" id="room-photos-input" type="file" accept="image/jpeg,image/png,image/webp" multiple class="form-control" />
                             <div class="form-text">JPG, PNG, or WebP. Up to 5 MB per image.</div>
+                            @if (!isEdit)
+                            {
+                                <div id="room-upload-status" class="form-text mt-1"></div>
+                            }
                             <span asp-validation-for="Photos" class="text-danger"></span>
                         </div>
 
@@ -64,16 +120,16 @@
                                     @foreach (var image in Model.ExistingImages)
                                     {
                                         <label class="admin-image-tile">
-                                            <img src="@image.Url" alt="@image.AltText" loading="lazy" />
+                                            <img src="@image.Url" alt="@image.AltText" width="@(image.Width > 0 ? image.Width : null)" height="@(image.Height > 0 ? image.Height : null)" loading="lazy" />
                                             <span class="admin-image-meta">
                                                 @if (image.IsCover)
                                                 {
                                                     <span class="badge text-bg-primary">Cover</span>
                                                 }
-                                                <span class="form-check">
+                                                <label class="form-check admin-remove-check">
                                                     <input class="form-check-input" type="checkbox" name="RemoveImageIds" value="@image.Id" />
                                                     <span class="form-check-label">Remove</span>
-                                                </span>
+                                                </label>
                                             </span>
                                         </label>
                                     }
@@ -83,7 +139,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a asp-action="Edit" asp-route-id="@Model.HotelId" class="btn btn-link text-decoration-none">Cancel</a>
+                        <a asp-action="Edit" asp-route-id="@Model.HotelId" id="room-form-cancel" class="btn btn-link text-decoration-none">Cancel</a>
                         <button type="submit" class="btn btn-primary">@(isEdit ? "Update" : "Create")</button>
                     </div>
                 </form>
@@ -94,4 +150,76 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @if (!isEdit)
+    {
+        <script>
+            (() => {
+                const form = document.querySelector('form[enctype="multipart/form-data"]');
+                const fileInput = document.getElementById('room-photos-input');
+                const status = document.getElementById('room-upload-status');
+                const cancelLink = document.getElementById('room-form-cancel');
+                if (!form || !fileInput || !status || !cancelLink) return;
+
+                const tokenInput = form.querySelector('input[name="__RequestVerificationToken"]');
+                const draftInput = form.querySelector('input[name="DraftUploadId"]');
+                const hotelIdInput = form.querySelector('input[name="HotelId"]');
+                if (!tokenInput || !draftInput || !hotelIdInput) return;
+
+                const uploadUrl = '@Url.Action("UploadRoomDraftPhotos", "Hotels", new { area = "Admin" })';
+                const discardUrl = '@Url.Action("DiscardRoomDraftPhotos", "Hotels", new { area = "Admin" })';
+
+                fileInput.addEventListener('change', async () => {
+                    const files = fileInput.files;
+                    if (!files || files.length === 0) return;
+
+                    status.textContent = `Uploading ${files.length} file(s)...`;
+
+                    const data = new FormData();
+                    data.append('__RequestVerificationToken', tokenInput.value);
+                    data.append('hotelId', hotelIdInput.value);
+                    data.append('draftUploadId', draftInput.value);
+                    for (const file of files) {
+                        data.append('photos', file);
+                    }
+
+                    try {
+                        const response = await fetch(uploadUrl, {
+                            method: 'POST',
+                            body: data
+                        });
+
+                        if (!response.ok) {
+                            const err = await response.json().catch(() => null);
+                            status.textContent = err?.message ?? 'Upload failed.';
+                            return;
+                        }
+
+                        const payload = await response.json();
+                        status.textContent = `Uploaded ${payload.count ?? files.length} file(s).`;
+                        fileInput.value = '';
+                    } catch {
+                        status.textContent = 'Upload failed.';
+                    }
+                });
+
+                cancelLink.addEventListener('click', async (event) => {
+                    event.preventDefault();
+
+                    const data = new FormData();
+                    data.append('__RequestVerificationToken', tokenInput.value);
+                    data.append('draftUploadId', draftInput.value);
+
+                    try {
+                        await fetch(discardUrl, {
+                            method: 'POST',
+                            body: data
+                        });
+                    } catch {
+                    }
+
+                    window.location.href = cancelLink.href;
+                });
+            })();
+        </script>
+    }
 }

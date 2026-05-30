@@ -47,7 +47,7 @@
                                 <td style="width: 88px;">
                                     @if (!string.IsNullOrWhiteSpace(hotel.CoverImageUrl))
                                     {
-                                        <img src="@hotel.CoverImageUrl" class="admin-table-thumb" alt="@hotel.Name" loading="lazy" />
+                                        <img src="@hotel.CoverImageUrl" class="admin-table-thumb" alt="@hotel.Name" width="@(hotel.CoverImageWidth > 0 ? hotel.CoverImageWidth : null)" height="@(hotel.CoverImageHeight > 0 ? hotel.CoverImageHeight : null)" loading="lazy" />
                                     }
                                     else
                                     {

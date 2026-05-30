@@ -102,6 +102,8 @@
 }
 
 .admin-image-tile {
+    display: grid;
+    grid-template-rows: 180px auto;
     position: relative;
     overflow: hidden;
     border: 1px solid var(--border-soft);
@@ -111,7 +113,7 @@
 
 .admin-image-tile img {
     width: 100%;
-    aspect-ratio: 16 / 10;
+    height: 100%;
     object-fit: cover;
     display: block;
 }
@@ -122,6 +124,26 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.65rem;
+    border-top: 1px solid var(--border-soft);
+    background: rgba(16, 20, 41, 0.9);
+}
+
+.admin-remove-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-remove-check .form-check-input {
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.admin-remove-check .form-check-label {
+    line-height: 1.1;
 }
 
 .admin-room-card {
@@ -129,7 +151,7 @@
 }
 
 .admin-room-thumb {
-    aspect-ratio: 16 / 8;
+    aspect-ratio: 16 / 9;
     display: block;
 }
 

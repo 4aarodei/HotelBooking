@@ -1,36 +1,32 @@
 using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Hotels;
 using HotelBooking.Application.Media;
 using HotelBooking.Domain.Entities.Hotels;
 using HotelBooking.ViewModels.Admin;
+using HotelBooking.Web.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace HotelBooking.Web.Areas.Admin.Controllers;
 
 public class HotelsController : AdminControllerBase
 {
+    private readonly IAdminHotelManagementService _adminHotelManagementService;
     private readonly IHotelRepository _hotelRepository;
     private readonly IRoomRepository _roomRepository;
-    private readonly IImageProcessor _imageProcessor;
-    private readonly IImageStorage _imageStorage;
-    private readonly ImageUploadOptions _imageOptions;
-    private readonly ILogger<HotelsController> _logger;
+    private readonly RoomDraftImageUploadService _roomDraftImageUploadService;
 
     public HotelsController(
+        IAdminHotelManagementService adminHotelManagementService,
         IHotelRepository hotelRepository,
         IRoomRepository roomRepository,
-        IImageProcessor imageProcessor,
-        IImageStorage imageStorage,
-        IOptions<ImageUploadOptions> imageOptions,
-        ILogger<HotelsController> logger)
+        RoomDraftImageUploadService roomDraftImageUploadService)
     {
+        _adminHotelManagementService = adminHotelManagementService;
         _hotelRepository = hotelRepository;
         _roomRepository = roomRepository;
-        _imageProcessor = imageProcessor;
-        _imageStorage = imageStorage;
-        _imageOptions = imageOptions.Value;
-        _logger = logger;
+        _roomDraftImageUploadService = roomDraftImageUploadService;
     }
 
     [HttpGet]
@@ -45,7 +41,9 @@ public class HotelsController : AdminControllerBase
                 Name = h.Name,
                 City = h.City,
                 Address = h.Address,
-                CoverImageUrl = GetCoverImageUrl(h.Images)
+                CoverImageUrl = GetCoverImage(h.Images)?.Url,
+                CoverImageWidth = GetCoverImage(h.Images)?.Width,
+                CoverImageHeight = GetCoverImage(h.Images)?.Height
             })
             .ToList();
 
@@ -62,46 +60,30 @@ public class HotelsController : AdminControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AdminHotelFormViewModel model, CancellationToken ct)
     {
-        ValidateFileCount(model.Photos, nameof(model.Photos));
-
         if (!ModelState.IsValid)
         {
             return View(model);
         }
 
-        var hotel = new Hotel
-        {
-            Id = Guid.NewGuid(),
-            Name = model.Name?.Trim() ?? string.Empty,
-            City = model.City?.Trim() ?? string.Empty,
-            Address = model.Address?.Trim() ?? string.Empty,
-            Description = model.Description?.Trim()
-        };
-
-        var newImages = new List<HotelImage>();
         try
         {
-            await AddHotelImagesAsync(hotel, model.Photos, newImages, ct);
+            var hotelId = await _adminHotelManagementService.CreateHotelAsync(
+                new CreateHotelCommand(
+                    model.Name ?? string.Empty,
+                    model.City ?? string.Empty,
+                    model.Address ?? string.Empty,
+                    model.Description,
+                    ToImageUploadFiles(model.Photos)),
+                ct);
+
+            TempData["SuccessMessage"] = "Hotel created.";
+            return RedirectToAction(nameof(Edit), new { id = hotelId });
         }
         catch (ImageUploadValidationException ex)
         {
-            await CleanupHotelImagesAsync(newImages, ct);
             ModelState.AddModelError(nameof(model.Photos), ex.Message);
             return View(model);
         }
-
-        try
-        {
-            await _hotelRepository.AddAsync(hotel, ct);
-        }
-        catch
-        {
-            await CleanupHotelImagesAsync(newImages, ct);
-            throw;
-        }
-
-        TempData["SuccessMessage"] = "Hotel created.";
-        return RedirectToAction(nameof(Edit), new { id = hotel.Id });
     }
 
     [HttpGet]
@@ -120,8 +102,6 @@ public class HotelsController : AdminControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(AdminHotelFormViewModel model, CancellationToken ct)
     {
-        ValidateFileCount(model.Photos, nameof(model.Photos));
-
         if (model.Id is null)
         {
             return BadRequest();
@@ -138,37 +118,35 @@ public class HotelsController : AdminControllerBase
             return View(ApplyHotelInput(MapHotelForm(hotel), model));
         }
 
-        hotel.Name = model.Name?.Trim() ?? string.Empty;
-        hotel.City = model.City?.Trim() ?? string.Empty;
-        hotel.Address = model.Address?.Trim() ?? string.Empty;
-        hotel.Description = model.Description?.Trim();
-
-        var newImages = new List<HotelImage>();
         try
         {
-            await AddHotelImagesAsync(hotel, model.Photos, newImages, ct);
+            await _adminHotelManagementService.UpdateHotelAsync(
+                new UpdateHotelCommand(
+                    model.Id.Value,
+                    model.Name ?? string.Empty,
+                    model.City ?? string.Empty,
+                    model.Address ?? string.Empty,
+                    model.Description,
+                    ToImageUploadFiles(model.Photos),
+                    model.RemoveImageIds),
+                ct);
         }
         catch (ImageUploadValidationException ex)
         {
-            await CleanupHotelImagesAsync(newImages, ct);
             ModelState.AddModelError(nameof(model.Photos), ex.Message);
             return View(ApplyHotelInput(MapHotelForm(hotel), model));
         }
-
-        var removedImages = RemoveHotelImages(hotel, model.RemoveImageIds);
-        NormalizeHotelCovers(hotel.Images);
-
-        try
+        catch (DbUpdateConcurrencyException)
         {
-            await _hotelRepository.UpdateAsync(hotel, ct);
-        }
-        catch
-        {
-            await CleanupHotelImagesAsync(newImages, ct);
-            throw;
-        }
+            ModelState.AddModelError(string.Empty, "Hotel data was changed by another operation. Reload and try again.");
+            var latest = await _hotelRepository.GetByIdWithImagesAsync(model.Id.Value, ct);
+            if (latest is null)
+            {
+                return NotFound();
+            }
 
-        await DeleteHotelImagesAsync(removedImages, hotel.Id, ct);
+            return View(ApplyHotelInput(MapHotelForm(latest), model));
+        }
 
         TempData["SuccessMessage"] = "Hotel updated.";
         return RedirectToAction(nameof(Edit), new { id = hotel.Id });
@@ -187,6 +165,7 @@ public class HotelsController : AdminControllerBase
         {
             HotelId = hotel.Id,
             HotelName = hotel.Name,
+            DraftUploadId = Guid.NewGuid().ToString("N"),
             PricePerNight = 1000m,
             Quantity = 1,
             IsActive = true
@@ -197,8 +176,6 @@ public class HotelsController : AdminControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateRoom(AdminRoomFormViewModel model, CancellationToken ct)
     {
-        ValidateFileCount(model.Photos, nameof(model.Photos));
-
         var hotel = await _hotelRepository.GetByIdAsync(model.HotelId, ct);
         if (hotel is null)
         {
@@ -206,48 +183,96 @@ public class HotelsController : AdminControllerBase
         }
 
         model.HotelName = hotel.Name;
+        EnsureDraftUploadId(model);
 
         if (!ModelState.IsValid)
         {
             return View("RoomForm", model);
         }
 
-        var room = new Room
-        {
-            Id = Guid.NewGuid(),
-            HotelId = model.HotelId,
-            Name = model.Name?.Trim() ?? string.Empty,
-            Capacity = model.Capacity,
-            PricePerNight = model.PricePerNight,
-            Quantity = model.Quantity,
-            IsActive = model.IsActive
-        };
-
-        var newImages = new List<RoomImage>();
         try
         {
-            await AddRoomImagesAsync(room, model.Photos, newImages, ct);
-            NormalizeRoomCovers(room.Images);
+            var files = ToImageUploadFiles(model.Photos);
+            var draftFiles = await ReadDraftFilesAsync(model.DraftUploadId, ct);
+            files.AddRange(draftFiles);
+
+            await _adminHotelManagementService.CreateRoomAsync(
+                new CreateRoomCommand(
+                    model.HotelId,
+                    model.Name ?? string.Empty,
+                    model.Description,
+                    model.Amenities,
+                    model.Capacity,
+                    model.PricePerNight,
+                    model.Quantity,
+                    model.IncludesBreakfast,
+                    model.HasPrivateBathroom,
+                    model.HasSaunaAccess,
+                    model.HasBalcony,
+                    model.HasWorkspace,
+                    model.HasAirConditioning,
+                    model.IsActive,
+                    files),
+                ct);
+
+            await DeleteDraftFilesAsync(model.DraftUploadId, ct);
+            TempData["SuccessMessage"] = "Room created.";
+            return RedirectToAction(nameof(Edit), new { id = model.HotelId });
         }
         catch (ImageUploadValidationException ex)
         {
-            await CleanupRoomImagesAsync(newImages, ct);
             ModelState.AddModelError(nameof(model.Photos), ex.Message);
             return View("RoomForm", model);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadRoomDraftPhotos(Guid hotelId, string? draftUploadId, List<IFormFile>? photos, CancellationToken ct)
+    {
+        var hotelExists = await _hotelRepository.GetByIdAsync(hotelId, ct);
+        if (hotelExists is null)
+        {
+            return NotFound();
+        }
+
+        if (!TryParseDraftId(draftUploadId, out var draftId))
+        {
+            return BadRequest("Invalid draft id.");
+        }
+
+        var files = photos ?? [];
+        if (files.Count == 0)
+        {
+            return Ok(new { uploaded = Array.Empty<object>(), count = 0 });
         }
 
         try
         {
-            await _roomRepository.AddAsync(room, ct);
+            var uploaded = await _roomDraftImageUploadService.SaveDraftFilesAsync(draftId, files, ct);
+            return Ok(new
+            {
+                uploaded = uploaded.Select(x => new { fileName = x.FileName, url = x.Url }),
+                count = uploaded.Count
+            });
         }
-        catch
+        catch (ImageUploadValidationException ex)
         {
-            await CleanupRoomImagesAsync(newImages, ct);
-            throw;
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DiscardRoomDraftPhotos(string? draftUploadId, CancellationToken ct)
+    {
+        if (!TryParseDraftId(draftUploadId, out var draftId))
+        {
+            return Ok();
         }
 
-        TempData["SuccessMessage"] = "Room created.";
-        return RedirectToAction(nameof(Edit), new { id = model.HotelId });
+        await _roomDraftImageUploadService.DeleteDraftAsync(draftId, ct);
+        return Ok();
     }
 
     [HttpGet]
@@ -272,8 +297,6 @@ public class HotelsController : AdminControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditRoom(AdminRoomFormViewModel model, CancellationToken ct)
     {
-        ValidateFileCount(model.Photos, nameof(model.Photos));
-
         if (model.Id is null)
         {
             return BadRequest();
@@ -299,38 +322,51 @@ public class HotelsController : AdminControllerBase
             return View("RoomForm", ApplyRoomInput(MapRoomForm(room, hotel.Name), model));
         }
 
-        room.Name = model.Name?.Trim() ?? string.Empty;
-        room.Capacity = model.Capacity;
-        room.PricePerNight = model.PricePerNight;
-        room.Quantity = model.Quantity;
-        room.IsActive = model.IsActive;
-
-        var newImages = new List<RoomImage>();
         try
         {
-            await AddRoomImagesAsync(room, model.Photos, newImages, ct);
+            await _adminHotelManagementService.UpdateRoomAsync(
+                new UpdateRoomCommand(
+                    model.Id.Value,
+                    model.Name ?? string.Empty,
+                    model.Description,
+                    model.Amenities,
+                    model.Capacity,
+                    model.PricePerNight,
+                    model.Quantity,
+                    model.IncludesBreakfast,
+                    model.HasPrivateBathroom,
+                    model.HasSaunaAccess,
+                    model.HasBalcony,
+                    model.HasWorkspace,
+                    model.HasAirConditioning,
+                    model.IsActive,
+                    ToImageUploadFiles(model.Photos),
+                    model.RemoveImageIds),
+                ct);
         }
         catch (ImageUploadValidationException ex)
         {
-            await CleanupRoomImagesAsync(newImages, ct);
             ModelState.AddModelError(nameof(model.Photos), ex.Message);
             return View("RoomForm", ApplyRoomInput(MapRoomForm(room, hotel.Name), model));
         }
-
-        var removedImages = RemoveRoomImages(room, model.RemoveImageIds);
-        NormalizeRoomCovers(room.Images);
-
-        try
+        catch (DbUpdateConcurrencyException)
         {
-            await _roomRepository.UpdateAsync(room, ct);
-        }
-        catch
-        {
-            await CleanupRoomImagesAsync(newImages, ct);
-            throw;
-        }
+            ModelState.AddModelError(string.Empty, "Room data was changed by another operation. Reload and try again.");
 
-        await DeleteRoomImagesAsync(removedImages, room.Id, ct);
+            var latestRoom = await _roomRepository.GetByIdWithImagesAsync(model.Id.Value, ct);
+            if (latestRoom is null)
+            {
+                return NotFound();
+            }
+
+            var latestHotel = await _hotelRepository.GetByIdAsync(latestRoom.HotelId, ct);
+            if (latestHotel is null)
+            {
+                return NotFound();
+            }
+
+            return View("RoomForm", ApplyRoomInput(MapRoomForm(latestRoom, latestHotel.Name), model));
+        }
 
         TempData["SuccessMessage"] = "Room updated.";
         return RedirectToAction(nameof(Edit), new { id = room.HotelId });
@@ -353,6 +389,8 @@ public class HotelsController : AdminControllerBase
                     Id = i.Id,
                     Url = i.Url,
                     AltText = i.AltText ?? hotel.Name,
+                    Width = i.Width,
+                    Height = i.Height,
                     IsCover = i.IsCover
                 })
                 .ToList(),
@@ -366,7 +404,9 @@ public class HotelsController : AdminControllerBase
                     Quantity = r.Quantity,
                     PricePerNight = r.PricePerNight,
                     IsActive = r.IsActive,
-                    CoverImageUrl = GetCoverImageUrl(r.Images)
+                    CoverImageUrl = GetCoverImage(r.Images)?.Url,
+                    CoverImageWidth = GetCoverImage(r.Images)?.Width,
+                    CoverImageHeight = GetCoverImage(r.Images)?.Height
                 })
                 .ToList()
         };
@@ -379,10 +419,19 @@ public class HotelsController : AdminControllerBase
             Id = room.Id,
             HotelId = room.HotelId,
             HotelName = hotelName,
+            DraftUploadId = string.Empty,
             Name = room.Name,
+            Description = room.Description,
+            Amenities = room.Amenities,
             Capacity = room.Capacity,
             PricePerNight = room.PricePerNight,
             Quantity = room.Quantity,
+            IncludesBreakfast = room.IncludesBreakfast,
+            HasPrivateBathroom = room.HasPrivateBathroom,
+            HasSaunaAccess = room.HasSaunaAccess,
+            HasBalcony = room.HasBalcony,
+            HasWorkspace = room.HasWorkspace,
+            HasAirConditioning = room.HasAirConditioning,
             IsActive = room.IsActive,
             ExistingImages = room.Images
                 .OrderByDescending(i => i.IsCover)
@@ -392,6 +441,8 @@ public class HotelsController : AdminControllerBase
                     Id = i.Id,
                     Url = i.Url,
                     AltText = i.AltText ?? room.Name,
+                    Width = i.Width,
+                    Height = i.Height,
                     IsCover = i.IsCover
                 })
                 .ToList()
@@ -410,209 +461,88 @@ public class HotelsController : AdminControllerBase
     private static AdminRoomFormViewModel ApplyRoomInput(AdminRoomFormViewModel target, AdminRoomFormViewModel source)
     {
         target.Name = source.Name;
+        target.DraftUploadId = source.DraftUploadId;
+        target.Description = source.Description;
+        target.Amenities = source.Amenities;
         target.Capacity = source.Capacity;
         target.PricePerNight = source.PricePerNight;
         target.Quantity = source.Quantity;
+        target.IncludesBreakfast = source.IncludesBreakfast;
+        target.HasPrivateBathroom = source.HasPrivateBathroom;
+        target.HasSaunaAccess = source.HasSaunaAccess;
+        target.HasBalcony = source.HasBalcony;
+        target.HasWorkspace = source.HasWorkspace;
+        target.HasAirConditioning = source.HasAirConditioning;
         target.IsActive = source.IsActive;
         return target;
     }
 
-    private async Task AddHotelImagesAsync(Hotel hotel, IFormFileCollection? files, List<HotelImage> addedImages, CancellationToken ct)
+    private static void EnsureDraftUploadId(AdminRoomFormViewModel model)
     {
-        if (files is null || files.Count == 0)
+        if (string.IsNullOrWhiteSpace(model.DraftUploadId) || !Guid.TryParse(model.DraftUploadId, out _))
+        {
+            model.DraftUploadId = Guid.NewGuid().ToString("N");
+        }
+    }
+
+    private static bool TryParseDraftId(string? value, out Guid draftId)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            draftId = Guid.Empty;
+            return false;
+        }
+
+        return Guid.TryParse(value, out draftId);
+    }
+
+    private async Task<List<ImageUploadFile>> ReadDraftFilesAsync(string? draftUploadId, CancellationToken ct)
+    {
+        if (!TryParseDraftId(draftUploadId, out var draftId))
+        {
+            return [];
+        }
+
+        var files = await _roomDraftImageUploadService.GetDraftAsUploadFilesAsync(draftId, ct);
+        return files.ToList();
+    }
+
+    private async Task DeleteDraftFilesAsync(string? draftUploadId, CancellationToken ct)
+    {
+        if (!TryParseDraftId(draftUploadId, out var draftId))
         {
             return;
         }
 
-        var sortOrder = hotel.Images.Count == 0 ? 0 : hotel.Images.Max(i => i.SortOrder) + 1;
-        foreach (var file in files.Where(f => f.Length > 0))
-        {
-            using var processed = await _imageProcessor.ProcessAsync(ToImageUploadFile(file), ct);
-            var stored = await _imageStorage.SaveHotelImageAsync(hotel.Id, processed, ct);
-            var image = new HotelImage
-            {
-                StorageKey = stored.StorageKey,
-                Url = stored.PublicUrl,
-                ContentType = stored.ContentType,
-                SizeBytes = stored.SizeBytes,
-                Width = stored.Width,
-                Height = stored.Height,
-                AltText = hotel.Name,
-                IsCover = hotel.Images.Count == 0,
-                SortOrder = sortOrder++
-            };
-
-            hotel.Images.Add(image);
-            addedImages.Add(image);
-        }
+        await _roomDraftImageUploadService.DeleteDraftAsync(draftId, ct);
     }
 
-    private async Task AddRoomImagesAsync(Room room, IFormFileCollection? files, List<RoomImage> addedImages, CancellationToken ct)
+    private static List<ImageUploadFile> ToImageUploadFiles(IEnumerable<IFormFile>? files)
     {
-        if (files is null || files.Count == 0)
-        {
-            return;
-        }
-
-        var sortOrder = room.Images.Count == 0 ? 0 : room.Images.Max(i => i.SortOrder) + 1;
-        foreach (var file in files.Where(f => f.Length > 0))
-        {
-            using var processed = await _imageProcessor.ProcessAsync(ToImageUploadFile(file), ct);
-            var stored = await _imageStorage.SaveRoomImageAsync(room.Id, processed, ct);
-            var image = new RoomImage
-            {
-                StorageKey = stored.StorageKey,
-                Url = stored.PublicUrl,
-                ContentType = stored.ContentType,
-                SizeBytes = stored.SizeBytes,
-                Width = stored.Width,
-                Height = stored.Height,
-                AltText = room.Name,
-                IsCover = room.Images.Count == 0,
-                SortOrder = sortOrder++
-            };
-
-            room.Images.Add(image);
-            addedImages.Add(image);
-        }
+        return files?
+            .Where(file => file.Length > 0)
+            .Select(file => new ImageUploadFile(
+                file.FileName,
+                file.ContentType,
+                file.Length,
+                file.OpenReadStream))
+            .ToList()
+            ?? [];
     }
 
-    private List<HotelImage> RemoveHotelImages(Hotel hotel, IEnumerable<Guid> imageIds)
-    {
-        var ids = imageIds.ToHashSet();
-        var removed = hotel.Images.Where(i => ids.Contains(i.Id)).ToList();
-        foreach (var image in removed)
-        {
-            hotel.Images.Remove(image);
-            _logger.LogInformation("Admin removed hotel image metadata. HotelId: {HotelId}, ImageId: {ImageId}, StorageKey: {StorageKey}",
-                hotel.Id,
-                image.Id,
-                image.StorageKey);
-        }
-
-        return removed;
-    }
-
-    private List<RoomImage> RemoveRoomImages(Room room, IEnumerable<Guid> imageIds)
-    {
-        var ids = imageIds.ToHashSet();
-        var removed = room.Images.Where(i => ids.Contains(i.Id)).ToList();
-        foreach (var image in removed)
-        {
-            room.Images.Remove(image);
-            _logger.LogInformation("Admin removed room image metadata. RoomId: {RoomId}, ImageId: {ImageId}, StorageKey: {StorageKey}",
-                room.Id,
-                image.Id,
-                image.StorageKey);
-        }
-
-        return removed;
-    }
-
-    private async Task CleanupHotelImagesAsync(IEnumerable<HotelImage> images, CancellationToken ct)
-    {
-        foreach (var image in images)
-        {
-            await DeleteStoredImageAsync(image.StorageKey, image.Url, "hotel-upload-cleanup", image.Id, ct);
-        }
-    }
-
-    private async Task CleanupRoomImagesAsync(IEnumerable<RoomImage> images, CancellationToken ct)
-    {
-        foreach (var image in images)
-        {
-            await DeleteStoredImageAsync(image.StorageKey, image.Url, "room-upload-cleanup", image.Id, ct);
-        }
-    }
-
-    private async Task DeleteHotelImagesAsync(IEnumerable<HotelImage> images, Guid hotelId, CancellationToken ct)
-    {
-        foreach (var image in images)
-        {
-            await DeleteStoredImageAsync(image.StorageKey, image.Url, $"hotel:{hotelId:N}", image.Id, ct);
-        }
-    }
-
-    private async Task DeleteRoomImagesAsync(IEnumerable<RoomImage> images, Guid roomId, CancellationToken ct)
-    {
-        foreach (var image in images)
-        {
-            await DeleteStoredImageAsync(image.StorageKey, image.Url, $"room:{roomId:N}", image.Id, ct);
-        }
-    }
-
-    private async Task DeleteStoredImageAsync(string storageKey, string publicUrl, string scope, Guid imageId, CancellationToken ct)
-    {
-        try
-        {
-            await _imageStorage.DeleteAsync(storageKey, publicUrl, ct);
-            _logger.LogInformation("Deleted image blob. Scope: {Scope}, ImageId: {ImageId}, StorageKey: {StorageKey}",
-                scope,
-                imageId,
-                storageKey);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Image blob delete failed and should be retried. Scope: {Scope}, ImageId: {ImageId}, StorageKey: {StorageKey}",
-                scope,
-                imageId,
-                storageKey);
-        }
-    }
-
-    private void ValidateFileCount(IFormFileCollection? files, string modelKey)
-    {
-        var count = files?.Count(f => f.Length > 0) ?? 0;
-        if (count > _imageOptions.MaxFilesPerUpload)
-        {
-            ModelState.AddModelError(modelKey, $"Upload at most {_imageOptions.MaxFilesPerUpload} images at a time.");
-        }
-    }
-
-    private static ImageUploadFile ToImageUploadFile(IFormFile file)
-    {
-        return new ImageUploadFile(
-            file.FileName,
-            file.ContentType,
-            file.Length,
-            file.OpenReadStream);
-    }
-
-    private static void NormalizeHotelCovers(ICollection<HotelImage> images)
-    {
-        var ordered = images.OrderBy(i => i.SortOrder).ToList();
-        for (var i = 0; i < ordered.Count; i++)
-        {
-            ordered[i].IsCover = i == 0;
-            ordered[i].SortOrder = i;
-        }
-    }
-
-    private static void NormalizeRoomCovers(ICollection<RoomImage> images)
-    {
-        var ordered = images.OrderBy(i => i.SortOrder).ToList();
-        for (var i = 0; i < ordered.Count; i++)
-        {
-            ordered[i].IsCover = i == 0;
-            ordered[i].SortOrder = i;
-        }
-    }
-
-    private static string? GetCoverImageUrl(IEnumerable<HotelImage> images)
+    private static HotelImage? GetCoverImage(IEnumerable<HotelImage> images)
     {
         return images
             .OrderByDescending(i => i.IsCover)
             .ThenBy(i => i.SortOrder)
-            .Select(i => i.Url)
             .FirstOrDefault();
     }
 
-    private static string? GetCoverImageUrl(IEnumerable<RoomImage> images)
+    private static RoomImage? GetCoverImage(IEnumerable<RoomImage> images)
     {
         return images
             .OrderByDescending(i => i.IsCover)
             .ThenBy(i => i.SortOrder)
-            .Select(i => i.Url)
             .FirstOrDefault();
     }
 }
