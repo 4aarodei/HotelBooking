@@ -22,7 +22,11 @@ public class UsersController : AdminControllerBase
     public async Task<IActionResult> Index()
     {
         var users = _userManager.Users.ToList();
-        var roles = _roleManager.Roles.Select(r => r.Name).ToList();
+        var roles = _roleManager.Roles
+            .Select(r => r.Name)
+            .Where(r => r != null)
+            .Cast<string>()
+            .ToList();
 
         var model = new List<UserRolesVm>();
 
@@ -32,7 +36,7 @@ public class UsersController : AdminControllerBase
             {
                 UserId = user.Id,
                 Email = user.Email!,
-                Roles = await _userManager.GetRolesAsync(user),
+                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
                 AllRoles = roles
             });
         }
@@ -44,14 +48,53 @@ public class UsersController : AdminControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateRole(string userId, string role)
     {
+        if (string.IsNullOrWhiteSpace(role) || !await _roleManager.RoleExistsAsync(role))
+        {
+            return BadRequest("Selected role does not exist.");
+        }
+
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null) return NotFound();
+        if (user == null)
+        {
+            return NotFound();
+        }
 
         var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Contains(AppRoles.SuperAdmin) && role != AppRoles.SuperAdmin)
+        {
+            var superAdmins = await _userManager.GetUsersInRoleAsync(AppRoles.SuperAdmin);
+            if (superAdmins.Count <= 1)
+            {
+                return BadRequest("Cannot remove the last SuperAdmin.");
+            }
+        }
 
-        await _userManager.RemoveFromRolesAsync(user, currentRoles);
-        await _userManager.AddToRoleAsync(user, role);
+        var rolesToRemove = currentRoles.Where(r => r != role).ToList();
+        if (rolesToRemove.Count > 0)
+        {
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+            if (!removeResult.Succeeded)
+            {
+                AddIdentityErrors(removeResult);
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        if (!currentRoles.Contains(role))
+        {
+            var addResult = await _userManager.AddToRoleAsync(user, role);
+            if (!addResult.Succeeded)
+            {
+                AddIdentityErrors(addResult);
+                return RedirectToAction(nameof(Index));
+            }
+        }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private void AddIdentityErrors(IdentityResult result)
+    {
+        TempData["ErrorMessage"] = string.Join(" ", result.Errors.Select(e => e.Description));
     }
 }

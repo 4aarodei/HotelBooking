@@ -2,23 +2,53 @@
 
 <div class="row g-3">
     <div class="col-md-6">
-        <label class="form-label">Назва</label>
-        <input asp-for="Name" class="form-control" placeholder="Приклад: Гранд Готель" />
+        <label asp-for="Name" class="form-label">Name</label>
+        <input asp-for="Name" class="form-control" placeholder="Riverfront Boutique Hotel" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
     <div class="col-md-6">
-        <label class="form-label">Місто</label>
-        <input asp-for="City" class="form-control" placeholder="Київ" />
+        <label asp-for="City" class="form-label">City</label>
+        <input asp-for="City" class="form-control" placeholder="Kyiv" />
         <span asp-validation-for="City" class="text-danger"></span>
     </div>
     <div class="col-12">
-        <label class="form-label">Адреса</label>
-        <input asp-for="Address" class="form-control" placeholder="Вул. Хрещатик, 1" />
+        <label asp-for="Address" class="form-label">Address</label>
+        <input asp-for="Address" class="form-control" placeholder="Naberezhno-Khreshchatytska St, 12" />
         <span asp-validation-for="Address" class="text-danger"></span>
     </div>
     <div class="col-12">
-        <label class="form-label">Опис</label>
-        <textarea asp-for="Description" rows="4" class="form-control" placeholder="Коротко про готель та особливості"></textarea>
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" rows="4" class="form-control" placeholder="Short hotel description"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
+    <div class="col-12">
+        <label asp-for="Photos" class="form-label">Hotel photos</label>
+        <input asp-for="Photos" type="file" accept="image/jpeg,image/png,image/webp" multiple class="form-control" />
+        <div class="form-text">JPG, PNG, or WebP. Up to 5 MB per image.</div>
+        <span asp-validation-for="Photos" class="text-danger"></span>
+    </div>
+
+    @if (Model.ExistingImages.Any())
+    {
+        <div class="col-12">
+            <div class="admin-gallery-grid">
+                @foreach (var image in Model.ExistingImages)
+                {
+                    <label class="admin-image-tile">
+                        <img src="@image.Url" alt="@image.AltText" loading="lazy" />
+                        <span class="admin-image-meta">
+                            @if (image.IsCover)
+                            {
+                                <span class="badge text-bg-primary">Cover</span>
+                            }
+                            <span class="form-check">
+                                <input class="form-check-input" type="checkbox" name="RemoveImageIds" value="@image.Id" />
+                                <span class="form-check-label">Remove</span>
+                            </span>
+                        </span>
+                    </label>
+                }
+            </div>
+        </div>
+    }
 </div>

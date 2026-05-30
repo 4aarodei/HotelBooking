@@ -1,4 +1,4 @@
-﻿namespace HotelBooking.Web.ViewModels.UserProfileViewModels;
+namespace HotelBooking.Web.ViewModels.UserProfileViewModels;
 
 public class UserBookingItemViewModel
 {

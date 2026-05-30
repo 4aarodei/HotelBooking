@@ -1,0 +1,170 @@
+.hotel-card {
+    overflow: hidden;
+}
+
+.hotel-card .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.hotel-card-image,
+.room-card-image,
+.admin-room-thumb,
+.admin-table-thumb {
+    width: 100%;
+    object-fit: cover;
+    background: var(--surface-strong);
+}
+
+.hotel-card-image {
+    aspect-ratio: 16 / 10;
+    display: block;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.room-card {
+    overflow: hidden;
+}
+
+.room-card-image {
+    aspect-ratio: 16 / 10;
+    display: block;
+}
+
+.room-card-image img,
+.hotel-gallery-item img,
+.room-gallery-row img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hotel-gallery {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-auto-rows: minmax(120px, 190px);
+    gap: 0.75rem;
+}
+
+.hotel-gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    background: var(--surface-strong);
+    min-height: 0;
+}
+
+.hotel-gallery-main {
+    grid-row: span 2;
+}
+
+.hotel-gallery-empty,
+.hotel-image-fallback,
+.admin-image-empty {
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    border: 1px solid var(--border-soft);
+    background: linear-gradient(135deg, rgba(154, 140, 255, 0.12), rgba(94, 183, 241, 0.08));
+}
+
+.hotel-gallery-empty {
+    min-height: 320px;
+    border-radius: var(--radius-md);
+}
+
+.hotel-gallery-empty i,
+.hotel-image-fallback i,
+.admin-image-empty i {
+    font-size: 2rem;
+}
+
+.room-gallery-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+}
+
+.room-gallery-row a {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+}
+
+.admin-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.85rem;
+}
+
+.admin-image-tile {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+}
+
+.admin-image-tile img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    display: block;
+}
+
+.admin-image-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem;
+}
+
+.admin-room-card {
+    overflow: hidden;
+}
+
+.admin-room-thumb {
+    aspect-ratio: 16 / 8;
+    display: block;
+}
+
+.admin-table-thumb {
+    width: 72px;
+    height: 48px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+}
+
+@media (max-width: 991px) {
+    .hotel-gallery {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: 150px;
+    }
+
+    .hotel-gallery-main {
+        grid-column: 1 / -1;
+        grid-row: span 2;
+    }
+}
+
+@media (max-width: 575px) {
+    .hotel-gallery {
+        display: flex;
+        gap: 0.65rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 0.25rem;
+    }
+
+    .hotel-gallery-item {
+        flex: 0 0 86%;
+        aspect-ratio: 16 / 11;
+        scroll-snap-align: start;
+    }
+}

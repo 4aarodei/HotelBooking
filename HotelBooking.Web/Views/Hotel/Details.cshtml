@@ -2,17 +2,40 @@
 
 <div class="container py-5">
     <section class="mb-4">
-        <p class="eyebrow mb-2">Готель</p>
+        <p class="eyebrow mb-2">Hotel</p>
         <h1 class="display-6 fw-bold mb-2">@Model.Name</h1>
         <p class="text-muted mb-0">@Model.City · @Model.Address</p>
     </section>
+
+    @if (Model.Images.Any())
+    {
+        <section class="hotel-gallery pswp-gallery mb-4" id="hotel-gallery">
+            @for (var i = 0; i < Model.Images.Count; i++)
+            {
+                var image = Model.Images[i];
+                <a href="@image.Url"
+                   data-pswp-width="1600"
+                   data-pswp-height="1000"
+                   class="hotel-gallery-item @(i == 0 ? "hotel-gallery-main" : string.Empty)"
+                   target="_blank">
+                    <img src="@image.Url" alt="@image.AltText" loading="@(i == 0 ? "eager" : "lazy")" />
+                </a>
+            }
+        </section>
+    }
+    else
+    {
+        <section class="hotel-gallery-empty mb-4">
+            <i class="bi bi-image"></i>
+        </section>
+    }
 
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="h5 mb-0">Про готель</h2>
+                        <h2 class="h5 mb-0">About this hotel</h2>
                         <span class="tag-pill"><i class="bi bi-geo-alt"></i> @Model.City</span>
                     </div>
                     @if (!string.IsNullOrWhiteSpace(Model.Description))
@@ -22,22 +45,22 @@
                     else
                     {
                         <div class="alert alert-info" role="alert">
-                            Опис для цього готелю поки що відсутній.
+                            Description is not available yet.
                         </div>
                     }
 
                     <div class="mt-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <h2 class="h5 mb-1">Доступні кімнати</h2>
-                                <div class="text-muted small">@Model.CheckIn.ToString("dd.MM.yyyy") — @Model.CheckOut.ToString("dd.MM.yyyy")</div>
+                                <h2 class="h5 mb-1">Available rooms</h2>
+                                <div class="text-muted small">@Model.CheckIn.ToString("dd.MM.yyyy") - @Model.CheckOut.ToString("dd.MM.yyyy")</div>
                             </div>
-                            <span class="text-muted">@Model.Rooms.Count пропозицій</span>
+                            <span class="text-muted">@Model.Rooms.Count offers</span>
                         </div>
                         @if (!Model.Rooms.Any())
                         {
                             <div class="alert alert-info" role="alert">
-                                Наразі немає доступних кімнат
+                                No rooms are available for the selected dates.
                             </div>
                         }
                         else
@@ -46,21 +69,48 @@
                                 @foreach (var room in Model.Rooms)
                                 {
                                     <div class="col">
-                                        <div class="card h-100 shadow-sm">
-                                            <div class="card-body d-flex flex-column gap-2">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <h3 class="h6 mb-1">@room.Name</h3>
-                                                    <span class="badge text-bg-primary">@room.PricePerNight.ToString("0.00") ₴ / ніч</span>
+                                        <article class="card h-100 shadow-sm room-card">
+                                            @if (!string.IsNullOrWhiteSpace(room.ImageUrl))
+                                            {
+                                                <a href="@room.ImageUrl"
+                                                   class="room-card-image pswp-gallery-item"
+                                                   data-pswp-width="1600"
+                                                   data-pswp-height="1000"
+                                                   target="_blank">
+                                                    <img src="@room.ImageUrl" alt="@room.Name" loading="lazy" />
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <div class="room-card-image hotel-image-fallback">
+                                                    <i class="bi bi-door-open"></i>
                                                 </div>
-                                                <div class="room-meta"><i class="bi bi-people"></i> @room.Capacity осіб</div>
+                                            }
+                                            <div class="card-body d-flex flex-column gap-2">
+                                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                                    <h3 class="h6 mb-1">@room.Name</h3>
+                                                    <span class="badge text-bg-primary">@room.PricePerNight.ToString("0.00") UAH / night</span>
+                                                </div>
+                                                <div class="room-meta"><i class="bi bi-people"></i> @room.Capacity guests</div>
+                                                @if (room.Images.Count > 1)
+                                                {
+                                                    <div class="room-gallery-row pswp-gallery">
+                                                        @foreach (var image in room.Images)
+                                                        {
+                                                            <a href="@image.Url" data-pswp-width="1600" data-pswp-height="1000" target="_blank">
+                                                                <img src="@image.Url" alt="@image.AltText" loading="lazy" />
+                                                            </a>
+                                                        }
+                                                    </div>
+                                                }
                                                 <form asp-controller="Booking" asp-action="Create" method="get" class="mt-auto">
                                                     <input type="hidden" name="roomId" value="@room.Id" />
                                                     <input type="hidden" name="checkIn" value="@Model.CheckIn.ToString("yyyy-MM-dd")" />
                                                     <input type="hidden" name="checkOut" value="@Model.CheckOut.ToString("yyyy-MM-dd")" />
-                                                    <button type="submit" class="btn btn-primary w-100">Забронювати</button>
+                                                    <button type="submit" class="btn btn-primary w-100">Book now</button>
                                                 </form>
                                             </div>
-                                        </div>
+                                        </article>
                                     </div>
                                 }
                             </div>
@@ -74,15 +124,15 @@
             <div class="card shadow-sm">
                 <div class="card-body d-grid gap-3">
                     <div>
-                        <span class="text-muted small d-block">Місто</span>
+                        <span class="text-muted small d-block">City</span>
                         <strong>@Model.City</strong>
                     </div>
                     <div>
-                        <span class="text-muted small d-block">Адреса</span>
+                        <span class="text-muted small d-block">Address</span>
                         <strong>@Model.Address</strong>
                     </div>
                     <div>
-                        <span class="text-muted small d-block">Доступних кімнат</span>
+                        <span class="text-muted small d-block">Available rooms</span>
                         <strong>@Model.Rooms.Count</strong>
                     </div>
                 </div>
@@ -90,3 +140,21 @@
         </aside>
     </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+}
+
+@section Scripts {
+    <script type="module">
+        import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js';
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallery: '.pswp-gallery, .room-card',
+            children: 'a[href]',
+            pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.min.js')
+        });
+
+        lightbox.init();
+    </script>
+}

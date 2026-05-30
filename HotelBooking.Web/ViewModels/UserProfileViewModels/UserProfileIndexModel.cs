@@ -1,5 +1,5 @@
-using HotelBooking.Domain.Entities.Identity;
 using System.ComponentModel.DataAnnotations;
+using HotelBooking.Domain.Entities.Identity;
 
 namespace HotelBooking.ViewModels.UserProfileViewModels
 {

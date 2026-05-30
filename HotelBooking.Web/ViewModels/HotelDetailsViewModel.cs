@@ -9,7 +9,8 @@ public class HotelDetailsViewModel
     public string City { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public List<Room> Rooms { get; set; } = new();
+    public List<ImageViewModel> Images { get; set; } = new();
+    public List<RoomDetailsViewModel> Rooms { get; set; } = new();
     public DateOnly CheckIn { get; set; }
     public DateOnly CheckOut { get; set; }
 
@@ -22,9 +23,48 @@ public class HotelDetailsViewModel
             City = hotel.City,
             Address = hotel.Address,
             Description = hotel.Description ?? string.Empty,
-            Rooms = hotel.Rooms.ToList(),
+            Images = hotel.Images
+                .OrderByDescending(i => i.IsCover)
+                .ThenBy(i => i.SortOrder)
+                .Select(i => new ImageViewModel
+                {
+                    Url = i.Url,
+                    AltText = i.AltText ?? hotel.Name
+                })
+                .ToList(),
+            Rooms = hotel.Rooms
+                .OrderBy(r => r.PricePerNight)
+                .ThenBy(r => r.Capacity)
+                .Select(r => new RoomDetailsViewModel
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    ImageUrl = GetRoomCoverUrl(r),
+                    Images = r.Images
+                        .OrderByDescending(i => i.IsCover)
+                        .ThenBy(i => i.SortOrder)
+                        .Select(i => new ImageViewModel
+                        {
+                            Url = i.Url,
+                            AltText = i.AltText ?? r.Name
+                        })
+                        .ToList(),
+                    Capacity = r.Capacity,
+                    Quantity = r.Quantity,
+                    PricePerNight = r.PricePerNight
+                })
+                .ToList(),
             CheckIn = checkIn,
             CheckOut = checkOut
         };
+    }
+
+    private static string? GetRoomCoverUrl(Room room)
+    {
+        return room.Images
+                   .OrderByDescending(i => i.IsCover)
+                   .ThenBy(i => i.SortOrder)
+                   .Select(i => i.Url)
+                   .FirstOrDefault();
     }
 }

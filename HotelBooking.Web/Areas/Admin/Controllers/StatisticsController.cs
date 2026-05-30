@@ -6,16 +6,18 @@ namespace HotelBooking.Web.Areas.Admin.Controllers;
 public class StatisticsController : AdminControllerBase
 {
     private readonly IBookingStatisticsQuery _bookingStatisticsQuery;
+    private readonly IClock _clock;
 
-    public StatisticsController(IBookingStatisticsQuery bookingStatisticsQuery)
+    public StatisticsController(IBookingStatisticsQuery bookingStatisticsQuery, IClock clock)
     {
         _bookingStatisticsQuery = bookingStatisticsQuery;
+        _clock = clock;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index(DateOnly? from, DateOnly? to)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = _clock.Today;
 
         var fromDate = from ?? today.AddDays(-7);
         var toDate = to ?? today;

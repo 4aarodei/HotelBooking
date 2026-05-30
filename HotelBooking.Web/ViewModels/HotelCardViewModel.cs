@@ -7,6 +7,7 @@ public class HotelCardViewModel
     public string Summary { get; set; } = string.Empty;
     public string PriceText { get; set; } = string.Empty;
     public string ActionText { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
     public string? CheckIn { get; set; }
     public string? CheckOut { get; set; }
 }
