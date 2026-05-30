@@ -14,4 +14,6 @@ public class Room
     public int Quantity { get; set; } = 1;
 
     public bool IsActive { get; set; } = true;
+
+    public ICollection<RoomImage> Images { get; set; } = new List<RoomImage>();
 }

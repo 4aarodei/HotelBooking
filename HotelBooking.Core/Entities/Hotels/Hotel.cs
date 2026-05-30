@@ -10,4 +10,5 @@ public class Hotel
     public string? Description { get; set; }
 
     public ICollection<Room> Rooms { get; set; } = new List<Room>();
+    public ICollection<HotelImage> Images { get; set; } = new List<HotelImage>();
 }

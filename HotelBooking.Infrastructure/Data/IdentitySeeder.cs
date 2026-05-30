@@ -1,5 +1,6 @@
 using HotelBooking.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -7,13 +8,13 @@ namespace HotelBooking.Infrastructure.Data;
 
 public static class IdentitySeeder
 {
-    private const string SuperAdminEmail = "admin@hotelbooking.local";
-    private const string SuperAdminPassword = "Admin123!";
+    private const string DefaultSuperAdminEmail = "admin@hotelbooking.local";
 
     public static async Task SeedAsync(IServiceProvider services)
     {
         var logger = services.GetRequiredService<ILoggerFactory>()
             .CreateLogger(nameof(IdentitySeeder));
+        var configuration = services.GetRequiredService<IConfiguration>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -32,23 +33,32 @@ public static class IdentitySeeder
             }
         }
 
-        var superAdmin = await userManager.FindByEmailAsync(SuperAdminEmail);
+        var superAdminEmail = configuration["AdminSeed:Email"] ?? DefaultSuperAdminEmail;
+        var superAdminPassword = configuration["AdminSeed:Password"];
+
+        var superAdmin = await userManager.FindByEmailAsync(superAdminEmail);
         if (superAdmin is null)
         {
+            if (string.IsNullOrWhiteSpace(superAdminPassword))
+            {
+                logger.LogWarning("SuperAdmin user was not seeded because AdminSeed:Password is not configured.");
+                return;
+            }
+
             superAdmin = new ApplicationUser
             {
-                UserName = SuperAdminEmail,
-                Email = SuperAdminEmail,
+                UserName = superAdminEmail,
+                Email = superAdminEmail,
                 EmailConfirmed = true,
                 FirstName = "Super",
                 LastName = "Admin"
             };
 
-            var createResult = await userManager.CreateAsync(superAdmin, SuperAdminPassword);
+            var createResult = await userManager.CreateAsync(superAdmin, superAdminPassword);
             if (createResult.Succeeded)
             {
                 await userManager.AddToRoleAsync(superAdmin, AppRoles.SuperAdmin);
-                logger.LogInformation("SuperAdmin seeded: {Email}", SuperAdminEmail);
+                logger.LogInformation("SuperAdmin seeded: {Email}", superAdminEmail);
             }
             else
             {

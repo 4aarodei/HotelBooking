@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using HotelBooking.Application.Services;
+using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.ViewModels.UserProfileViewModels;
 using HotelBooking.Web.ViewModels.UserProfileViewModels;
@@ -12,11 +12,11 @@ namespace HotelBooking.Web.Controllers
     [Authorize]
     public class UserProfileController : Controller
     {
-        private readonly BookingService _bookingService;
+        private readonly IBookingService _bookingService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public UserProfileController(BookingService bookingService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public UserProfileController(IBookingService bookingService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _bookingService = bookingService;
             _userManager = userManager;

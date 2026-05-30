@@ -1,3 +1,4 @@
+using System.Data;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Infrastructure.Data;
@@ -27,10 +28,29 @@ public class BookingRepository : IBookingRepository
             .ToDictionaryAsync(x => x.RoomId, x => x.Count, ct);
     }
 
-    public async Task AddAsync(Booking booking, CancellationToken ct)
+    public async Task<bool> TryAddIfAvailableAsync(Booking booking, int roomQuantity, CancellationToken ct)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+
+        var overlappingBookingsCount = await _context.Bookings
+            .Where(b =>
+                b.RoomId == booking.RoomId &&
+                b.Status != BookingStatus.Cancelled &&
+                b.CheckIn < booking.CheckOut &&
+                b.CheckOut > booking.CheckIn)
+            .CountAsync(ct);
+
+        if (overlappingBookingsCount >= roomQuantity)
+        {
+            await transaction.RollbackAsync(ct);
+            return false;
+        }
+
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
+
+        return true;
     }
 
     public async Task<List<Booking>> GetByUserAsync(string userId, CancellationToken ct)

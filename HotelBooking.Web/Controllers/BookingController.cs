@@ -1,10 +1,10 @@
+using System.Security.Claims;
 using HotelBooking.Application.Exceptions;
-using HotelBooking.Application.Services;
+using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace HotelBooking.Web.Controllers;
 
@@ -12,17 +12,19 @@ namespace HotelBooking.Web.Controllers;
 [Authorize(Roles = AppRoles.User)]
 public class BookingController : Controller
 {
-    private readonly BookingService _bookingService;
+    private readonly IBookingService _bookingService;
+    private readonly IClock _clock;
 
-    public BookingController(BookingService bookingService)
+    public BookingController(IBookingService bookingService, IClock clock)
     {
         _bookingService = bookingService;
+        _clock = clock;
     }
 
     [HttpGet]
     public IActionResult Create(Guid roomId, DateOnly? checkIn, DateOnly? checkOut)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = _clock.Today;
         var resolvedCheckIn = checkIn ?? today.AddDays(1);
         var resolvedCheckOut = checkOut ?? resolvedCheckIn.AddDays(1);
 

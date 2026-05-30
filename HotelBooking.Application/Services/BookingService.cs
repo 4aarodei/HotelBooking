@@ -4,17 +4,20 @@ using HotelBooking.Domain.Entities.Bookings;
 
 namespace HotelBooking.Application.Services;
 
-public class BookingService
+public class BookingService : IBookingService
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IRoomRepository _roomRepository;
+    private readonly IClock _clock;
 
     public BookingService(
         IBookingRepository bookingRepository,
-        IRoomRepository roomRepository)
+        IRoomRepository roomRepository,
+        IClock clock)
     {
         _bookingRepository = bookingRepository;
         _roomRepository = roomRepository;
+        _clock = clock;
     }
 
     public async Task<Booking> CreateBookingAsync(string userId, Guid roomId, DateOnly checkIn, DateOnly checkOut, CancellationToken ct = default)
@@ -32,13 +35,7 @@ public class BookingService
             throw new BookingRuleViolationException("Room is not available for booking.");
         }
 
-        var bookingsByRoom = await _bookingRepository.GetOverlappingActiveBookingsCountByRoomAsync(
-            new[] { roomId },
-            checkIn,
-            checkOut,
-            ct);
-
-        if (bookingsByRoom.GetValueOrDefault(roomId, 0) >= room.Quantity)
+        if (room.Quantity <= 0)
         {
             throw new BookingRuleViolationException("Room is already fully booked for these dates.");
         }
@@ -55,10 +52,14 @@ public class BookingService
             PricePerNightSnapshot = room.PricePerNight,
             Nights = nights,
             TotalPrice = nights * room.PricePerNight,
-            CreatedAtUtc = DateTimeOffset.UtcNow
+            CreatedAtUtc = _clock.UtcNow
         };
 
-        await _bookingRepository.AddAsync(booking, ct);
+        var created = await _bookingRepository.TryAddIfAvailableAsync(booking, room.Quantity, ct);
+        if (!created)
+        {
+            throw new BookingRuleViolationException("Room is already fully booked for these dates.");
+        }
 
         return booking;
     }

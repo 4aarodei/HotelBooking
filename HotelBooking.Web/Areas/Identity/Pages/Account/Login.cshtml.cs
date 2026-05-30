@@ -3,11 +3,11 @@
 #nullable disable
 
 using System.ComponentModel.DataAnnotations;
+using HotelBooking.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using HotelBooking.Domain.Entities.Identity;
 
 namespace HotelBooking.Areas.Identity.Pages.Account
 {

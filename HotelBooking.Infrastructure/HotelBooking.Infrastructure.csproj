@@ -7,8 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
 		<PackageReference Include="Dapper" Version="2.1.66" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
 
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22">
@@ -20,6 +21,10 @@
 	<ItemGroup>
 		<ProjectReference Include="../HotelBooking.Application/HotelBooking.Application.csproj" />
 		<ProjectReference Include="../HotelBooking.Core/HotelBooking.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Data\Migrations\" />
 	</ItemGroup>
 
 </Project>

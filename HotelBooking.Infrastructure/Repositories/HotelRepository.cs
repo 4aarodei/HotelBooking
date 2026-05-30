@@ -20,12 +20,15 @@ public class HotelRepository : IHotelRepository
 
         if (!string.IsNullOrWhiteSpace(city))
         {
-            var normalizedCity = city.ToLower();
-            hotelsQuery = hotelsQuery.Where(h => h.City.ToLower() == normalizedCity);
+            var normalizedCity = city.Trim();
+            hotelsQuery = hotelsQuery.Where(h => h.City == normalizedCity);
         }
 
         return await hotelsQuery
+            .Include(h => h.Images)
             .Include(h => h.Rooms.Where(r => r.IsActive))
+            .ThenInclude(r => r.Images)
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync(ct);
     }
@@ -33,14 +36,41 @@ public class HotelRepository : IHotelRepository
     public Task<Hotel?> GetWithRoomsByIdAsync(Guid id, CancellationToken ct)
     {
         return _context.Hotels
+            .Include(h => h.Images)
             .Include(h => h.Rooms.Where(r => r.IsActive))
+            .ThenInclude(r => r.Images)
+            .AsSplitQuery()
             .AsNoTracking()
             .FirstOrDefaultAsync(h => h.Id == id, ct);
+    }
+
+    public Task<List<string>> GetDistinctCitiesAsync(CancellationToken ct)
+    {
+        return _context.Hotels
+            .Where(h => h.City != string.Empty)
+            .Select(h => h.City.Trim())
+            .Distinct()
+            .OrderBy(city => city)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public Task<List<Hotel>> GetFeaturedAsync(int count, CancellationToken ct)
+    {
+        return _context.Hotels
+            .Include(h => h.Images)
+            .Include(h => h.Rooms.Where(r => r.IsActive))
+            .OrderBy(h => h.Name)
+            .Take(count)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 
     public async Task<List<Hotel>> GetAllAsync(CancellationToken ct)
     {
         return await _context.Hotels
+            .Include(h => h.Images)
             .OrderBy(h => h.Name)
             .AsNoTracking()
             .ToListAsync(ct);
@@ -49,6 +79,16 @@ public class HotelRepository : IHotelRepository
     public Task<Hotel?> GetByIdAsync(Guid id, CancellationToken ct)
     {
         return _context.Hotels.FirstOrDefaultAsync(h => h.Id == id, ct);
+    }
+
+    public Task<Hotel?> GetByIdWithImagesAsync(Guid id, CancellationToken ct)
+    {
+        return _context.Hotels
+            .Include(h => h.Images)
+            .Include(h => h.Rooms)
+            .ThenInclude(r => r.Images)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(h => h.Id == id, ct);
     }
 
     public async Task AddAsync(Hotel hotel, CancellationToken ct)

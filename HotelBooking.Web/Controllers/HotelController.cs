@@ -1,4 +1,4 @@
-using HotelBooking.Application.Services;
+using HotelBooking.Application.Interfaces;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,22 +6,24 @@ namespace HotelBooking.Web.Controllers;
 
 public class HotelController : Controller
 {
-    private readonly HotelService _hotelService;
+    private readonly IHotelService _hotelService;
+    private readonly IClock _clock;
 
-    public HotelController(HotelService hotelService)
+    public HotelController(IHotelService hotelService, IClock clock)
     {
         _hotelService = hotelService;
+        _clock = clock;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index(string? city, DateOnly? checkIn, DateOnly? checkOut)
     {
-        var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
+        var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut, _clock.Today);
 
         var hotels = await _hotelService.GetAvailableHotelsAsync(checkInDate, checkOutDate, city);
         var cities = await _hotelService.GetAvailableCitiesAsync();
 
-        var vm = HotelIndexViewModel.Create(hotels, city, checkInDate, checkOutDate, cities);
+        var vm = HotelIndexViewModel.Create(hotels, city, checkInDate, checkOutDate, cities, _clock.Today);
 
         return View(vm);
     }
@@ -29,7 +31,7 @@ public class HotelController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(Guid hotelId, DateOnly? checkIn, DateOnly? checkOut)
     {
-        var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut);
+        var (checkInDate, checkOutDate) = ResolveDateRange(checkIn, checkOut, _clock.Today);
         var hotel = await _hotelService.GetByIdWithAvailabilityAsync(hotelId, checkInDate, checkOutDate);
 
         if (hotel == null)
@@ -42,9 +44,8 @@ public class HotelController : Controller
         return View(vm);
     }
 
-    private static (DateOnly checkIn, DateOnly checkOut) ResolveDateRange(DateOnly? checkIn, DateOnly? checkOut)
+    private static (DateOnly checkIn, DateOnly checkOut) ResolveDateRange(DateOnly? checkIn, DateOnly? checkOut, DateOnly today)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
         var resolvedCheckIn = checkIn ?? today.AddDays(1);
         var resolvedCheckOut = checkOut ?? resolvedCheckIn.AddDays(1);
 
