@@ -11,11 +11,16 @@ public class UsersController : AdminControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public UsersController(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        SignInManager<ApplicationUser> signInManager)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _signInManager = signInManager;
     }
 
     [HttpGet]
@@ -88,6 +93,23 @@ public class UsersController : AdminControllerBase
                 AddIdentityErrors(addResult);
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        var stampResult = await _userManager.UpdateSecurityStampAsync(user);
+        if (!stampResult.Succeeded)
+        {
+            AddIdentityErrors(stampResult);
+            return RedirectToAction(nameof(Index));
+        }
+
+        var currentUserId = _userManager.GetUserId(User);
+        if (string.Equals(currentUserId, user.Id, StringComparison.Ordinal))
+        {
+            // If the currently authenticated SuperAdmin changed their own role,
+            // force re-login so the new permissions are applied immediately.
+            await _signInManager.SignOutAsync();
+            TempData["InfoMessage"] = "Role was updated. Please sign in again.";
+            return Redirect("~/Identity/Account/Login");
         }
 
         return RedirectToAction(nameof(Index));

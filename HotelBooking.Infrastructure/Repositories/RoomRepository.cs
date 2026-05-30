@@ -26,6 +26,15 @@ public class RoomRepository : IRoomRepository
             .FirstOrDefaultAsync(r => r.Id == id, ct);
     }
 
+    public Task<Room?> GetByIdWithHotelAndImagesAsync(Guid id, CancellationToken ct)
+    {
+        return _context.Rooms
+            .Include(r => r.Hotel)
+            .Include(r => r.Images)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == id, ct);
+    }
+
     public async Task AddAsync(Room room, CancellationToken ct)
     {
         _context.Rooms.Add(room);
@@ -34,7 +43,12 @@ public class RoomRepository : IRoomRepository
 
     public async Task UpdateAsync(Room room, CancellationToken ct)
     {
-        _context.Rooms.Update(room);
+        var entry = _context.Entry(room);
+        if (entry.State == EntityState.Detached)
+        {
+            _context.Rooms.Attach(room);
+        }
+
         await _context.SaveChangesAsync(ct);
     }
 }

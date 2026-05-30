@@ -99,7 +99,12 @@ public class HotelRepository : IHotelRepository
 
     public async Task UpdateAsync(Hotel hotel, CancellationToken ct)
     {
-        _context.Hotels.Update(hotel);
+        var entry = _context.Entry(hotel);
+        if (entry.State == EntityState.Detached)
+        {
+            _context.Hotels.Attach(hotel);
+        }
+
         await _context.SaveChangesAsync(ct);
     }
 }
