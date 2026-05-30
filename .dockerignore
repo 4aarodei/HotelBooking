@@ -1,0 +1,13 @@
+**/.git
+**/.vs
+**/.idea
+**/.dotnet-home
+**/bin
+**/obj
+**/TestResults
+**/*.user
+**/*.suo
+**/*.cache
+**/wwwroot/uploads
+Dockerfile
+README.md
