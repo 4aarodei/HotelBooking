@@ -1,0 +1,162 @@
+name: Deploy to Azure Container Apps
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DOTNET_VERSION: 8.0.x
+  IMAGE_REPOSITORY: hotelbooking
+
+jobs:
+  build_test_and_push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      acr_login_server: ${{ steps.acr.outputs.login_server }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore HotelBooking.sln
+
+      - name: Build
+        run: dotnet build HotelBooking.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test HotelBooking.sln --configuration Release --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish HotelBooking.Web/HotelBooking.Web.csproj --configuration Release --no-build --output ./artifacts/publish
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve ACR login server
+        id: acr
+        shell: bash
+        run: |
+          LOGIN_SERVER=$(az acr show --name "${{ vars.ACR_NAME }}" --query loginServer -o tsv)
+          echo "login_server=$LOGIN_SERVER" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image with ACR Build
+        id: meta
+        shell: bash
+        run: |
+          IMAGE_TAG="${GITHUB_SHA}"
+          IMAGE_REPO="${{ vars.IMAGE_REPOSITORY || env.IMAGE_REPOSITORY }}"
+          az acr build \
+            --registry "${{ vars.ACR_NAME }}" \
+            --image "$IMAGE_REPO:$IMAGE_TAG" \
+            .
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+  migrate_and_deploy:
+    runs-on: ubuntu-latest
+    needs: build_test_and_push
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install dotnet-ef
+        shell: bash
+        run: |
+          dotnet tool install --global dotnet-ef
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve previous active revision
+        id: previous
+        shell: bash
+        run: |
+          PREV_REVISION=$(az containerapp revision list \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --name "${{ vars.CONTAINER_APP_NAME }}" \
+            --query "sort_by([?properties.active==\`true\`], &properties.createdTime)[-1].name" \
+            -o tsv || true)
+          echo "name=$PREV_REVISION" >> "$GITHUB_OUTPUT"
+
+      - name: Run EF migrations (separate deployment step)
+        shell: bash
+        run: |
+          CONNECTION_STRING=$(az keyvault secret show \
+            --vault-name "${{ vars.KEY_VAULT_NAME }}" \
+            --name "ConnectionStrings--DefaultConnection" \
+            --query value -o tsv)
+
+          ASPNETCORE_ENVIRONMENT=Development dotnet ef database update \
+            --project HotelBooking.Infrastructure/HotelBooking.Infrastructure.csproj \
+            --startup-project HotelBooking.Web/HotelBooking.Web.csproj \
+            --connection "$CONNECTION_STRING"
+
+      - name: Deploy new container revision
+        shell: bash
+        run: |
+          IMAGE_REPO="${{ vars.IMAGE_REPOSITORY || env.IMAGE_REPOSITORY }}"
+          IMAGE_TAG="${{ needs.build_test_and_push.outputs.image_tag }}"
+          LOGIN_SERVER="${{ needs.build_test_and_push.outputs.acr_login_server }}"
+
+          az containerapp update \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --name "${{ vars.CONTAINER_APP_NAME }}" \
+            --image "$LOGIN_SERVER/$IMAGE_REPO:$IMAGE_TAG"
+
+      - name: Smoke test readiness endpoint
+        id: smoke
+        shell: bash
+        run: |
+          FQDN=$(az containerapp show \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --name "${{ vars.CONTAINER_APP_NAME }}" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+
+          URL="https://$FQDN/health/ready"
+          echo "Checking $URL"
+
+          for i in {1..20}; do
+            if curl -fsS --max-time 10 "$URL" > /dev/null; then
+              echo "Smoke check passed"
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "Smoke check failed"
+          exit 1
+
+      - name: Rollback to previous revision on failure
+        if: failure() && steps.previous.outputs.name != ''
+        shell: bash
+        run: |
+          az containerapp revision activate \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --name "${{ vars.CONTAINER_APP_NAME }}" \
+            --revision "${{ steps.previous.outputs.name }}"

@@ -1,0 +1,48 @@
+services:
+  web:
+    build:
+      context: ../..
+      dockerfile: HotelBooking.Web/docker/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=db-dev,1433;Database=HotelBookingDev;User Id=sa;Password=${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd123};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true"
+      ImageStorage__Provider: Local
+      DataProtection__PersistKeysToFileSystemPath: /app/dpkeys
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_uploads:/app/uploads
+      - app_dpkeys:/app/dpkeys
+    depends_on:
+      - db-dev
+
+  db-dev:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd123}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - db-dev-data:/var/opt/mssql
+
+  db-test:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    profiles:
+      - testdb
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: "${MSSQL_TEST_SA_PASSWORD:-YourStrong!Passw0rd123}"
+    ports:
+      - "1434:1433"
+    volumes:
+      - db-test-data:/var/opt/mssql
+
+volumes:
+  app_uploads:
+  app_dpkeys:
+  db-dev-data:
+  db-test-data:

@@ -1,219 +1,123 @@
-# HotelBooking
+# HotelBooking2
 
-A web application for searching hotels and creating bookings, built with ASP.NET Core MVC and EF Core.
+ASP.NET Core MVC application for hotel search and booking, prepared for Docker + Azure Container Apps production deployment.
 
-## Current architecture (after refactor)
+## Architecture
 
-- **HotelBooking.Web**
-  - MVC controllers, Razor views, view models, Identity UI.
-- **HotelBooking.Application**
-  - Application services with real orchestration (`BookingService`, `HotelService`).
-  - Contracts for repositories and statistics queries.
-  - Media contracts and image validation/re-encoding pipeline.
-  - Domain-level booking rule exception (`BookingRuleViolationException`).
-- **HotelBooking.Infrastructure**
-  - EF Core `ApplicationDbContext`.
-  - Repository implementations.
-  - Dapper read model for booking statistics.
-  - Azure Blob Storage image adapter.
-- **HotelBooking.Core**
-  - Domain entities and booking status enum.
+- `HotelBooking.Web` - MVC/UI, Identity, runtime composition.
+- `HotelBooking.Application` - business logic, booking orchestration, media validation pipeline.
+- `HotelBooking.Infrastructure` - EF Core, repositories, Dapper read-model, Azure Blob image storage adapter.
+- `HotelBooking.Core` - domain entities and enums.
 
-## Key design decisions
+## Production readiness highlights
 
-1. **Removed thin proxy services**
-   - `RoomService` and `BookingStatusService` were removed because they only forwarded repository calls.
+- Docker-ready multi-stage build with non-root runtime user.
+- Fail-fast startup policy for non-development environments:
+  - required SQL connection
+  - required Azure Blob image storage configuration
+  - required DataProtection key persistence path
+  - SMTP required only when confirmed accounts are enforced
+- Health endpoints split:
+  - `/health/live` - process liveness
+  - `/health/ready` - readiness including DB connectivity
+  - `/health` - alias to readiness
+- SQL retry policy enabled for Azure SQL transient errors.
+- Reverse proxy support for ingress environments (Azure Container Apps).
+- Key Vault configuration provider support via `DefaultAzureCredential`.
 
-2. **Kept only meaningful application orchestration**
-   - `BookingService` now owns booking rules: date validation, availability check, nights/total calculation, and initial status assignment.
-   - `HotelService` keeps availability orchestration for hotel search/details.
+## Local development
 
-3. **Simplified booking status model**
-   - Replaced duplicated identity status model (`StatusId` + external status code GUIDs) with a single `BookingStatus` enum on `Booking`.
-
-4. **Improved date/time modeling**
-   - Booking stay range uses `DateOnly` (`CheckIn`, `CheckOut`).
-   - Creation timestamp uses `DateTimeOffset` (`CreatedAtUtc`).
-
-5. **Safer null handling**
-   - Replaced multiple `null!` property initializations in domain entities with `required` or nullable navigation references where appropriate.
-
-6. **Exception handling for booking rules**
-   - Introduced `BookingRuleViolationException` and mapped it in MVC controller handling.
-
-7. **Automated booking rule tests**
-   - Added `HotelBooking.Tests` with unit tests for `BookingService` booking rules.
-
-8. **Production-style media storage**
-   - Image storage is abstracted behind `IImageStorage`.
-   - Production can use Azure Blob Storage via `ImageStorage:Provider=AzureBlob`.
-   - Local disk storage remains only as the development fallback.
-   - Image records store storage key, public URL, content type, size, dimensions, and creation time.
-   - Uploads are checked by extension, declared content type, file signature, real image decode, dimensions, pixel count, and size, then re-encoded to WebP with metadata stripped.
-   - `Room.ImageUrl` has been removed from the domain model; room images are now sourced from `RoomImages`.
-
-## Booking rules covered in tests
-
-- check-out must be later than check-in
-- room must exist
-- room must be active
-- room capacity must not be exceeded for overlapping dates
-- successful booking must set pending status, nights, and total price correctly
-
-## Run locally
-
-### Prerequisites
+Prerequisites:
 
 - .NET 8 SDK
 - SQL Server / LocalDB
 
-### Setup
+Run:
 
-```bash
-git clone https://github.com/4aarodei/HotelBooking.git
-cd HotelBooking
-```
-
-Set connection string (example):
-
-```bash
-cd HotelBooking.Web
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
-  "Server=(localdb)\\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;MultipleActiveResultSets=true"
-```
-
-Optional development admin seed:
-
-```bash
-dotnet user-secrets set "AdminSeed:Email" "admin@hotelbooking.local"
-dotnet user-secrets set "AdminSeed:Password" "Use-a-strong-local-password-123!"
-```
-
-If `AdminSeed:Password` is not configured, the roles are created but the default SuperAdmin user is skipped. This keeps secrets out of source control.
-
-Email confirmation is disabled by default in Development and enabled by default outside Development. Override it when needed:
-
-```bash
-dotnet user-secrets set "Identity:RequireConfirmedAccount" "false"
-```
-
-For environments where confirmed accounts are enabled, configure SMTP:
-
-```bash
-dotnet user-secrets set "Email:Smtp:Host" "smtp.example.com"
-dotnet user-secrets set "Email:Smtp:Port" "587"
-dotnet user-secrets set "Email:Smtp:EnableSsl" "true"
-dotnet user-secrets set "Email:Smtp:UserName" "smtp-user"
-dotnet user-secrets set "Email:Smtp:Password" "smtp-password"
-dotnet user-secrets set "Email:Smtp:From" "no-reply@example.com"
-```
-
-Development image uploads use local disk by default:
-
-```bash
-dotnet user-secrets set "ImageStorage:Provider" "Local"
-```
-
-Production and staging must use Azure Blob Storage and environment variables or managed secret storage:
-
-```bash
-ImageStorage__Provider=AzureBlob
-ImageStorage__AzureBlob__ConnectionString=<azure-storage-connection-string>
-ImageStorage__AzureBlob__ContainerName=hotel-images
-ImageStorage__AzureBlob__PublicBaseUrl=https://<cdn-or-storage-host>/hotel-images
-ConnectionStrings__DefaultConnection=<azure-sql-connection-string>
-```
-
-The app exposes `/health` for container and platform health probes. Do not rely on `wwwroot/uploads` as persistent production storage; the Docker image ignores uploaded files and expects durable media to live in Blob Storage.
-
-Outside `Development`, the app refuses to start unless:
-
-```bash
-ImageStorage__Provider=AzureBlob
-ImageStorage__AzureBlob__ConnectionString=<azure-storage-connection-string>
-ImageStorage__AzureBlob__ContainerName=<container-name>
-ImageStorage__AzureBlob__PublicBaseUrl=https://<cdn-or-storage-host>/<container-name>
-```
-
-This prevents accidental production deployment with local file storage.
-
-Apply migrations:
-
-```bash
-dotnet ef database update \
-  --project HotelBooking.Infrastructure \
-  --startup-project HotelBooking.Web
-```
-
-Run app:
-
-```bash
+```powershell
+dotnet restore HotelBooking.sln
+dotnet build HotelBooking.sln -c Release
+dotnet test HotelBooking.sln -c Release
 dotnet run --project HotelBooking.Web
 ```
 
-## Test command
+## Local container run (production profile)
 
-```bash
-dotnet test HotelBooking.Tests/HotelBooking.Tests.csproj
+Build image:
+
+```powershell
+docker build -f HotelBooking.Web/docker/Dockerfile -t hotelbooking .
 ```
 
-## Docker
+Run:
 
-Build the production image:
-
-```bash
-docker build -t hotelbooking .
+```powershell
+docker compose -f HotelBooking.Web/docker/docker-compose.yml up --build
 ```
 
-Run with environment-based configuration:
+Or run the app image directly:
 
-```bash
-docker run --rm -p 8080:8080 \
-  -e ASPNETCORE_ENVIRONMENT=Production \
-  -e ConnectionStrings__DefaultConnection="<connection-string>" \
-  -e ImageStorage__Provider=AzureBlob \
-  -e ImageStorage__AzureBlob__ConnectionString="<storage-connection-string>" \
-  -e ImageStorage__AzureBlob__ContainerName="hotel-images" \
-  -e ImageStorage__AzureBlob__PublicBaseUrl="https://<cdn-or-storage-host>/hotel-images" \
+```powershell
+docker run --rm -p 8080:8080 `
+  -e ASPNETCORE_ENVIRONMENT=Production `
+  -e ConnectionStrings__DefaultConnection="<azure-sql-connection-string>" `
+  -e ImageStorage__Provider=AzureBlob `
+  -e ImageStorage__AzureBlob__ConnectionString="<storage-connection-string>" `
+  -e ImageStorage__AzureBlob__ContainerName="hotel-images" `
+  -e ImageStorage__AzureBlob__PublicBaseUrl="https://<storage-account>.blob.core.windows.net/hotel-images" `
+  -e DataProtection__PersistKeysToFileSystemPath="/app/dpkeys" `
+  -e Identity__RequireConfirmedAccount="false" `
   hotelbooking
 ```
 
-## Environment model
+## Runtime configuration contract (Stage/Prod)
 
-- `Development`
-  - Runs with `dotnet run` as the primary workflow.
-  - May use LocalDB and `ImageStorage=Local`.
-  - Applies migrations and development seed data on startup.
-- `Staging`
-  - Intended for future Docker/Azure Container Apps deployment.
-  - Must use Azure SQL and `ImageStorage=AzureBlob`.
-  - Must receive secrets from environment variables or managed secret storage.
-- `Production`
-  - Intended for Docker + Azure Container Apps.
-  - Must use Azure SQL and `ImageStorage=AzureBlob`.
-  - Must not execute automatic DB migrations in web startup.
+Required:
 
-## Azure Container Apps target
+- `ConnectionStrings__DefaultConnection`
+- `ImageStorage__Provider=AzureBlob`
+- `ImageStorage__AzureBlob__ConnectionString`
+- `ImageStorage__AzureBlob__ContainerName`
+- `ImageStorage__AzureBlob__PublicBaseUrl`
+- `DataProtection__PersistKeysToFileSystemPath`
 
-Planned production deployment model:
+Conditional:
 
-- Docker image built in CI
-- Image pushed to Azure Container Registry
-- Azure Container App updated to the new image revision
-- Azure SQL used as the application database
-- Azure Blob Storage used for hotel and room images
-- Optional next steps: Key Vault and Application Insights
+- If `Identity__RequireConfirmedAccount=true`, then SMTP must be configured:
+  - `Email__Smtp__Host`
+  - `Email__Smtp__From`
+  - optional auth settings (`Port`, `EnableSsl`, `UserName`, `Password`)
 
-## Pre-Docker readiness checklist
+Optional:
 
-- `dotnet build` passes
-- `dotnet test` passes
-- `dotnet publish` passes
-- Production startup fails fast when Blob Storage is not configured
-- No production image flow depends on `wwwroot/uploads`
-- Public/admin views render room and hotel images from image metadata
-- Production DB migrations are planned as a separate deployment step
+- `Azure__KeyVault__Uri` (loads config from Key Vault via Managed Identity)
+- `Sql__MaxRetryCount` (default `5`)
+- `Sql__MaxRetryDelaySeconds` (default `10`)
 
-## CI
+## Database migrations policy
 
-The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` that restores, builds, and tests the solution on Windows with .NET 8.
+- Development: app applies migrations on startup.
+- Stage/Production: migrations are executed as a **separate deployment step** (not app startup).
+
+Command:
+
+```powershell
+dotnet ef database update `
+  --project HotelBooking.Infrastructure/HotelBooking.Infrastructure.csproj `
+  --startup-project HotelBooking.Web/HotelBooking.Web.csproj
+```
+
+## Azure deployment
+
+- IaC: `infra/main.bicep`
+- CD workflow: `.github/workflows/deploy-aca.yml`
+- Operational runbook: `RUNBOOK.md`
+- Environment matrix: `ENVIRONMENT_MATRIX.md`
+- Baseline gap log: `DEPLOYMENT_GAP.md`
+
+Typical flow:
+
+1. Provision infra with Bicep.
+2. Configure GitHub Azure OIDC secrets and deployment variables.
+3. Run deploy workflow.
+4. Verify `/health/live` and `/health/ready`.

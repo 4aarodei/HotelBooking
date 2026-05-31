@@ -1,15 +1,23 @@
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using HotelBooking.Application;
 using HotelBooking.Application.Media;
 using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Data;
 using HotelBooking.Infrastructure.Storage;
+using HotelBooking.Web.Health;
 using HotelBooking.Web.Services;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigureKeyVault(builder);
 
 if (builder.Environment.IsDevelopment())
 {
@@ -34,7 +42,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlServer =>
+    {
+        sqlServer.EnableRetryOnFailure(
+            maxRetryCount: builder.Configuration.GetValue<int?>("Sql:MaxRetryCount") ?? 5,
+            maxRetryDelay: TimeSpan.FromSeconds(builder.Configuration.GetValue<int?>("Sql:MaxRetryDelaySeconds") ?? 10),
+            errorNumbersToAdd: null);
+    }));
+
+ConfigureDataProtection(builder.Services, builder.Configuration, builder.Environment);
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
@@ -77,9 +99,16 @@ builder.Services.AddInfrastructure();
 builder.Services.AddApplication();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddCheck<DatabaseReadinessHealthCheck>("sql", tags: ["ready"]);
 
 var app = builder.Build();
+
+if (ShouldUseForwardedHeaders(app.Environment, app.Configuration))
+{
+    app.UseForwardedHeaders();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -123,9 +152,62 @@ app.MapControllers();
 
 app.MapRazorPages();
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live")
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 app.Run();
+
+static void ConfigureKeyVault(WebApplicationBuilder builder)
+{
+    var keyVaultUriRaw = builder.Configuration["Azure:KeyVault:Uri"];
+    if (string.IsNullOrWhiteSpace(keyVaultUriRaw))
+    {
+        return;
+    }
+
+    if (!Uri.TryCreate(keyVaultUriRaw, UriKind.Absolute, out var keyVaultUri))
+    {
+        throw new InvalidOperationException("Azure:KeyVault:Uri must be a valid absolute URI.");
+    }
+
+    builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+}
+
+static void ConfigureDataProtection(IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+{
+    var dataProtection = services.AddDataProtection()
+        .SetApplicationName(configuration["DataProtection:ApplicationName"] ?? "HotelBooking");
+
+    var keyPersistencePath = configuration["DataProtection:PersistKeysToFileSystemPath"];
+    if (string.IsNullOrWhiteSpace(keyPersistencePath))
+    {
+        if (!environment.IsDevelopment())
+        {
+            throw new InvalidOperationException(
+                "DataProtection:PersistKeysToFileSystemPath is required outside Development.");
+        }
+
+        return;
+    }
+
+    Directory.CreateDirectory(keyPersistencePath);
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keyPersistencePath));
+}
+
+static bool ShouldUseForwardedHeaders(IHostEnvironment environment, IConfiguration configuration)
+{
+    return !environment.IsDevelopment() || configuration.GetValue<bool>("ReverseProxy:Enabled");
+}
 
 static void ValidateImageStorageConfiguration(IHostEnvironment environment, string imageStorageProvider, IConfiguration configuration)
 {

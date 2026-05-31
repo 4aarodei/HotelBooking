@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "prefix": {
+      "value": "hotelbooking"
+    },
+    "environmentName": {
+      "value": "prod"
+    },
+    "acrName": {
+      "value": "hotelbookingacr12345"
+    },
+    "containerAppEnvironmentName": {
+      "value": "hotelbooking-aca-env"
+    },
+    "containerAppName": {
+      "value": "hotelbooking-web"
+    },
+    "sqlServerName": {
+      "value": "hotelbookingsql12345"
+    },
+    "sqlDatabaseName": {
+      "value": "hotelbooking-db"
+    },
+    "sqlAdminLogin": {
+      "value": "sqladminuser"
+    },
+    "sqlAdminPassword": {
+      "value": "REPLACE_ME"
+    },
+    "storageAccountName": {
+      "value": "hotelbookingst12345"
+    },
+    "keyVaultName": {
+      "value": "hotelbooking-kv-12345"
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": "hotelbooking-law"
+    },
+    "appInsightsName": {
+      "value": "hotelbooking-appi"
+    },
+    "imageRepository": {
+      "value": "hotelbooking"
+    },
+    "imageTag": {
+      "value": "latest"
+    },
+    "identityRequireConfirmedAccount": {
+      "value": false
+    },
+    "smtpHost": {
+      "value": ""
+    },
+    "smtpFrom": {
+      "value": ""
+    }
+  }
+}
