@@ -1,3 +1,4 @@
+using HotelBooking.Application.Caching;
 using HotelBooking.Application.Hotels;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Media;
@@ -118,11 +119,138 @@ public class AdminHotelManagementServiceTests
                 CancellationToken.None));
     }
 
+    [Fact]
+    public async Task CreateHotelAsync_InvalidatesCitiesAndBumpsCatalogVersion_AfterSuccessfulSave()
+    {
+        var cache = new FakeAppCache();
+        var service = CreateService(
+            new FakeHotelRepository(),
+            new FakeRoomRepository(),
+            new FakeImageStorage(),
+            cache: cache);
+
+        await service.CreateHotelAsync(
+            new CreateHotelCommand("River", "Kyiv", "Street 1", null, []),
+            CancellationToken.None);
+
+        Assert.Contains(HotelCacheKeys.Cities, cache.RemovedKeys);
+        AssertCatalogVersionWasBumped(cache);
+    }
+
+    [Fact]
+    public async Task UpdateHotelAsync_InvalidatesCitiesAndBumpsCatalogVersion_AfterSuccessfulSave()
+    {
+        var hotel = new Hotel
+        {
+            Id = Guid.NewGuid(),
+            Name = "River",
+            City = "Kyiv",
+            Address = "Street 1"
+        };
+        var cache = new FakeAppCache();
+        var service = CreateService(
+            new FakeHotelRepository { Hotel = hotel },
+            new FakeRoomRepository(),
+            new FakeImageStorage(),
+            cache: cache);
+
+        await service.UpdateHotelAsync(
+            new UpdateHotelCommand(hotel.Id, "River Prime", "Lviv", "Street 2", "Updated", [], []),
+            CancellationToken.None);
+
+        Assert.Contains(HotelCacheKeys.Cities, cache.RemovedKeys);
+        AssertCatalogVersionWasBumped(cache);
+    }
+
+    [Fact]
+    public async Task CreateRoomAsync_BumpsCatalogVersion_AfterSuccessfulSave()
+    {
+        var hotelId = Guid.NewGuid();
+        var cache = new FakeAppCache();
+        var service = CreateService(
+            new FakeHotelRepository { Hotel = new Hotel { Id = hotelId, Name = "River", City = "Kyiv", Address = "Street 1" } },
+            new FakeRoomRepository(),
+            new FakeImageStorage(),
+            cache: cache);
+
+        await service.CreateRoomAsync(CreateRoomCommand(hotelId), CancellationToken.None);
+
+        Assert.DoesNotContain(HotelCacheKeys.Cities, cache.RemovedKeys);
+        AssertCatalogVersionWasBumped(cache);
+    }
+
+    [Fact]
+    public async Task UpdateRoomAsync_BumpsCatalogVersion_AfterSuccessfulSave()
+    {
+        var room = new Room
+        {
+            Id = Guid.NewGuid(),
+            HotelId = Guid.NewGuid(),
+            Name = "Standard",
+            Capacity = 2,
+            PricePerNight = 100m,
+            Quantity = 2,
+            IsActive = true
+        };
+        var cache = new FakeAppCache();
+        var service = CreateService(
+            new FakeHotelRepository(),
+            new FakeRoomRepository { Room = room },
+            new FakeImageStorage(),
+            cache: cache);
+
+        await service.UpdateRoomAsync(UpdateRoomCommand(room.Id), CancellationToken.None);
+
+        Assert.DoesNotContain(HotelCacheKeys.Cities, cache.RemovedKeys);
+        AssertCatalogVersionWasBumped(cache);
+    }
+
+    [Fact]
+    public async Task CreateHotelAsync_CacheInvalidationFailure_DoesNotFailSuccessfulSave()
+    {
+        var cache = new FakeAppCache { ThrowOnRemove = true, ThrowOnSet = true };
+        var hotelRepository = new FakeHotelRepository();
+        var service = CreateService(
+            hotelRepository,
+            new FakeRoomRepository(),
+            new FakeImageStorage(),
+            cache: cache);
+
+        var hotelId = await service.CreateHotelAsync(
+            new CreateHotelCommand("River", "Kyiv", "Street 1", null, []),
+            CancellationToken.None);
+
+        Assert.Equal(hotelId, hotelRepository.Hotel?.Id);
+    }
+
+    [Fact]
+    public async Task CreateHotelAsync_DoesNotDeleteUploadedImages_WhenCacheInvalidationIsCanceledAfterSave()
+    {
+        var cache = new FakeAppCache { CancelOnRemove = true };
+        var hotelRepository = new FakeHotelRepository();
+        var imageStorage = new FakeImageStorage();
+        var service = CreateService(
+            hotelRepository,
+            new FakeRoomRepository(),
+            imageStorage,
+            cache: cache);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() =>
+            service.CreateHotelAsync(
+                new CreateHotelCommand("River", "Kyiv", "Street 1", null, [CreateImageFile("one.png")]),
+                CancellationToken.None));
+
+        Assert.NotNull(hotelRepository.Hotel);
+        Assert.Single(imageStorage.SavedHotelImages);
+        Assert.Empty(imageStorage.DeletedImages);
+    }
+
     private static AdminHotelManagementService CreateService(
         FakeHotelRepository hotelRepository,
         FakeRoomRepository roomRepository,
         FakeImageStorage imageStorage,
-        int maxFilesPerUpload = 8)
+        int maxFilesPerUpload = 8,
+        IAppCache? cache = null)
     {
         hotelRepository.Hotel ??= new Hotel
         {
@@ -137,6 +265,7 @@ public class AdminHotelManagementServiceTests
             roomRepository,
             new FakeImageProcessor(),
             imageStorage,
+            cache ?? new FakeAppCache(),
             Options.Create(new ImageUploadOptions { MaxFilesPerUpload = maxFilesPerUpload }),
             NullLogger<AdminHotelManagementService>.Instance);
     }
@@ -144,6 +273,55 @@ public class AdminHotelManagementServiceTests
     private static ImageUploadFile CreateImageFile(string fileName)
     {
         return new ImageUploadFile(fileName, "image/png", 128, () => new MemoryStream([1, 2, 3]));
+    }
+
+    private static CreateRoomCommand CreateRoomCommand(Guid hotelId)
+    {
+        return new CreateRoomCommand(
+            hotelId,
+            "Standard",
+            null,
+            null,
+            2,
+            100m,
+            2,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            true,
+            []);
+    }
+
+    private static UpdateRoomCommand UpdateRoomCommand(Guid roomId)
+    {
+        return new UpdateRoomCommand(
+            roomId,
+            "Standard",
+            null,
+            null,
+            2,
+            100m,
+            2,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            true,
+            [],
+            []);
+    }
+
+    private static void AssertCatalogVersionWasBumped(FakeAppCache cache)
+    {
+        var setCall = Assert.Single(cache.SetCalls, c => c.Key == HotelCacheKeys.CatalogVersion);
+        Assert.Equal(TimeSpan.FromDays(365), setCall.Ttl);
+        var catalogVersion = Assert.IsType<string>(setCall.Value);
+        Assert.False(string.IsNullOrWhiteSpace(catalogVersion));
     }
 
     private sealed class FakeHotelRepository : IHotelRepository
@@ -227,6 +405,45 @@ public class AdminHotelManagementServiceTests
         public Task DeleteAsync(string storageKey, string publicUrl, CancellationToken ct)
         {
             DeletedImages.Add((storageKey, publicUrl));
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeAppCache : IAppCache
+    {
+        public List<string> RemovedKeys { get; } = [];
+        public List<(string Key, object? Value, TimeSpan Ttl)> SetCalls { get; } = [];
+        public bool ThrowOnRemove { get; init; }
+        public bool ThrowOnSet { get; init; }
+        public bool CancelOnRemove { get; init; }
+
+        public Task<T?> GetAsync<T>(string key, CancellationToken ct = default)
+            => Task.FromResult<T?>(default);
+
+        public Task SetAsync<T>(string key, T value, TimeSpan ttl, CancellationToken ct = default)
+        {
+            if (ThrowOnSet)
+            {
+                throw new InvalidOperationException("Cache set failed.");
+            }
+
+            SetCalls.Add((key, value, ttl));
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveAsync(string key, CancellationToken ct = default)
+        {
+            if (CancelOnRemove)
+            {
+                throw new OperationCanceledException();
+            }
+
+            if (ThrowOnRemove)
+            {
+                throw new InvalidOperationException("Cache remove failed.");
+            }
+
+            RemovedKeys.Add(key);
             return Task.CompletedTask;
         }
     }

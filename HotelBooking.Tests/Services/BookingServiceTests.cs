@@ -1,8 +1,10 @@
+using HotelBooking.Application.Caching;
 using HotelBooking.Application.Exceptions;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Services;
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Domain.Entities.Hotels;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace HotelBooking.Tests.Services;
@@ -12,7 +14,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_Throws_WhenCheckOutNotAfterCheckIn()
     {
-        var service = new BookingService(new FakeBookingRepository(), new FakeRoomRepository(new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 2 }), new FakeClock());
+        var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 2 }));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
             service.CreateBookingAsync("user-1", Guid.NewGuid(), new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 20)));
@@ -22,7 +24,7 @@ public class BookingServiceTests
     public async Task CreateBookingAsync_Throws_WhenRoomInactive()
     {
         var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = false, Quantity = 2 };
-        var service = new BookingService(new FakeBookingRepository(), new FakeRoomRepository(room), new FakeClock());
+        var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(room));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
             service.CreateBookingAsync("user-1", room.Id, new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 22)));
@@ -32,7 +34,7 @@ public class BookingServiceTests
     public async Task CreateBookingAsync_Throws_WhenRoomNotFound()
     {
         var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 2 };
-        var service = new BookingService(new FakeBookingRepository(), new FakeRoomRepository(room), new FakeClock());
+        var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(room));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
             service.CreateBookingAsync("user-1", Guid.NewGuid(), new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 22)));
@@ -46,7 +48,7 @@ public class BookingServiceTests
         {
             OverlapsByRoom = new Dictionary<Guid, int> { [room.Id] = 1 }
         };
-        var service = new BookingService(repository, new FakeRoomRepository(room), new FakeClock());
+        var service = CreateService(repository, new FakeRoomRepository(room));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
             service.CreateBookingAsync("user-1", room.Id, new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 22)));
@@ -58,7 +60,8 @@ public class BookingServiceTests
         var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 3, PricePerNight = 120m };
         var repository = new FakeBookingRepository();
         var clock = new FakeClock { UtcNow = new DateTimeOffset(2026, 4, 19, 10, 30, 0, TimeSpan.Zero) };
-        var service = new BookingService(repository, new FakeRoomRepository(room), clock);
+        var cache = new FakeAppCache();
+        var service = CreateService(repository, new FakeRoomRepository(room), clock, cache);
 
         var result = await service.CreateBookingAsync("user-1", room.Id, new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 23));
 
@@ -67,6 +70,39 @@ public class BookingServiceTests
         Assert.Equal(360m, result.TotalPrice);
         Assert.Equal(clock.UtcNow, result.CreatedAtUtc);
         Assert.Single(repository.AddedBookings);
+        var setCall = Assert.Single(cache.SetCalls);
+        Assert.Equal(HotelCacheKeys.AvailabilityVersion, setCall.Key);
+        Assert.Equal(TimeSpan.FromDays(365), setCall.Ttl);
+    }
+
+    [Fact]
+    public async Task CreateBookingAsync_DoesNotFail_WhenAvailabilityCacheVersionBumpFails()
+    {
+        var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 3, PricePerNight = 120m };
+        var repository = new FakeBookingRepository();
+        var service = CreateService(
+            repository,
+            new FakeRoomRepository(room),
+            cache: new FakeAppCache { ThrowOnSet = true });
+
+        var result = await service.CreateBookingAsync("user-1", room.Id, new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 23));
+
+        Assert.Equal(room.Id, result.RoomId);
+        Assert.Single(repository.AddedBookings);
+    }
+
+    private static BookingService CreateService(
+        FakeBookingRepository bookingRepository,
+        FakeRoomRepository roomRepository,
+        IClock? clock = null,
+        IAppCache? cache = null)
+    {
+        return new BookingService(
+            bookingRepository,
+            roomRepository,
+            clock ?? new FakeClock(),
+            cache ?? new FakeAppCache(),
+            NullLogger<BookingService>.Instance);
     }
 
     private sealed class FakeRoomRepository : IRoomRepository
@@ -121,5 +157,28 @@ public class BookingServiceTests
     {
         public DateOnly Today { get; init; } = new(2026, 4, 19);
         public DateTimeOffset UtcNow { get; init; } = new(2026, 4, 19, 9, 0, 0, TimeSpan.Zero);
+    }
+
+    private sealed class FakeAppCache : IAppCache
+    {
+        public bool ThrowOnSet { get; init; }
+        public List<(string Key, TimeSpan Ttl)> SetCalls { get; } = [];
+
+        public Task<T?> GetAsync<T>(string key, CancellationToken ct = default)
+            => Task.FromResult<T?>(default);
+
+        public Task SetAsync<T>(string key, T value, TimeSpan ttl, CancellationToken ct = default)
+        {
+            if (ThrowOnSet)
+            {
+                throw new InvalidOperationException("Cache unavailable.");
+            }
+
+            SetCalls.Add((key, ttl));
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveAsync(string key, CancellationToken ct = default)
+            => Task.CompletedTask;
     }
 }

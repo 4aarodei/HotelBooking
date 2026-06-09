@@ -1,3 +1,4 @@
+using HotelBooking.Application.Caching;
 using HotelBooking.Application.Hotels;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Media;
@@ -9,10 +10,13 @@ namespace HotelBooking.Application.Services;
 
 public sealed class AdminHotelManagementService : IAdminHotelManagementService
 {
+    private static readonly TimeSpan CatalogVersionTtl = TimeSpan.FromDays(365);
+
     private readonly IHotelRepository _hotelRepository;
     private readonly IRoomRepository _roomRepository;
     private readonly IImageProcessor _imageProcessor;
     private readonly IImageStorage _imageStorage;
+    private readonly IAppCache _cache;
     private readonly ImageUploadOptions _imageOptions;
     private readonly ILogger<AdminHotelManagementService> _logger;
 
@@ -21,6 +25,7 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
         IRoomRepository roomRepository,
         IImageProcessor imageProcessor,
         IImageStorage imageStorage,
+        IAppCache cache,
         IOptions<ImageUploadOptions> imageOptions,
         ILogger<AdminHotelManagementService> logger)
     {
@@ -28,6 +33,7 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
         _roomRepository = roomRepository;
         _imageProcessor = imageProcessor;
         _imageStorage = imageStorage;
+        _cache = cache;
         _imageOptions = imageOptions.Value;
         _logger = logger;
     }
@@ -52,13 +58,15 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
         {
             NormalizeHotelCovers(hotel.Images);
             await _hotelRepository.AddAsync(hotel, ct);
-            return hotel.Id;
         }
         catch
         {
             await CleanupHotelImagesAsync(newImages, ct);
             throw;
         }
+
+        await InvalidateHotelReadCacheAsync(ct);
+        return hotel.Id;
     }
 
     public async Task UpdateHotelAsync(UpdateHotelCommand command, CancellationToken ct = default)
@@ -90,6 +98,7 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
         }
 
         await DeleteHotelImagesAsync(removedImages, hotel.Id, ct);
+        await InvalidateHotelReadCacheAsync(ct);
     }
 
     public async Task<Guid> CreateRoomAsync(CreateRoomCommand command, CancellationToken ct = default)
@@ -125,13 +134,15 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
         {
             NormalizeRoomCovers(room.Images);
             await _roomRepository.AddAsync(room, ct);
-            return room.Id;
         }
         catch
         {
             await CleanupRoomImagesAsync(newImages, ct);
             throw;
         }
+
+        await BumpCatalogVersionAsync(ct);
+        return room.Id;
     }
 
     public async Task UpdateRoomAsync(UpdateRoomCommand command, CancellationToken ct = default)
@@ -172,6 +183,7 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
         }
 
         await DeleteRoomImagesAsync(removedImages, room.Id, ct);
+        await BumpCatalogVersionAsync(ct);
     }
 
     private void EnsureFileCount(IReadOnlyList<ImageUploadFile> files)
@@ -319,7 +331,7 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
                 imageId,
                 storageKey);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger.LogWarning(
                 ex,
@@ -353,5 +365,39 @@ public sealed class AdminHotelManagementService : IAdminHotelManagementService
     private static string? NormalizeOptionalText(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private async Task InvalidateHotelReadCacheAsync(CancellationToken ct)
+    {
+        await InvalidateCitiesCacheAsync(ct);
+        await BumpCatalogVersionAsync(ct);
+    }
+
+    private async Task InvalidateCitiesCacheAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _cache.RemoveAsync(HotelCacheKeys.Cities, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "Failed to invalidate hotel cities cache.");
+        }
+    }
+
+    private async Task BumpCatalogVersionAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _cache.SetAsync(
+                HotelCacheKeys.CatalogVersion,
+                Guid.NewGuid().ToString("N"),
+                CatalogVersionTtl,
+                ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "Failed to bump hotel read cache catalog version.");
+        }
     }
 }
