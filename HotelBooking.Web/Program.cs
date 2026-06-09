@@ -13,15 +13,16 @@ builder.ValidateRuntimeSettings(runtimeSettings);
 // 3) Register infrastructure services.
 builder.Services.AddHotelBookingDatabase(builder.Configuration, runtimeSettings.ConnectionString);
 builder.Services.AddHotelBookingDataProtection(builder.Configuration, builder.Environment);
-builder.Services.AddHotelBookingForwardedHeaders();
+builder.Services.AddHotelBookingForwardedHeaders(builder.Configuration);
 builder.Services.AddHotelBookingApplicationServices();
 
 // 4) Register app features.
 builder.Services.AddHotelBookingIdentity(runtimeSettings.RequireConfirmedAccount);
 builder.Services.AddHotelBookingOptions(builder.Configuration);
+builder.Services.AddHotelBookingRedis(builder.Configuration);
 builder.Services.AddHotelBookingEmailSender(runtimeSettings.HasSmtpEmail);
 builder.Services.AddHotelBookingImageStorage(runtimeSettings.ImageStorageProvider);
-builder.Services.AddHotelBookingMvcAndHealthChecks();
+builder.Services.AddHotelBookingMvcAndHealthChecks(builder.Configuration);
 
 var app = builder.Build();
 

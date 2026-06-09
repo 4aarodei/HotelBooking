@@ -1,7 +1,12 @@
+using System.Net;
 using HotelBooking.Application;
+using HotelBooking.Application.Caching;
+using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Media;
 using HotelBooking.Infrastructure;
+using HotelBooking.Infrastructure.Caching;
 using HotelBooking.Infrastructure.Data;
+using HotelBooking.Infrastructure.RateLimiting;
 using HotelBooking.Infrastructure.Storage;
 using HotelBooking.Web.Health;
 using HotelBooking.Web.Services;
@@ -11,6 +16,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using StackExchange.Redis;
+using ForwardedHeadersIpNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 namespace HotelBooking.Web.Startup;
 
@@ -58,14 +65,48 @@ internal static class ServiceCollectionExtensions
     }
 
     // Trust reverse-proxy headers in container/ingress environments.
-    public static void AddHotelBookingForwardedHeaders(this IServiceCollection services)
+    public static void AddHotelBookingForwardedHeaders(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            options.KnownNetworks.Clear();
-            options.KnownProxies.Clear();
+            options.ForwardLimit = 1;
+
+            foreach (var proxy in configuration.GetSection("ReverseProxy:KnownProxies").Get<string[]>() ?? [])
+            {
+                if (!IPAddress.TryParse(proxy, out var address))
+                {
+                    throw new InvalidOperationException($"ReverseProxy:KnownProxies contains invalid IP address '{proxy}'.");
+                }
+
+                options.KnownProxies.Add(address);
+            }
+
+            foreach (var network in configuration.GetSection("ReverseProxy:KnownNetworks").Get<string[]>() ?? [])
+            {
+                options.KnownNetworks.Add(ParseCidr(network));
+            }
         });
+    }
+
+    private static ForwardedHeadersIpNetwork ParseCidr(string value)
+    {
+        var parts = value.Split('/', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2 ||
+            !IPAddress.TryParse(parts[0], out var prefix) ||
+            !int.TryParse(parts[1], out var prefixLength))
+        {
+            throw new InvalidOperationException($"ReverseProxy:KnownNetworks contains invalid CIDR '{value}'.");
+        }
+
+        try
+        {
+            return new ForwardedHeadersIpNetwork(prefix, prefixLength);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            throw new InvalidOperationException($"ReverseProxy:KnownNetworks contains invalid CIDR '{value}'.", ex);
+        }
     }
 
     // Bind options classes from appsettings/env vars.
@@ -75,6 +116,7 @@ internal static class ServiceCollectionExtensions
         services.Configure<ImageUploadOptions>(configuration.GetSection("ImageStorage"));
         services.Configure<LocalImageStorageOptions>(configuration.GetSection("ImageStorage"));
         services.Configure<AzureBlobImageStorageOptions>(configuration.GetSection("ImageStorage:AzureBlob"));
+        services.Configure<RedisOptions>(configuration.GetSection("Redis"));
         services.Configure<SecurityStampValidatorOptions>(options =>
         {
             options.ValidationInterval = TimeSpan.FromMinutes(5);
@@ -113,12 +155,52 @@ internal static class ServiceCollectionExtensions
         services.AddApplication();
     }
 
-    // MVC plus live/ready health checks.
-    public static void AddHotelBookingMvcAndHealthChecks(this IServiceCollection services)
+    // Redis-backed cache and distributed rate limiter. Disabled config uses fail-open no-op services.
+    public static void AddHotelBookingRedis(this IServiceCollection services, IConfiguration configuration)
     {
+        var redis = configuration.GetSection("Redis").Get<RedisOptions>() ?? new RedisOptions();
+        if (!redis.Enabled)
+        {
+            services.AddSingleton<IAppCache, NoOpAppCache>();
+            services.AddSingleton<IFixedWindowRateLimiter, DisabledFixedWindowRateLimiter>();
+            return;
+        }
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redis.ConnectionString;
+            options.InstanceName = redis.InstanceName;
+        });
+
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
+        {
+            var options = ConfigurationOptions.Parse(redis.ConnectionString);
+            options.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(options);
+        });
+
+        services.AddSingleton<RedisFixedWindowRateLimiter>();
+        services.AddSingleton<DisabledFixedWindowRateLimiter>();
+        services.AddSingleton<IAppCache, DistributedAppCache>();
+        services.AddSingleton<IFixedWindowRateLimiter>(serviceProvider =>
+            redis.RateLimiting.Enabled
+                ? serviceProvider.GetRequiredService<RedisFixedWindowRateLimiter>()
+                : serviceProvider.GetRequiredService<DisabledFixedWindowRateLimiter>());
+    }
+
+    // MVC plus live/ready health checks.
+    public static void AddHotelBookingMvcAndHealthChecks(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redis = configuration.GetSection("Redis").Get<RedisOptions>() ?? new RedisOptions();
+
         services.AddControllersWithViews();
-        services.AddHealthChecks()
+        var healthChecks = services.AddHealthChecks()
             .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
             .AddCheck<DatabaseReadinessHealthCheck>("sql", tags: ["ready"]);
+
+        if (redis.Enabled && redis.RequiredForReadiness)
+        {
+            healthChecks.AddCheck<RedisReadinessHealthCheck>("redis", tags: ["ready"]);
+        }
     }
 }

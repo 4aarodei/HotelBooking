@@ -1,4 +1,5 @@
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using HotelBooking.Application.Caching;
 
 namespace HotelBooking.Web.Startup;
 
@@ -65,6 +66,7 @@ internal static class BuilderConfigurationExtensions
         }
 
         ValidateImageStorageConfiguration(builder.Environment, runtimeSettings.ImageStorageProvider, builder.Configuration);
+        ValidateRedisConfiguration(builder.Configuration);
     }
 
     // In Stage/Prod we allow only Azure Blob and required Blob values.
@@ -106,6 +108,35 @@ internal static class BuilderConfigurationExtensions
         {
             throw new InvalidOperationException(
                 "ImageStorage:AzureBlob:PublicBaseUrl must be a valid absolute URL outside Development.");
+        }
+    }
+
+    private static void ValidateRedisConfiguration(IConfiguration configuration)
+    {
+        var redis = configuration.GetSection("Redis").Get<RedisOptions>() ?? new RedisOptions();
+        if (!redis.Enabled)
+        {
+            if (redis.RateLimiting.Enabled)
+            {
+                throw new InvalidOperationException("Redis:RateLimiting:Enabled requires Redis:Enabled=true.");
+            }
+
+            if (redis.RequiredForReadiness)
+            {
+                throw new InvalidOperationException("Redis:RequiredForReadiness requires Redis:Enabled=true.");
+            }
+
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(redis.ConnectionString))
+        {
+            throw new InvalidOperationException("Redis:ConnectionString is required when Redis:Enabled=true.");
+        }
+
+        if (string.IsNullOrWhiteSpace(redis.InstanceName))
+        {
+            throw new InvalidOperationException("Redis:InstanceName is required when Redis:Enabled=true.");
         }
     }
 }
