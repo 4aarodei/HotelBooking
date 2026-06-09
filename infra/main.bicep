@@ -37,6 +37,24 @@ param storageAccountName string
 @description('Blob container name for image storage.')
 param imageContainerName string = 'hotel-images'
 
+@description('Azure Managed Redis resource name.')
+param redisName string = '${prefix}-redis'
+
+@description('Azure Managed Redis SKU.')
+param redisSkuName string = 'Balanced_B0'
+
+@description('Azure Managed Redis database name.')
+param redisDatabaseName string = 'default'
+
+@description('Azure Managed Redis encrypted database port.')
+param redisPort int = 10000
+
+@description('Fail readiness checks when Redis is unavailable.')
+param redisRequiredForReadiness bool = false
+
+@description('Enable Redis-backed distributed rate limiting.')
+param redisRateLimitingEnabled bool = true
+
 @description('File share name used for DataProtection key persistence.')
 param dataProtectionShareName string = 'dpkeys'
 
@@ -89,6 +107,7 @@ var sqlConnectionString = 'Server=tcp:${sqlServerName}.database.windows.net,1433
 var storageAccountKey = listKeys(storage.id, storage.apiVersion).keys[0].value
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storageAccountKey};EndpointSuffix=${environment().suffixes.storage}'
 var publicBaseUrl = 'https://${storage.name}.blob.${environment().suffixes.storage}/${imageContainerName}'
+var redisConnectionString = '${redisEnterprise.properties.hostName}:${redisDatabase.properties.port},password=${redisDatabase.listKeys().primaryKey},ssl=True,abortConnect=False'
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: acrName
@@ -197,6 +216,32 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-11-01-preview' = {
   }
 }
 
+resource redisEnterprise 'Microsoft.Cache/redisEnterprise@2025-04-01' = {
+  name: redisName
+  location: location
+  tags: tags
+  sku: {
+    name: redisSkuName
+  }
+  properties: {
+    encryption: {}
+    highAvailability: 'Enabled'
+    minimumTlsVersion: '1.2'
+  }
+}
+
+resource redisDatabase 'Microsoft.Cache/redisEnterprise/databases@2025-04-01' = {
+  name: redisDatabaseName
+  parent: redisEnterprise
+  properties: {
+    clientProtocol: 'Encrypted'
+    clusteringPolicy: 'OSSCluster'
+    evictionPolicy: 'VolatileLRU'
+    modules: []
+    port: redisPort
+  }
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
   location: location
@@ -240,6 +285,13 @@ resource kvImageStoragePublicBaseUrl 'Microsoft.KeyVault/vaults/secrets@2023-07-
   name: '${keyVault.name}/ImageStorage--AzureBlob--PublicBaseUrl'
   properties: {
     value: publicBaseUrl
+  }
+}
+
+resource kvRedisConnection 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: '${keyVault.name}/Redis--ConnectionString'
+  properties: {
+    value: redisConnectionString
   }
 }
 
@@ -313,6 +365,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           keyVaultUrl: kvImageStoragePublicBaseUrl.properties.secretUriWithVersion
           identity: 'system'
         }
+        {
+          name: 'redis-connection'
+          keyVaultUrl: kvRedisConnection.properties.secretUriWithVersion
+          identity: 'system'
+        }
       ]
     }
     template: {
@@ -352,6 +409,26 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'DataProtection__PersistKeysToFileSystemPath'
               value: '/mnt/dpkeys'
+            }
+            {
+              name: 'Redis__Enabled'
+              value: 'true'
+            }
+            {
+              name: 'Redis__ConnectionString'
+              secretRef: 'redis-connection'
+            }
+            {
+              name: 'Redis__InstanceName'
+              value: 'HotelBooking:'
+            }
+            {
+              name: 'Redis__RequiredForReadiness'
+              value: string(redisRequiredForReadiness)
+            }
+            {
+              name: 'Redis__RateLimiting__Enabled'
+              value: string(redisRateLimitingEnabled)
             }
             {
               name: 'Azure__KeyVault__Uri'

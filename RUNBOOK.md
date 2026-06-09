@@ -17,6 +17,9 @@
 - Health checks:
   - `https://<fqdn>/health/live`
   - `https://<fqdn>/health/ready`
+- Redis readiness:
+  - By default, Redis is not part of readiness because cache and rate limiting fail open.
+  - Set `Redis__RequiredForReadiness=true` only when you want `/health/ready` to fail during Redis outages.
 - Smoke scenario:
   - open home page
   - search hotels
@@ -54,6 +57,14 @@ The `deploy-aca.yml` workflow already attempts this rollback automatically when 
 
 - Check Blob service health and storage connection secret.
 - Validate `ImageStorage__AzureBlob__*` values.
+
+### Redis unreachable
+
+- Expect public browsing and booking attempts to continue with warnings in logs.
+- Confirm `Redis__ConnectionString` comes from Key Vault secret `Redis--ConnectionString`.
+- Verify Azure Managed Redis database exists and uses encrypted client protocol.
+- Keep `Redis__RequiredForReadiness=false` unless the operational policy requires Redis-gated rollout.
+- SQL remains the source of truth for booking availability; do not use Redis outage recovery to bypass SQL validation.
 
 ### Auth/session instability after restart
 

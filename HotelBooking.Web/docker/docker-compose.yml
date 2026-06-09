@@ -9,6 +9,10 @@ services:
       ConnectionStrings__DefaultConnection: "Server=db,1433;Database=HotelBookingDev;User Id=sa;Password=${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd123};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true"
       ImageStorage__Provider: Local
       DataProtection__PersistKeysToFileSystemPath: /app/dpkeys
+      Redis__Enabled: "true"
+      Redis__ConnectionString: redis:6379
+      Redis__InstanceName: "HotelBooking:"
+      Redis__RateLimiting__Enabled: "true"
     ports:
       - "8080:8080"
     volumes:
@@ -16,6 +20,7 @@ services:
       - app_dpkeys:/app/dpkeys
     depends_on:
       - db
+      - redis
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -27,6 +32,11 @@ services:
       - "1433:1433"
     volumes:
       - db-data:/var/opt/mssql
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
 
 volumes:
   app_uploads:

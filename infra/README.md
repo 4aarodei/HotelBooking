@@ -5,6 +5,7 @@ This folder contains Bicep templates to provision the minimum production stack:
 - Azure Container Registry (ACR)
 - Azure Container Apps Environment + Container App
 - Azure SQL Server + Database
+- Azure Managed Redis (`Microsoft.Cache/redisEnterprise`) + default database
 - Storage Account + Blob container + File share (DataProtection keys)
 - Key Vault
 - Log Analytics + Application Insights
@@ -41,5 +42,7 @@ az deployment group create `
 ## Notes
 
 - The template configures Container App to read critical runtime values from Key Vault using Managed Identity.
+- Redis connection details are stored in Key Vault and exposed to the Container App as `Redis__ConnectionString`.
+- Redis is configured for encrypted client protocol; `/health/ready` includes Redis only when `redisRequiredForReadiness=true`.
 - DataProtection keys are persisted to an Azure Files mount at `/mnt/dpkeys`.
 - If `identityRequireConfirmedAccount=true`, configure `smtpHost` and `smtpFrom` or app startup will fail by design.

@@ -32,6 +32,18 @@
     "storageAccountName": {
       "value": "hotelbookingst12345"
     },
+    "redisName": {
+      "value": "hotelbooking-redis-12345"
+    },
+    "redisSkuName": {
+      "value": "Balanced_B0"
+    },
+    "redisRequiredForReadiness": {
+      "value": false
+    },
+    "redisRateLimitingEnabled": {
+      "value": true
+    },
     "keyVaultName": {
       "value": "hotelbooking-kv-12345"
     },
