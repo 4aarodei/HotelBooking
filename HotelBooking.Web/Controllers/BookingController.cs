@@ -13,11 +13,16 @@ namespace HotelBooking.Web.Controllers;
 public class BookingController : Controller
 {
     private readonly IBookingService _bookingService;
+    private readonly IFixedWindowRateLimiter _rateLimiter;
     private readonly IClock _clock;
 
-    public BookingController(IBookingService bookingService, IClock clock)
+    public BookingController(
+        IBookingService bookingService,
+        IFixedWindowRateLimiter rateLimiter,
+        IClock clock)
     {
         _bookingService = bookingService;
+        _rateLimiter = rateLimiter;
         _clock = clock;
     }
 
@@ -56,6 +61,20 @@ public class BookingController : Controller
         if (userId is null)
         {
             return Unauthorized();
+        }
+
+        var rateLimit = await _rateLimiter.CheckAsync(
+            $"rate-limit:booking-create:user:{userId}",
+            permitLimit: 5,
+            window: TimeSpan.FromMinutes(10),
+            ct);
+
+        if (!rateLimit.IsAllowed)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                "Too many booking attempts. Please wait a few minutes and try again.");
+            return View(request);
         }
 
         try
