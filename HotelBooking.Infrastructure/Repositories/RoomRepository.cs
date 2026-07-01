@@ -1,4 +1,4 @@
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Persistence;
 using HotelBooking.Domain.Entities.Hotels;
 using HotelBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

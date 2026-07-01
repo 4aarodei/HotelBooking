@@ -1,5 +1,5 @@
 using System.Data;
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Persistence;
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

@@ -1,7 +1,8 @@
 using System.Security.Claims;
-using HotelBooking.Application.Exceptions;
-using HotelBooking.Application.Interfaces;
-using HotelBooking.Domain.Entities.Identity;
+using HotelBooking.Application.Bookings;
+using HotelBooking.Application.Common;
+using HotelBooking.Application.RateLimiting;
+using HotelBooking.Application.Security;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

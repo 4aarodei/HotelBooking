@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using HotelBooking.Application.Interfaces;
-using HotelBooking.Domain.Entities.Identity;
+using HotelBooking.Application.Bookings;
+using HotelBooking.Infrastructure.Identity;
 using HotelBooking.ViewModels.UserProfileViewModels;
 using HotelBooking.Web.ViewModels.UserProfileViewModels;
 using Microsoft.AspNetCore.Authorization;

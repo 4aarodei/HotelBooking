@@ -1,5 +1,5 @@
 using System.Text.Json;
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Caching;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace HotelBooking.Infrastructure.Caching;

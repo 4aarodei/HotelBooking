@@ -4,7 +4,7 @@ WORKDIR /src
 COPY Directory.Build.props ./
 COPY NuGet.Config ./
 
-COPY HotelBooking.Core/HotelBooking.Core.csproj HotelBooking.Core/
+COPY HotelBooking.Domain/HotelBooking.Domain.csproj HotelBooking.Domain/
 COPY HotelBooking.Application/HotelBooking.Application.csproj HotelBooking.Application/
 COPY HotelBooking.Infrastructure/HotelBooking.Infrastructure.csproj HotelBooking.Infrastructure/
 COPY HotelBooking.Web/HotelBooking.Web.csproj HotelBooking.Web/

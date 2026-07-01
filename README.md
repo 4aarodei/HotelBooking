@@ -4,10 +4,17 @@ ASP.NET Core MVC application for hotel search and booking, prepared for Docker +
 
 ## Architecture
 
-- `HotelBooking.Web` - MVC/UI, Identity, runtime composition.
-- `HotelBooking.Application` - business logic, booking orchestration, media validation pipeline.
-- `HotelBooking.Infrastructure` - EF Core, repositories, Dapper read-model, Azure Blob image storage adapter.
-- `HotelBooking.Core` - domain entities and enums.
+- `HotelBooking.Web` - MVC/UI, Identity screens, health endpoints, and runtime composition.
+- `HotelBooking.Application` - use cases/queries, repository/cache/media ports, booking orchestration, and media validation pipeline.
+- `HotelBooking.Infrastructure` - EF Core, ASP.NET Identity user storage, repositories, Dapper read-model, Redis adapters, and Azure Blob image storage.
+- `HotelBooking.Domain` - domain entities, value objects, enums, factories, and stable invariants with no ASP.NET Identity/EF dependency.
+
+Important boundaries:
+
+- Domain does not reference ASP.NET Core Identity or EF Core.
+- `ApplicationUser` lives in Infrastructure; bookings keep a stable `UserId`.
+- Web controllers call Application services/use cases rather than repositories.
+- Architecture guard tests protect the main layer rules.
 
 ## Production readiness highlights
 

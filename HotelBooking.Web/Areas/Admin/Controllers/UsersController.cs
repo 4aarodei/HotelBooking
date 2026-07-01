@@ -1,4 +1,5 @@
-using HotelBooking.Domain.Entities.Identity;
+using HotelBooking.Application.Security;
+using HotelBooking.Infrastructure.Identity;
 using HotelBooking.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

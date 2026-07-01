@@ -1,4 +1,4 @@
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Caching;
 
 namespace HotelBooking.Infrastructure.Caching;
 

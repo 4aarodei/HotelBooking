@@ -1,4 +1,5 @@
-using HotelBooking.Domain.Entities.Identity;
+using HotelBooking.Application.Security;
+using HotelBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

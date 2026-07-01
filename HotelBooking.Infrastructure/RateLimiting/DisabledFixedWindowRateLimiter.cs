@@ -1,4 +1,4 @@
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.RateLimiting;
 
 namespace HotelBooking.Infrastructure.RateLimiting;
 

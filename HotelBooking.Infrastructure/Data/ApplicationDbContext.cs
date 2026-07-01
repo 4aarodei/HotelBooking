@@ -1,6 +1,6 @@
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Domain.Entities.Hotels;
-using HotelBooking.Domain.Entities.Identity;
+using HotelBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -145,12 +145,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(b => b.Room)
             .WithMany()
             .HasForeignKey(b => b.RoomId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.Entity<Booking>()
-            .HasOne(b => b.User)
-            .WithMany()
-            .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Booking>()

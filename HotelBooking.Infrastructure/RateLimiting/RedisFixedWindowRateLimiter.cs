@@ -1,4 +1,5 @@
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Common;
+using HotelBooking.Application.RateLimiting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 

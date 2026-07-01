@@ -1,8 +1,8 @@
 using System.Net;
 using HotelBooking.Application;
 using HotelBooking.Application.Caching;
-using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Media;
+using HotelBooking.Application.RateLimiting;
 using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Caching;
 using HotelBooking.Infrastructure.Data;

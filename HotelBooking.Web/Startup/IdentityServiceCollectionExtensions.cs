@@ -1,5 +1,5 @@
-using HotelBooking.Domain.Entities.Identity;
 using HotelBooking.Infrastructure.Data;
+using HotelBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace HotelBooking.Web.Startup;

@@ -1,5 +1,4 @@
 using Dapper;
-using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Statistics;
 
 namespace HotelBooking.Infrastructure.Dapper;

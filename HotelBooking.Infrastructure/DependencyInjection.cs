@@ -1,4 +1,5 @@
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Persistence;
+using HotelBooking.Application.Statistics;
 using HotelBooking.Infrastructure.Dapper;
 using HotelBooking.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,4 +1,5 @@
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Common;
+using HotelBooking.Application.Statistics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBooking.Web.Areas.Admin.Controllers;
