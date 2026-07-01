@@ -34,7 +34,7 @@
                 <p class="text-uppercase text-muted small mb-1">Inventory</p>
                 <h2 class="h4 fw-bold mb-0">Rooms</h2>
             </div>
-            <a asp-action="CreateRoom" asp-route-hotelId="@Model.Id" class="btn btn-primary">
+            <a asp-controller="Rooms" asp-action="Create" asp-route-hotelId="@Model.Id" class="btn btn-primary">
                 <i class="bi bi-plus-lg"></i> Add room
             </a>
         </div>
@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="text-muted small">@room.Capacity guests · @room.Quantity units</div>
                                 <div class="fw-semibold">@room.PricePerNight.ToString("0.00") ₴ / night</div>
-                                <a asp-action="EditRoom" asp-route-id="@room.Id" class="btn btn-outline-primary mt-auto">
+                                <a asp-controller="Rooms" asp-action="Edit" asp-route-id="@room.Id" class="btn btn-outline-primary mt-auto">
                                     <i class="bi bi-pencil"></i> Edit room
                                 </a>
                             </div>

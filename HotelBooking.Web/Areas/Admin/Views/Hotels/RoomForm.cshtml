@@ -11,14 +11,14 @@
                 <p class="text-uppercase text-muted small mb-1">@Model.HotelName</p>
                 <h1 class="h3 fw-bold mb-0">@(isEdit ? "Edit room" : "Add room")</h1>
             </div>
-            <a asp-action="Edit" asp-route-id="@Model.HotelId" class="btn btn-outline-secondary">
+            <a asp-controller="Hotels" asp-action="Edit" asp-route-id="@Model.HotelId" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back to hotel
             </a>
         </div>
 
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <form asp-action="@(isEdit ? "EditRoom" : "CreateRoom")" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <form asp-controller="Rooms" asp-action="@(isEdit ? "Edit" : "Create")" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="HotelId" />
                     <input type="hidden" asp-for="HotelName" />
@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a asp-action="Edit" asp-route-id="@Model.HotelId" id="room-form-cancel" class="btn btn-link text-decoration-none">Cancel</a>
+                        <a asp-controller="Hotels" asp-action="Edit" asp-route-id="@Model.HotelId" id="room-form-cancel" class="btn btn-link text-decoration-none">Cancel</a>
                         <button type="submit" class="btn btn-primary">@(isEdit ? "Update" : "Create")</button>
                     </div>
                 </form>
@@ -165,8 +165,8 @@
                 const hotelIdInput = form.querySelector('input[name="HotelId"]');
                 if (!tokenInput || !draftInput || !hotelIdInput) return;
 
-                const uploadUrl = '@Url.Action("UploadRoomDraftPhotos", "Hotels", new { area = "Admin" })';
-                const discardUrl = '@Url.Action("DiscardRoomDraftPhotos", "Hotels", new { area = "Admin" })';
+                const uploadUrl = '@Url.Action("Upload", "RoomDraftPhotos", new { area = "Admin" })';
+                const discardUrl = '@Url.Action("Discard", "RoomDraftPhotos", new { area = "Admin" })';
 
                 fileInput.addEventListener('change', async () => {
                     const files = fileInput.files;
