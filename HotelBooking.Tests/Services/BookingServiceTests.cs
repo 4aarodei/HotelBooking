@@ -1,7 +1,7 @@
 using HotelBooking.Application.Caching;
-using HotelBooking.Application.Exceptions;
-using HotelBooking.Application.Interfaces;
-using HotelBooking.Application.Services;
+using HotelBooking.Application.Bookings;
+using HotelBooking.Application.Common;
+using HotelBooking.Application.Persistence;
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Domain.Entities.Hotels;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -14,7 +14,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_Throws_WhenCheckOutNotAfterCheckIn()
     {
-        var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 2 }));
+        var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(CreateRoom(quantity: 2)));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
             service.CreateBookingAsync("user-1", Guid.NewGuid(), new DateOnly(2026, 4, 20), new DateOnly(2026, 4, 20)));
@@ -23,7 +23,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_Throws_WhenRoomInactive()
     {
-        var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = false, Quantity = 2 };
+        var room = CreateRoom(isActive: false, quantity: 2);
         var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(room));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
@@ -33,7 +33,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_Throws_WhenRoomNotFound()
     {
-        var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 2 };
+        var room = CreateRoom(quantity: 2);
         var service = CreateService(new FakeBookingRepository(), new FakeRoomRepository(room));
 
         await Assert.ThrowsAsync<BookingRuleViolationException>(() =>
@@ -43,7 +43,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_Throws_WhenNoAvailability()
     {
-        var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 1, PricePerNight = 100 };
+        var room = CreateRoom(quantity: 1, pricePerNight: 100m);
         var repository = new FakeBookingRepository
         {
             OverlapsByRoom = new Dictionary<Guid, int> { [room.Id] = 1 }
@@ -57,7 +57,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_CreatesPendingBookingWithCalculatedTotals()
     {
-        var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 3, PricePerNight = 120m };
+        var room = CreateRoom(quantity: 3, pricePerNight: 120m);
         var repository = new FakeBookingRepository();
         var clock = new FakeClock { UtcNow = new DateTimeOffset(2026, 4, 19, 10, 30, 0, TimeSpan.Zero) };
         var cache = new FakeAppCache();
@@ -78,7 +78,7 @@ public class BookingServiceTests
     [Fact]
     public async Task CreateBookingAsync_DoesNotFail_WhenAvailabilityCacheVersionBumpFails()
     {
-        var room = new Room { Id = Guid.NewGuid(), Name = "Standard", IsActive = true, Quantity = 3, PricePerNight = 120m };
+        var room = CreateRoom(quantity: 3, pricePerNight: 120m);
         var repository = new FakeBookingRepository();
         var service = CreateService(
             repository,
@@ -97,12 +97,35 @@ public class BookingServiceTests
         IClock? clock = null,
         IAppCache? cache = null)
     {
-        return new BookingService(
+        var createBooking = new CreateBookingUseCase(
             bookingRepository,
             roomRepository,
             clock ?? new FakeClock(),
             cache ?? new FakeAppCache(),
-            NullLogger<BookingService>.Instance);
+            NullLogger<CreateBookingUseCase>.Instance);
+        var getUserBookings = new GetUserBookingsUseCase(bookingRepository);
+
+        return new BookingService(createBooking, getUserBookings);
+    }
+
+    private static Room CreateRoom(bool isActive = true, int quantity = 1, decimal pricePerNight = 100m)
+    {
+        return Room.Create(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "Standard",
+            null,
+            null,
+            2,
+            pricePerNight,
+            quantity,
+            includesBreakfast: false,
+            hasPrivateBathroom: true,
+            hasSaunaAccess: false,
+            hasBalcony: false,
+            hasWorkspace: false,
+            hasAirConditioning: false,
+            isActive);
     }
 
     private sealed class FakeRoomRepository : IRoomRepository

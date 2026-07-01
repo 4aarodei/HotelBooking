@@ -1,7 +1,9 @@
 using System.Net;
 using System.Security.Claims;
+using HotelBooking.Application.Bookings;
+using HotelBooking.Application.Common;
 using HotelBooking.Application.Hotels;
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.RateLimiting;
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Domain.Entities.Hotels;
 using HotelBooking.Web.Controllers;
@@ -125,19 +127,19 @@ public class RateLimitedControllerTests
         public Task<List<string>> GetAvailableCitiesAsync(CancellationToken ct = default)
             => Task.FromResult(new List<string>());
 
-        public Task<List<Hotel>> GetAvailableHotelsAsync(
+        public Task<List<HotelReadModel>> GetAvailableHotelsAsync(
             DateOnly checkIn,
             DateOnly checkOut,
             string? city,
             CancellationToken ct = default)
-            => Task.FromResult(new List<Hotel>());
+            => Task.FromResult(new List<HotelReadModel>());
 
-        public Task<Hotel?> GetByIdWithAvailabilityAsync(
+        public Task<HotelReadModel?> GetByIdWithAvailabilityAsync(
             Guid id,
             DateOnly checkIn,
             DateOnly checkOut,
             CancellationToken ct = default)
-            => Task.FromResult<Hotel?>(null);
+            => Task.FromResult<HotelReadModel?>(null);
 
         public Task<RoomAvailabilityDetails?> GetRoomByIdWithAvailabilityAsync(
             Guid roomId,
@@ -146,8 +148,8 @@ public class RateLimitedControllerTests
             CancellationToken ct = default)
             => Task.FromResult<RoomAvailabilityDetails?>(null);
 
-        public Task<List<Hotel>> GetFeaturedAsync(int count, CancellationToken ct = default)
-            => Task.FromResult(new List<Hotel>());
+        public Task<List<HotelReadModel>> GetFeaturedAsync(int count, CancellationToken ct = default)
+            => Task.FromResult(new List<HotelReadModel>());
     }
 
     private sealed class FakeBookingService : IBookingService
@@ -162,13 +164,24 @@ public class RateLimitedControllerTests
             CancellationToken ct = default)
         {
             CreateCalls++;
-            return Task.FromResult(new Booking
-            {
-                UserId = userId,
-                RoomId = roomId,
-                CheckIn = checkIn,
-                CheckOut = checkOut
-            });
+            var room = Room.Create(
+                roomId,
+                Guid.NewGuid(),
+                "Standard",
+                null,
+                null,
+                2,
+                100m,
+                1,
+                includesBreakfast: false,
+                hasPrivateBathroom: true,
+                hasSaunaAccess: false,
+                hasBalcony: false,
+                hasWorkspace: false,
+                hasAirConditioning: false,
+                isActive: true);
+
+            return Task.FromResult(Booking.CreatePending(userId, room, checkIn, checkOut, DateTimeOffset.UtcNow));
         }
 
         public Task<List<Booking>> GetBookingsByUserAsync(string userId, CancellationToken ct = default)

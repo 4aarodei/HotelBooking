@@ -1,7 +1,6 @@
 using HotelBooking.Application.Caching;
 using HotelBooking.Application.Hotels;
-using HotelBooking.Application.Interfaces;
-using HotelBooking.Application.Services;
+using HotelBooking.Application.Persistence;
 using HotelBooking.Domain.Entities.Bookings;
 using HotelBooking.Domain.Entities.Hotels;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -134,53 +133,60 @@ public class HotelServiceTests
     [Fact]
     public async Task GetRoomByIdWithAvailabilityAsync_ReturnsAvailableQuantity()
     {
-        var room = new Room
-        {
-            Id = Guid.NewGuid(),
-            HotelId = Guid.NewGuid(),
-            Name = "Deluxe",
-            Quantity = 3,
-            IsActive = true,
-            Hotel = new Hotel { Id = Guid.NewGuid(), Name = "River", City = "Kyiv", Address = "Street 1" }
-        };
+        var room = CreateRoom(quantity: 3);
         var bookingRepository = new FakeBookingRepository
         {
             OverlapsByRoom = new Dictionary<Guid, int> { [room.Id] = 1 }
         };
-        var service = new HotelService(
-            new FakeHotelRepository(),
-            new FakeRoomRepository(room),
-            bookingRepository,
-            new FakeAppCache(),
-            NullLogger<HotelService>.Instance);
+        var service = CreateService(
+            roomRepository: new FakeRoomRepository(room),
+            bookingRepository: bookingRepository);
 
         var result = await service.GetRoomByIdWithAvailabilityAsync(room.Id, new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 2));
 
         Assert.NotNull(result);
         Assert.Equal(2, result.AvailableQuantity);
-        Assert.Same(room, result.Room);
+        Assert.Equal(room.Id, result.Id);
+        Assert.Equal(room.Quantity, result.Quantity);
+        Assert.Equal(room.PricePerNight, result.PricePerNight);
     }
 
     [Fact]
     public async Task GetRoomByIdWithAvailabilityAsync_ReturnsNull_WhenRoomInactive()
     {
-        var room = new Room
-        {
-            Id = Guid.NewGuid(),
-            Name = "Closed",
-            Quantity = 1,
-            IsActive = false
-        };
-        var service = new HotelService(
-            new FakeHotelRepository(),
-            new FakeRoomRepository(room),
-            new FakeBookingRepository(),
-            new FakeAppCache(),
-            NullLogger<HotelService>.Instance);
+        var room = CreateRoom(name: "Closed", isActive: false);
+        var service = CreateService(roomRepository: new FakeRoomRepository(room));
 
         var result = await service.GetRoomByIdWithAvailabilityAsync(room.Id, new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 2));
 
         Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetAvailableHotelsAsync_ReturnsReadModelsWithoutMutatingRepositoryEntities()
+    {
+        var unavailableRoom = CreateRoom(name: "Sold out", quantity: 1);
+        var availableRoom = CreateRoom(name: "Available", quantity: 2);
+        var hotel = Hotel.Create(Guid.NewGuid(), "River", "Kyiv", "Street 1");
+        hotel.Rooms.Add(unavailableRoom);
+        hotel.Rooms.Add(availableRoom);
+
+        var service = CreateService(
+            hotelRepository: new FakeHotelRepository { SearchHotels = [hotel] },
+            bookingRepository: new FakeBookingRepository
+            {
+                OverlapsByRoom = new Dictionary<Guid, int> { [unavailableRoom.Id] = 1 }
+            });
+
+        var result = await service.GetAvailableHotelsAsync(
+            new DateOnly(2026, 5, 1),
+            new DateOnly(2026, 5, 2),
+            "Kyiv");
+
+        var readModel = Assert.Single(result);
+        var room = Assert.Single(readModel.Rooms);
+        Assert.Equal(availableRoom.Id, room.Id);
+        Assert.Equal(2, hotel.Rooms.Count);
     }
 
     private static HotelService CreateService(
@@ -189,12 +195,17 @@ public class HotelServiceTests
         FakeBookingRepository? bookingRepository = null,
         IAppCache? cache = null)
     {
+        var resolvedHotelRepository = hotelRepository ?? new FakeHotelRepository();
+        var resolvedRoomRepository = roomRepository ?? new FakeRoomRepository(CreateRoom(name: "Room"));
+        var resolvedBookingRepository = bookingRepository ?? new FakeBookingRepository();
+        var queryCache = new HotelQueryCache(cache ?? new FakeAppCache(), NullLogger<HotelQueryCache>.Instance);
+
         return new HotelService(
-            hotelRepository ?? new FakeHotelRepository(),
-            roomRepository ?? new FakeRoomRepository(new Room { Id = Guid.NewGuid(), Name = "Room", IsActive = true }),
-            bookingRepository ?? new FakeBookingRepository(),
-            cache ?? new FakeAppCache(),
-            NullLogger<HotelService>.Instance);
+            new GetAvailableCitiesQuery(resolvedHotelRepository, queryCache),
+            new SearchAvailableHotelsQuery(resolvedHotelRepository, resolvedBookingRepository, queryCache),
+            new GetHotelDetailsWithAvailabilityQuery(resolvedHotelRepository, resolvedBookingRepository),
+            new GetRoomDetailsWithAvailabilityQuery(resolvedRoomRepository, resolvedBookingRepository),
+            new GetFeaturedHotelsQuery(resolvedHotelRepository, queryCache));
     }
 
     private static Hotel CreateHotelWithRoom()
@@ -202,61 +213,75 @@ public class HotelServiceTests
         var hotelId = Guid.NewGuid();
         var roomId = Guid.NewGuid();
 
-        return new Hotel
+        var hotel = Hotel.Create(hotelId, "River", "Kyiv", "Street 1", "Central hotel");
+        hotel.Images.Add(new HotelImage
         {
-            Id = hotelId,
-            Name = "River",
-            City = "Kyiv",
-            Address = "Street 1",
-            Description = "Central hotel",
-            Images =
-            [
-                new HotelImage
-                {
-                    Id = Guid.NewGuid(),
-                    HotelId = hotelId,
-                    StorageKey = "hotels/cover.webp",
-                    Url = "https://cdn.example.com/hotels/cover.webp",
-                    ContentType = "image/webp",
-                    SizeBytes = 123,
-                    Width = 800,
-                    Height = 600,
-                    AltText = "River",
-                    IsCover = true,
-                    SortOrder = 0
-                }
-            ],
-            Rooms =
-            [
-                new Room
-                {
-                    Id = roomId,
-                    HotelId = hotelId,
-                    Name = "Deluxe",
-                    Capacity = 2,
-                    Quantity = 2,
-                    PricePerNight = 120m,
-                    IsActive = true,
-                    Images =
-                    [
-                        new RoomImage
-                        {
-                            Id = Guid.NewGuid(),
-                            RoomId = roomId,
-                            StorageKey = "rooms/cover.webp",
-                            Url = "https://cdn.example.com/rooms/cover.webp",
-                            ContentType = "image/webp",
-                            SizeBytes = 123,
-                            Width = 800,
-                            Height = 600,
-                            AltText = "Deluxe",
-                            IsCover = true,
-                            SortOrder = 0
-                        }
-                    ]
-                }
-            ]
-        };
+            Id = Guid.NewGuid(),
+            HotelId = hotelId,
+            StorageKey = "hotels/cover.webp",
+            Url = "https://cdn.example.com/hotels/cover.webp",
+            ContentType = "image/webp",
+            SizeBytes = 123,
+            Width = 800,
+            Height = 600,
+            AltText = "River",
+            IsCover = true,
+            SortOrder = 0
+        });
+
+        var room = CreateRoom(roomId, hotelId, "Deluxe", quantity: 2, pricePerNight: 120m);
+        room.Images.Add(new RoomImage
+        {
+            Id = Guid.NewGuid(),
+            RoomId = roomId,
+            StorageKey = "rooms/cover.webp",
+            Url = "https://cdn.example.com/rooms/cover.webp",
+            ContentType = "image/webp",
+            SizeBytes = 123,
+            Width = 800,
+            Height = 600,
+            AltText = "Deluxe",
+            IsCover = true,
+            SortOrder = 0
+        });
+
+        hotel.Rooms.Add(room);
+        return hotel;
+    }
+
+    private static Room CreateRoom(
+        string name = "Deluxe",
+        bool isActive = true,
+        int quantity = 1,
+        decimal pricePerNight = 100m)
+    {
+        return CreateRoom(Guid.NewGuid(), Guid.NewGuid(), name, isActive, quantity, pricePerNight);
+    }
+
+    private static Room CreateRoom(
+        Guid id,
+        Guid hotelId,
+        string name,
+        bool isActive = true,
+        int quantity = 1,
+        decimal pricePerNight = 100m)
+    {
+        return Room.Create(
+            id,
+            hotelId,
+            name,
+            null,
+            null,
+            2,
+            pricePerNight,
+            quantity,
+            includesBreakfast: false,
+            hasPrivateBathroom: true,
+            hasSaunaAccess: false,
+            hasBalcony: false,
+            hasWorkspace: false,
+            hasAirConditioning: false,
+            isActive);
     }
 
     private sealed class FakeHotelRepository : IHotelRepository
