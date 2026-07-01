@@ -1,5 +1,5 @@
 using System.Globalization;
-using HotelBooking.Domain.Entities.Hotels;
+using HotelBooking.Application.Hotels;
 
 namespace HotelBooking.Web.ViewModels;
 
@@ -16,7 +16,7 @@ public class HotelIndexViewModel
     public string MinCheckInDate { get; init; } = string.Empty;
     public string MinCheckOutDate => CheckIn.AddDays(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    public static HotelIndexViewModel Create(IEnumerable<Hotel> hotels, string? city, DateOnly checkIn, DateOnly checkOut, IReadOnlyList<string> cities, DateOnly today)
+    public static HotelIndexViewModel Create(IEnumerable<HotelReadModel> hotels, string? city, DateOnly checkIn, DateOnly checkOut, IReadOnlyList<string> cities, DateOnly today)
     {
         var vm = new HotelIndexViewModel
         {
@@ -45,7 +45,7 @@ public class HotelIndexViewModel
         return vm;
     }
 
-    private static decimal GetMinActivePrice(IEnumerable<Room> rooms)
+    private static decimal GetMinActivePrice(IEnumerable<RoomReadModel> rooms)
     {
         var activePrices = rooms
             .Where(r => r.IsActive)
@@ -55,7 +55,7 @@ public class HotelIndexViewModel
         return activePrices.Count > 0 ? activePrices.Min() : 0;
     }
 
-    private static string? GetHotelCoverUrl(Hotel hotel)
+    private static string? GetHotelCoverUrl(HotelReadModel hotel)
     {
         return hotel.Images
             .OrderByDescending(i => i.IsCover)

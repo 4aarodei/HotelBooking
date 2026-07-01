@@ -1,4 +1,4 @@
-using HotelBooking.Domain.Entities.Hotels;
+using HotelBooking.Application.Hotels;
 
 namespace HotelBooking.Web.ViewModels;
 
@@ -14,7 +14,7 @@ public class HotelDetailsViewModel
     public DateOnly CheckIn { get; set; }
     public DateOnly CheckOut { get; set; }
 
-    public static HotelDetailsViewModel Create(Hotel hotel, DateOnly checkIn, DateOnly checkOut)
+    public static HotelDetailsViewModel Create(HotelReadModel hotel, DateOnly checkIn, DateOnly checkOut)
     {
         return new HotelDetailsViewModel
         {
@@ -76,7 +76,7 @@ public class HotelDetailsViewModel
         };
     }
 
-    private static RoomImage? GetRoomCoverImage(Room room)
+    private static ImageReadModel? GetRoomCoverImage(RoomReadModel room)
     {
         return room.Images
                    .OrderByDescending(i => i.IsCover)

@@ -1,5 +1,7 @@
 using System.Globalization;
-using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Common;
+using HotelBooking.Application.Hotels;
+using HotelBooking.Application.RateLimiting;
 using HotelBooking.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 

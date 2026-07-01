@@ -23,18 +23,36 @@ public sealed record HotelReadSnapshot(
             hotel.Rooms.Select(RoomReadSnapshot.FromRoom).ToList());
     }
 
+    public static HotelReadSnapshot FromReadModel(HotelReadModel hotel)
+    {
+        return new HotelReadSnapshot(
+            hotel.Id,
+            hotel.Name,
+            hotel.City,
+            hotel.Address,
+            hotel.Description,
+            hotel.Images.Select(HotelImageSnapshot.FromReadModel).ToList(),
+            hotel.Rooms.Select(RoomReadSnapshot.FromReadModel).ToList());
+    }
+
     public Hotel ToHotel()
     {
-        return new Hotel
-        {
-            Id = Id,
-            Name = Name,
-            City = City,
-            Address = Address,
-            Description = Description,
-            Images = Images.Select(i => i.ToImage(Id)).ToList(),
-            Rooms = Rooms.Select(r => r.ToRoom(Id)).ToList()
-        };
+        var hotel = Hotel.Create(Id, Name, City, Address, Description);
+        hotel.ReplaceImages(Images.Select(i => i.ToImage(Id)));
+        hotel.ReplaceRooms(Rooms.Select(r => r.ToRoom(Id)));
+        return hotel;
+    }
+
+    public HotelReadModel ToReadModel(IEnumerable<RoomReadSnapshot>? rooms = null)
+    {
+        return new HotelReadModel(
+            Id,
+            Name,
+            City,
+            Address,
+            Description,
+            Images.Select(i => i.ToReadModel()).ToList(),
+            (rooms ?? Rooms).Select(r => r.ToReadModel()).ToList());
     }
 }
 
@@ -75,27 +93,68 @@ public sealed record RoomReadSnapshot(
             room.Images.Select(RoomImageSnapshot.FromImage).ToList());
     }
 
+    public static RoomReadSnapshot FromReadModel(RoomReadModel room)
+    {
+        return new RoomReadSnapshot(
+            room.Id,
+            room.Name,
+            room.Description,
+            room.Amenities,
+            room.Capacity,
+            room.PricePerNight,
+            room.Quantity,
+            room.IncludesBreakfast,
+            room.HasPrivateBathroom,
+            room.HasSaunaAccess,
+            room.HasBalcony,
+            room.HasWorkspace,
+            room.HasAirConditioning,
+            room.IsActive,
+            room.Images.Select(RoomImageSnapshot.FromReadModel).ToList());
+    }
+
     public Room ToRoom(Guid hotelId)
     {
-        return new Room
-        {
-            Id = Id,
-            HotelId = hotelId,
-            Name = Name,
-            Description = Description,
-            Amenities = Amenities,
-            Capacity = Capacity,
-            PricePerNight = PricePerNight,
-            Quantity = Quantity,
-            IncludesBreakfast = IncludesBreakfast,
-            HasPrivateBathroom = HasPrivateBathroom,
-            HasSaunaAccess = HasSaunaAccess,
-            HasBalcony = HasBalcony,
-            HasWorkspace = HasWorkspace,
-            HasAirConditioning = HasAirConditioning,
-            IsActive = IsActive,
-            Images = Images.Select(i => i.ToImage(Id)).ToList()
-        };
+        var room = Room.Create(
+            Id,
+            hotelId,
+            Name,
+            Description,
+            Amenities,
+            Capacity,
+            PricePerNight,
+            Quantity,
+            new RoomFeatures(
+                IncludesBreakfast,
+                HasPrivateBathroom,
+                HasSaunaAccess,
+                HasBalcony,
+                HasWorkspace,
+                HasAirConditioning),
+            IsActive);
+
+        room.ReplaceImages(Images.Select(i => i.ToImage(Id)));
+        return room;
+    }
+
+    public RoomReadModel ToReadModel()
+    {
+        return new RoomReadModel(
+            Id,
+            Name,
+            Description,
+            Amenities,
+            Capacity,
+            PricePerNight,
+            Quantity,
+            IncludesBreakfast,
+            HasPrivateBathroom,
+            HasSaunaAccess,
+            HasBalcony,
+            HasWorkspace,
+            HasAirConditioning,
+            IsActive,
+            Images.Select(i => i.ToReadModel()).ToList());
     }
 }
 
@@ -128,6 +187,22 @@ public sealed record HotelImageSnapshot(
             image.CreatedAtUtc);
     }
 
+    public static HotelImageSnapshot FromReadModel(ImageReadModel image)
+    {
+        return new HotelImageSnapshot(
+            Guid.NewGuid(),
+            string.Empty,
+            image.Url,
+            string.Empty,
+            0,
+            image.Width,
+            image.Height,
+            image.AltText,
+            image.IsCover,
+            image.SortOrder,
+            DateTimeOffset.UtcNow);
+    }
+
     public HotelImage ToImage(Guid hotelId)
     {
         return new HotelImage
@@ -145,6 +220,11 @@ public sealed record HotelImageSnapshot(
             SortOrder = SortOrder,
             CreatedAtUtc = CreatedAtUtc
         };
+    }
+
+    public ImageReadModel ToReadModel()
+    {
+        return new ImageReadModel(Url, AltText, Width, Height, IsCover, SortOrder);
     }
 }
 
@@ -177,6 +257,22 @@ public sealed record RoomImageSnapshot(
             image.CreatedAtUtc);
     }
 
+    public static RoomImageSnapshot FromReadModel(ImageReadModel image)
+    {
+        return new RoomImageSnapshot(
+            Guid.NewGuid(),
+            string.Empty,
+            image.Url,
+            string.Empty,
+            0,
+            image.Width,
+            image.Height,
+            image.AltText,
+            image.IsCover,
+            image.SortOrder,
+            DateTimeOffset.UtcNow);
+    }
+
     public RoomImage ToImage(Guid roomId)
     {
         return new RoomImage
@@ -194,5 +290,10 @@ public sealed record RoomImageSnapshot(
             SortOrder = SortOrder,
             CreatedAtUtc = CreatedAtUtc
         };
+    }
+
+    public ImageReadModel ToReadModel()
+    {
+        return new ImageReadModel(Url, AltText, Width, Height, IsCover, SortOrder);
     }
 }

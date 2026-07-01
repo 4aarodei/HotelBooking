@@ -1,5 +1,4 @@
 using HotelBooking.Application.Hotels;
-using HotelBooking.Domain.Entities.Hotels;
 
 namespace HotelBooking.Web.ViewModels;
 
@@ -29,40 +28,37 @@ public class RoomPageViewModel
 
     public static RoomPageViewModel Create(RoomAvailabilityDetails details, DateOnly checkIn, DateOnly checkOut)
     {
-        var room = details.Room;
-        var hotel = room.Hotel;
-
         return new RoomPageViewModel
         {
-            Id = room.Id,
-            HotelId = room.HotelId,
-            HotelName = hotel?.Name ?? string.Empty,
-            HotelCity = hotel?.City ?? string.Empty,
-            HotelAddress = hotel?.Address ?? string.Empty,
-            Name = room.Name,
-            Description = room.Description ?? string.Empty,
-            Amenities = SplitAmenities(room.Amenities),
-            Images = room.Images
+            Id = details.Id,
+            HotelId = details.HotelId,
+            HotelName = details.HotelName,
+            HotelCity = details.HotelCity,
+            HotelAddress = details.HotelAddress,
+            Name = details.Name,
+            Description = details.Description ?? string.Empty,
+            Amenities = SplitAmenities(details.Amenities),
+            Images = details.Images
                 .OrderByDescending(i => i.IsCover)
                 .ThenBy(i => i.SortOrder)
                 .Select(i => new ImageViewModel
                 {
                     Url = i.Url,
-                    AltText = i.AltText ?? room.Name,
+                    AltText = i.AltText ?? details.Name,
                     Width = i.Width,
                     Height = i.Height
                 })
                 .ToList(),
-            Capacity = room.Capacity,
-            Quantity = room.Quantity,
+            Capacity = details.Capacity,
+            Quantity = details.Quantity,
             AvailableQuantity = details.AvailableQuantity,
-            PricePerNight = room.PricePerNight,
-            IncludesBreakfast = room.IncludesBreakfast,
-            HasPrivateBathroom = room.HasPrivateBathroom,
-            HasSaunaAccess = room.HasSaunaAccess,
-            HasBalcony = room.HasBalcony,
-            HasWorkspace = room.HasWorkspace,
-            HasAirConditioning = room.HasAirConditioning,
+            PricePerNight = details.PricePerNight,
+            IncludesBreakfast = details.IncludesBreakfast,
+            HasPrivateBathroom = details.HasPrivateBathroom,
+            HasSaunaAccess = details.HasSaunaAccess,
+            HasBalcony = details.HasBalcony,
+            HasWorkspace = details.HasWorkspace,
+            HasAirConditioning = details.HasAirConditioning,
             CheckIn = checkIn,
             CheckOut = checkOut
         };
